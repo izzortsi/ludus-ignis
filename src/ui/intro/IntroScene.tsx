@@ -10,9 +10,7 @@ import {
   BREEZE_FRAMES,
   CINDER_VESSEL, CINDER_FIRE_FRAMES, CINDER_KINDLE_FRAMES,
   CINDER_SMOKE_FRAMES, EMBER_FALL_FRAMES,
-  RIO_MIYAKE,
-  MIRROR_LEAK_BACK, MIRROR_LEAK_WATER, MIRROR_LEAK_OUTER,
-  MIRROR_LEAK_MID, MIRROR_LEAK_CORE, MIRROR_LEAK_HUSKS
+  RIO_MIYAKE, MIRROR_LEAK
 } from './scene-art';
 import { cinder } from '../../core/cinder/cinder-store';
 
@@ -216,12 +214,7 @@ export function IntroScene(props: Props) {
           <Layer art={RIO_MIYAKE} className="intro-rio" />
         </Show>
         <Show when={phase() === 'flashback2'}>
-          <Layer art={MIRROR_LEAK_BACK} className="intro-mirror-back" />
-          <Layer art={MIRROR_LEAK_WATER} className="intro-mirror-water" />
-          <Layer art={MIRROR_LEAK_OUTER[f()]} className="intro-mirror-outer" />
-          <Layer art={MIRROR_LEAK_MID[f()]} className="intro-mirror-mid" />
-          <Layer art={MIRROR_LEAK_CORE[f()]} className="intro-mirror-core" />
-          <Layer art={MIRROR_LEAK_HUSKS} className="intro-mirror-husks" />
+          <Layer art={MIRROR_LEAK} className="intro-mirror" />
         </Show>
       </div>
 

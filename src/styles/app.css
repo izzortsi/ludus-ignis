@@ -618,30 +618,14 @@ html, body {
     0 0 8px rgba(255, 200, 120, 0.18);
 }
 
-/* Flashback 2 — mirror-life leak from a coastal lab into a pond */
-.intro-mirror-back {
-  color: rgba(160, 160, 165, 0.7);
-  text-shadow: 0 0 2px rgba(160, 160, 165, 0.3);
-}
-.intro-mirror-water {
-  color: rgba(70, 100, 130, 0.7);
-}
-.intro-mirror-outer {
-  color: rgba(150, 200, 130, 0.45);
-}
-.intro-mirror-mid {
-  color: rgba(140, 220, 110, 0.75);
-  text-shadow: 0 0 3px rgba(140, 220, 110, 0.4);
-}
-.intro-mirror-core {
-  color: rgba(180, 255, 130, 0.95);
+/* Flashback 2 — mirror-life leak (dense static reproduction).
+   Same paper-tone treatment as Rio so both flashbacks read as a matched
+   pair of "photographs from the past." */
+.intro-mirror {
+  color: rgba(235, 215, 175, 0.95);
   text-shadow:
-    0 0 4px rgba(180, 255, 130, 0.85),
-    0 0 10px rgba(120, 220, 90, 0.55);
-}
-.intro-mirror-husks {
-  color: rgba(180, 130, 110, 0.85);
-  text-shadow: 0 0 3px rgba(180, 130, 110, 0.4);
+    0 0 2px rgba(255, 230, 180, 0.35),
+    0 0 8px rgba(255, 200, 120, 0.18);
 }
 
 /* === prelude typewriter === */
