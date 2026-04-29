@@ -1,0 +1,49 @@
+# Render blueprint for probgame (static site).
+#
+# To deploy:
+#   1. Push this repo to GitHub.
+#   2. In Render dashboard: New → Blueprint → connect this repo.
+#   3. Render reads this file, builds, and serves /dist as a static site
+#      with HTTPS + global CDN. Free tier is sufficient for alpha testing.
+#
+# PWA notes: vite-plugin-pwa emits sw.js + manifest.webmanifest into dist/.
+# Render's static rewrite is a fallback (only catches paths with no file),
+# so the SW and manifest are served directly without falling through.
+
+services:
+  - type: web
+    name: probgame
+    runtime: static
+    buildCommand: npm ci && npm run build
+    staticPublishPath: ./dist
+    pullRequestPreviewsEnabled: false
+
+    envVars:
+      - key: NODE_VERSION
+        value: "22"
+
+    # SPA fallback — any path that isn't a file falls through to index.html.
+    # We don't have client-side routing yet, but this is harmless and ready.
+    routes:
+      - type: rewrite
+        source: /*
+        destination: /index.html
+
+    headers:
+      # Hashed asset filenames — safe to cache forever.
+      - path: /assets/*
+        name: Cache-Control
+        value: "public, max-age=31536000, immutable"
+      # Service worker must always be fresh so PWA updates land on next load.
+      - path: /sw.js
+        name: Cache-Control
+        value: "no-cache, no-store, must-revalidate"
+      - path: /registerSW.js
+        name: Cache-Control
+        value: "no-cache, no-store, must-revalidate"
+      - path: /manifest.webmanifest
+        name: Cache-Control
+        value: "no-cache"
+      - path: /index.html
+        name: Cache-Control
+        value: "no-cache"
