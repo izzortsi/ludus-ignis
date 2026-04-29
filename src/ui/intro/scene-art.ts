@@ -500,6 +500,134 @@ export const BREEZE_FRAMES: string[][] = Array.from({ length: FRAMES }, (_, t) =
 });
 
 // ---------------------------------------------------------------------------
+// BIG FIRE — close-up Doom-fire for the prelude's first flashback.
+// Centered on the canvas, with logs and coals beneath.
+// ---------------------------------------------------------------------------
+
+const BIG_FIRE_ROWS = 10;
+const BIG_FIRE_COLS = 22;
+
+function makeBigFireArt(t: number): string[] {
+  const r = mulberry32(t * 19 + 11);
+  const seedHeat = MAX_HEAT;
+
+  const heat: number[][] = Array.from(
+    { length: BIG_FIRE_ROWS + 2 },
+    () => Array(BIG_FIRE_COLS).fill(0)
+  );
+
+  for (let row = BIG_FIRE_ROWS; row < BIG_FIRE_ROWS + 2; row++) {
+    for (let c = 0; c < BIG_FIRE_COLS; c++) {
+      heat[row][c] = Math.max(0, seedHeat - Math.floor(r() * 2));
+    }
+  }
+  for (let row = BIG_FIRE_ROWS - 1; row >= 0; row--) {
+    for (let c = 0; c < BIG_FIRE_COLS; c++) {
+      const shift = Math.floor((r() - 0.5) * 4);
+      const srcCol = Math.max(0, Math.min(BIG_FIRE_COLS - 1, c + shift));
+      const cool = Math.floor(r() * 3);
+      heat[row][c] = Math.max(0, heat[row + 1][srcCol] - cool);
+    }
+  }
+  const cycle = (t * Math.PI * 2) / FRAMES;
+  for (let row = 0; row < BIG_FIRE_ROWS; row++) {
+    const fromBottom = (BIG_FIRE_ROWS - 1 - row) / (BIG_FIRE_ROWS - 1);
+    const halfWidth = (BIG_FIRE_COLS / 2) * Math.pow(1 - fromBottom, 0.6);
+    const sway = Math.sin(cycle + fromBottom * 4.0) * (0.4 + fromBottom * 1.6);
+    const center = BIG_FIRE_COLS / 2 + sway;
+    const denom = Math.max(halfWidth, 0.5);
+    for (let c = 0; c < BIG_FIRE_COLS; c++) {
+      const d = Math.abs(c + 0.5 - center) / denom;
+      const falloff = Math.max(0, 1 - d * d);
+      heat[row][c] = Math.floor(heat[row][c] * falloff);
+    }
+  }
+  return heat.slice(0, BIG_FIRE_ROWS).map((row) =>
+    row.map((h) => HEAT_GLYPHS[Math.min(h, MAX_HEAT)]).join('')
+  );
+}
+
+// Centered fire: COLS=64, BIG_FIRE_COLS=22, so left edge at col 21.
+// Vertical: fire rows 5-14, logs row 15, coals row 16.
+const BIG_FIRE_LEFT = 21;
+const BIG_FIRE_TOP = 5;
+const BIG_FIRE_LOGS  = '  _-=#|#|#|#|#|#|=-_  ';
+const BIG_FIRE_COALS = '   o@@o@@o@@o@@o@@o   ';
+
+export const BIG_FIRE_FRAMES: string[][] = Array.from({ length: FRAMES }, (_, t) => {
+  const grid = blank(ROWS, COLS);
+  placeBlock(grid, makeBigFireArt(t), BIG_FIRE_TOP, BIG_FIRE_LEFT);
+  placeBlock(grid, [BIG_FIRE_LOGS],  BIG_FIRE_TOP + BIG_FIRE_ROWS,     BIG_FIRE_LEFT);
+  placeBlock(grid, [BIG_FIRE_COALS], BIG_FIRE_TOP + BIG_FIRE_ROWS + 1, BIG_FIRE_LEFT);
+  return gridToArt(grid);
+});
+
+// Smoke for the big fire — denser, taller column for the close-up.
+const BIG_FIRE_SMOKE_STREAMS = [
+  { col: 24, drift: -0.30, period: 9,  chars: "'~. " },
+  { col: 26, drift: -0.10, period: 7,  chars: "~. " },
+  { col: 28, drift:  0.20, period: 8,  chars: "'~." },
+  { col: 30, drift:  0.40, period: 10, chars: "~'.~" },
+  { col: 31, drift:  0.10, period: 6,  chars: "'." },
+  { col: 32, drift:  0.50, period: 8,  chars: "'~." },
+  { col: 34, drift:  0.30, period: 9,  chars: "~'.~" },
+  { col: 36, drift: -0.10, period: 11, chars: "'~. " },
+  { col: 38, drift: -0.40, period: 10, chars: "~. " }
+];
+
+const BIG_FIRE_SMOKE_BASE_ROW = 4;
+const BIG_FIRE_SMOKE_HEIGHT = 4;
+
+export const BIG_FIRE_SMOKE_FRAMES: string[][] = Array.from({ length: FRAMES }, (_, t) => {
+  const grid = blank(ROWS, COLS);
+  for (let i = 0; i < BIG_FIRE_SMOKE_STREAMS.length; i++) {
+    const s = BIG_FIRE_SMOKE_STREAMS[i];
+    const phase = (t + i * 3) % s.period;
+    if (phase >= BIG_FIRE_SMOKE_HEIGHT) continue;
+    const row = BIG_FIRE_SMOKE_BASE_ROW - phase;
+    const col = Math.floor(s.col + phase * s.drift);
+    if (col < 0 || col >= COLS || row < 0) continue;
+    const ch = s.chars[phase % s.chars.length];
+    if (ch !== ' ') grid[row][col] = ch;
+  }
+  return gridToArt(grid);
+});
+
+// ---------------------------------------------------------------------------
+// HERD — small four-legged silhouettes crossing a distant ridge. Used for
+// the prelude's second flashback ("the herd will pass through the western
+// valley"). Animation: each member shifts steadily right; spacing matches
+// FRAMES so the loop seams close cleanly.
+// ---------------------------------------------------------------------------
+
+const HERD_GLYPH = [
+  ',_,',
+  '/=\\'
+];
+
+const HERD_COUNT = 5;
+const HERD_GAP   = 14; // cols between members
+const HERD_BASE_ROW = 14;
+
+export const HERD_FRAMES: string[][] = Array.from({ length: FRAMES }, (_, t) => {
+  const grid = blank(ROWS, COLS);
+  // Distant ridge silhouette
+  placeBlock(grid, MOUNTAINS_FAR_ART, 9, 1);
+  // Ground line below the herd
+  const groundLine = '_'.repeat(COLS);
+  grid[HERD_BASE_ROW + 2] = groundLine.split('');
+  // Per-frame shift: sweeps HERD_GAP cols over FRAMES, so the loop joins.
+  const shift = (t * HERD_GAP) / FRAMES;
+  for (let i = 0; i < HERD_COUNT; i++) {
+    const col = Math.floor(-HERD_GAP + i * HERD_GAP + shift);
+    if (col >= -2 && col < COLS) {
+      placeBlock(grid, HERD_GLYPH, HERD_BASE_ROW, col);
+    }
+  }
+  return gridToArt(grid);
+});
+
+// ---------------------------------------------------------------------------
 // EMBER FALL — a single * glyph traces a path from the Hearth's apex down
 // into the apprentice's bronze vessel, kindling the new Cinder.
 // ---------------------------------------------------------------------------

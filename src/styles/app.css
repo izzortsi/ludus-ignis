@@ -414,6 +414,7 @@ html, body {
 /* === intro === */
 
 .intro-root {
+  position: relative;
   min-height: 100vh;
   display: flex;
   flex-direction: column;
@@ -593,6 +594,64 @@ html, body {
   color: var(--fg-dim);
   opacity: 0.5;
   pointer-events: none;
+}
+
+/* === flashback layers === */
+
+.intro-big-fire {
+  color: var(--flame-orange);
+  text-shadow:
+    0 0 8px var(--flame-amber),
+    0 0 18px rgba(255, 170, 68, 0.55),
+    0 0 32px rgba(255, 119, 51, 0.3);
+}
+
+.intro-big-fire-smoke {
+  color: rgba(180, 170, 160, 0.45);
+}
+
+.intro-herd {
+  color: rgba(212, 184, 150, 0.85);
+  text-shadow: 0 0 3px rgba(212, 184, 150, 0.4);
+}
+
+/* === prelude typewriter === */
+
+.intro-typewriter {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  pointer-events: none;
+  padding: 2rem;
+}
+
+.intro-typewriter-text {
+  margin: 0;
+  max-width: 34rem;
+  text-align: center;
+  font-family: 'Menlo', 'Consolas', 'Courier New', monospace;
+  font-size: 1rem;
+  line-height: 1.8;
+  color: rgba(255, 235, 195, 0.92);
+  letter-spacing: 0.04em;
+  font-style: italic;
+}
+
+.intro-cursor {
+  display: inline-block;
+  margin-left: 2px;
+  opacity: 0.7;
+  animation: intro-cursor-blink 0.9s step-end infinite;
+}
+
+@keyframes intro-cursor-blink {
+  0%, 50%      { opacity: 0.7; }
+  50.01%, 100% { opacity: 0; }
 }
 
 .sky-view {

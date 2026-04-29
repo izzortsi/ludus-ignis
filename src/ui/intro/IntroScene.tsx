@@ -1,4 +1,4 @@
-import { Show, createMemo, createSignal, onMount, onCleanup } from 'solid-js';
+import { Show, createMemo, createSignal, onMount, onCleanup, createEffect } from 'solid-js';
 import {
   COLS, ROWS, ROW_PX, FRAMES, TWINKLE_FRAMES,
   STAR_FIELD, STARS_MED_FRAMES, STARS_BRIGHT_FRAMES, SKY_BOW,
@@ -8,15 +8,42 @@ import {
   HEARTH_SMOKE_FRAMES, HEARTH_EMBER_FRAMES,
   BREEZE_FRAMES,
   CINDER_VESSEL, CINDER_FIRE_FRAMES, CINDER_KINDLE_FRAMES,
-  CINDER_SMOKE_FRAMES, EMBER_FALL_FRAMES
+  CINDER_SMOKE_FRAMES, EMBER_FALL_FRAMES,
+  BIG_FIRE_FRAMES, BIG_FIRE_SMOKE_FRAMES,
+  HERD_FRAMES
 } from './scene-art';
 import { cinder } from '../../core/cinder/cinder-store';
 
 const TICK_MS = 140;
+const TYPE_MS = 32;
 
-type Phase = 'dawn' | 'kindle' | 'named';
+type Phase =
+  | 'text1' | 'flashback1'
+  | 'text2' | 'flashback2'
+  | 'text3'
+  | 'dawn' | 'kindle' | 'named';
 
-const PHASE_ORDER: readonly Phase[] = ['dawn', 'kindle', 'named'];
+const PHASE_ORDER: readonly Phase[] = [
+  'text1', 'flashback1', 'text2', 'flashback2', 'text3',
+  'dawn', 'kindle', 'named'
+];
+
+// Only flashbacks auto-advance — text screens and camp scenes wait for click.
+const PHASE_DURATIONS: Partial<Record<Phase, number>> = {
+  flashback1: 5500,
+  flashback2: 5500
+};
+
+// The Hearth-Tender's opening monologue — translated and lightly adapted
+// to the lore (the antigos / águas grandes invoking the lost civilization).
+const TEXTS: Partial<Record<Phase, string>> = {
+  text1:
+    'Escutem. O fogo está bom esta noite. Puxem a pele para perto.',
+  text2:
+    'Vocês já viram o futuro chegar. Já se perguntaram se a chuva cairá, se a caça passará pelo vale do oeste, se a criança viverá. Falam dessas coisas com palavras como talvez e provavelmente.',
+  text3:
+    'Quero dizer a vocês que o talvez não é nada. É uma forma de saber — uma forma que o amanhã lança de volta sobre o hoje. Aqueles do outro lado das águas grandes aprenderam a pesar essa forma. Aqui está um pouco do que aprenderam.'
+};
 
 function nextPhase(p: Phase): Phase | null {
   const i = PHASE_ORDER.indexOf(p);
@@ -33,9 +60,6 @@ interface LayerProps {
 }
 
 function Layer(props: LayerProps) {
-  // Inline the text expression so it re-evaluates reactively as props.art
-  // changes per animation tick. (Extracting `const text = ...` would freeze
-  // it at mount time — Solid only tracks reactive reads inside JSX/memos.)
   return (
     <pre class={`intro-layer ${props.className}`}>
       {typeof props.art === 'string' ? props.art : props.art.join('\n')}
@@ -43,20 +67,78 @@ function Layer(props: LayerProps) {
   );
 }
 
+// Typewriter — reveals text char by char. Restarts when text changes.
+function Typewriter(props: { text: string }) {
+  const [shown, setShown] = createSignal(0);
+  let intervalId: number | null = null;
+
+  function clearTimer() {
+    if (intervalId !== null) {
+      clearInterval(intervalId);
+      intervalId = null;
+    }
+  }
+
+  createEffect(() => {
+    const text = props.text;
+    setShown(0);
+    clearTimer();
+    intervalId = window.setInterval(() => {
+      setShown((n) => {
+        if (n >= text.length) {
+          clearTimer();
+          return n;
+        }
+        return n + 1;
+      });
+    }, TYPE_MS);
+  });
+
+  onCleanup(clearTimer);
+
+  const isDone = createMemo(() => shown() >= props.text.length);
+
+  return (
+    <div class="intro-typewriter">
+      <p class="intro-typewriter-text">
+        {props.text.slice(0, shown())}
+        {!isDone() && <span class="intro-cursor">_</span>}
+      </p>
+    </div>
+  );
+}
+
 export function IntroScene(props: Props) {
   const [tick, setTick] = createSignal(0);
-  const [phase, setPhase] = createSignal<Phase>('dawn');
+  const [phase, setPhase] = createSignal<Phase>('text1');
 
-  // Tick grows unbounded; downstream memos modulo by their own frame counts
-  // (FRAMES for fire/smoke/ember/breeze, TWINKLE_FRAMES for stars).
   onMount(() => {
     const id = window.setInterval(() => setTick((t) => t + 1), TICK_MS);
     onCleanup(() => clearInterval(id));
   });
 
-  // Each scene is an art piece — no auto-advance. Player clicks to move on.
+  // Auto-advance only for phases with a duration (flashbacks).
+  let advanceTimer: number | null = null;
+  function scheduleAutoAdvance() {
+    if (advanceTimer !== null) clearTimeout(advanceTimer);
+    const ms = PHASE_DURATIONS[phase()];
+    if (ms == null) return;
+    advanceTimer = window.setTimeout(() => {
+      const n = nextPhase(phase());
+      if (n) setPhase(n);
+    }, ms);
+  }
+  createEffect(() => {
+    phase(); // track
+    scheduleAutoAdvance();
+  });
+  onCleanup(() => {
+    if (advanceTimer !== null) clearTimeout(advanceTimer);
+  });
+
+  // Click anywhere advances any phase (named has its own button).
   function onClick() {
-    if (phase() === 'named') return; // dedicated button
+    if (phase() === 'named') return;
     const n = nextPhase(phase());
     if (n) setPhase(n);
   }
@@ -67,6 +149,13 @@ export function IntroScene(props: Props) {
 
   const f         = createMemo(() => tick() % FRAMES);
   const starFrame = createMemo(() => tick() % TWINKLE_FRAMES);
+
+  const isCampPhase = createMemo(
+    () => phase() === 'dawn' || phase() === 'kindle' || phase() === 'named'
+  );
+  const isTextPhase = createMemo(
+    () => phase() === 'text1' || phase() === 'text2' || phase() === 'text3'
+  );
 
   return (
     <div class="intro-root" onClick={onClick}>
@@ -80,44 +169,52 @@ export function IntroScene(props: Props) {
         {/* sizing filler so the absolutely-positioned layers have a parent */}
         <pre class="intro-filler">{Array(ROWS).fill(' '.repeat(COLS)).join('\n')}</pre>
 
-        {/* === sky === */}
-        <Layer art={STAR_FIELD} className="intro-stars-base" />
-        <Layer art={STARS_MED_FRAMES[starFrame()]} className="intro-stars-med" />
-        <Layer art={STARS_BRIGHT_FRAMES[starFrame()]} className="intro-stars-bright" />
-        <Layer art={SKY_BOW} className="intro-sky-bow" />
+        {/* === camp scene — dawn / kindle / named === */}
+        <Show when={isCampPhase()}>
+          <Layer art={STAR_FIELD} className="intro-stars-base" />
+          <Layer art={STARS_MED_FRAMES[starFrame()]} className="intro-stars-med" />
+          <Layer art={STARS_BRIGHT_FRAMES[starFrame()]} className="intro-stars-bright" />
+          <Layer art={SKY_BOW} className="intro-sky-bow" />
+          <Layer art={MOUNTAINS_FAR} className="intro-mountains-far" />
+          <Layer art={MOUNTAINS_NEAR} className="intro-mountains-near" />
+          <Layer art={GROUND} className="intro-ground" />
+          <Layer art={TRIBE_SLEEPING} className="intro-tribe" />
+          <Layer art={HEARTH_CART} className="intro-cart" />
+          <Layer art={HEARTH_FIRE_FRAMES[f()]} className="intro-hearth-fire" />
+          <Layer art={HEARTH_EMBER_FRAMES[f()]} className="intro-hearth-embers" />
+          <Layer art={HEARTH_SMOKE_FRAMES[f()]} className="intro-hearth-smoke" />
+          <Layer art={BREEZE_FRAMES[f()]} className="intro-breeze" />
+        </Show>
 
-        {/* === land === */}
-        <Layer art={MOUNTAINS_FAR} className="intro-mountains-far" />
-        <Layer art={MOUNTAINS_NEAR} className="intro-mountains-near" />
-        <Layer art={GROUND} className="intro-ground" />
-
-        {/* === camp — present in all phases === */}
-        <Layer art={TRIBE_SLEEPING} className="intro-tribe" />
-        <Layer art={HEARTH_CART} className="intro-cart" />
-        <Layer art={HEARTH_FIRE_FRAMES[f()]} className="intro-hearth-fire" />
-        <Layer art={HEARTH_EMBER_FRAMES[f()]} className="intro-hearth-embers" />
-        <Layer art={HEARTH_SMOKE_FRAMES[f()]} className="intro-hearth-smoke" />
-        <Layer art={BREEZE_FRAMES[f()]} className="intro-breeze" />
-
-        {/* === phase-specific === */}
         <Show when={phase() === 'kindle' || phase() === 'named'}>
           <Layer art={TENDER} className="intro-tender" />
           <Layer art={APPRENTICE} className="intro-apprentice" />
           <Layer art={CINDER_VESSEL} className="intro-cinder-vessel" />
         </Show>
-
         <Show when={phase() === 'kindle'}>
           <Layer art={EMBER_FALL_FRAMES[f()]} className="intro-ember-fall" />
           <Layer art={CINDER_KINDLE_FRAMES[f()]} className="intro-cinder-fire" />
         </Show>
-
         <Show when={phase() === 'named'}>
           <Layer art={CINDER_FIRE_FRAMES[f()]} className="intro-cinder-fire" />
           <Layer art={CINDER_SMOKE_FRAMES[f()]} className="intro-cinder-smoke" />
         </Show>
+
+        {/* === flashbacks === */}
+        <Show when={phase() === 'flashback1'}>
+          <Layer art={BIG_FIRE_FRAMES[f()]} className="intro-big-fire" />
+          <Layer art={BIG_FIRE_SMOKE_FRAMES[f()]} className="intro-big-fire-smoke" />
+        </Show>
+        <Show when={phase() === 'flashback2'}>
+          <Layer art={HERD_FRAMES[f()]} className="intro-herd" />
+        </Show>
       </div>
 
       {/* === text overlays === */}
+      <Show when={isTextPhase()}>
+        <Typewriter text={TEXTS[phase()]!} />
+      </Show>
+
       <Show when={phase() === 'dawn'}>
         <p class="intro-subtitle">uma manhã quieta.</p>
       </Show>
