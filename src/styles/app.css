@@ -598,17 +598,25 @@ html, body {
 
 /* === flashback layers === */
 
-.intro-big-fire {
-  color: var(--flame-orange);
+/* Flashback 1 — Miyake-class CME spiral over a city */
+.intro-spiral {
+  color: rgba(255, 240, 200, 0.95);
   text-shadow:
-    0 0 8px var(--flame-amber),
-    0 0 18px rgba(255, 170, 68, 0.55),
-    0 0 32px rgba(255, 119, 51, 0.3);
+    0 0 6px rgba(255, 240, 200, 0.85),
+    0 0 16px rgba(255, 200, 120, 0.55),
+    0 0 32px rgba(255, 180, 80, 0.3);
 }
-
-.intro-big-fire-smoke {
-  color: rgba(180, 170, 160, 0.45);
+.intro-city-far    { color: rgba(160, 150, 140, 0.35); }
+.intro-city-mid    { color: rgba(180, 170, 155, 0.55); }
+.intro-city-front  {
+  color: rgba(220, 200, 170, 0.95);
+  text-shadow: 0 0 3px rgba(255, 220, 150, 0.4);
 }
+.intro-city-shimmer {
+  color: rgba(255, 215, 130, 0.65);
+  text-shadow: 0 0 4px rgba(255, 200, 100, 0.5);
+}
+.intro-city-water  { color: rgba(80, 110, 140, 0.7); }
 
 .intro-herd {
   color: rgba(212, 184, 150, 0.85);

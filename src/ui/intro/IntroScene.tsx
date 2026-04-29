@@ -9,7 +9,7 @@ import {
   BREEZE_FRAMES,
   CINDER_VESSEL, CINDER_FIRE_FRAMES, CINDER_KINDLE_FRAMES,
   CINDER_SMOKE_FRAMES, EMBER_FALL_FRAMES,
-  BIG_FIRE_FRAMES, BIG_FIRE_SMOKE_FRAMES,
+  SPIRAL_FRAMES, CITY_FAR, CITY_MID, CITY_FRONT, CITY_SHIMMER, CITY_WATER,
   HERD_FRAMES
 } from './scene-art';
 import { cinder } from '../../core/cinder/cinder-store';
@@ -202,8 +202,12 @@ export function IntroScene(props: Props) {
 
         {/* === flashbacks === */}
         <Show when={phase() === 'flashback1'}>
-          <Layer art={BIG_FIRE_FRAMES[f()]} className="intro-big-fire" />
-          <Layer art={BIG_FIRE_SMOKE_FRAMES[f()]} className="intro-big-fire-smoke" />
+          <Layer art={SPIRAL_FRAMES[f()]} className="intro-spiral" />
+          <Layer art={CITY_FAR} className="intro-city-far" />
+          <Layer art={CITY_MID} className="intro-city-mid" />
+          <Layer art={CITY_WATER} className="intro-city-water" />
+          <Layer art={CITY_SHIMMER} className="intro-city-shimmer" />
+          <Layer art={CITY_FRONT} className="intro-city-front" />
         </Show>
         <Show when={phase() === 'flashback2'}>
           <Layer art={HERD_FRAMES[f()]} className="intro-herd" />

@@ -500,98 +500,185 @@ export const BREEZE_FRAMES: string[][] = Array.from({ length: FRAMES }, (_, t) =
 });
 
 // ---------------------------------------------------------------------------
-// BIG FIRE — close-up Doom-fire for the prelude's first flashback.
-// Centered on the canvas, with logs and coals beneath.
+// FLASHBACK 1 — Miyake-class CME spiral over a sleeping city.
+// Spiral is adapted from the mochi galaxy generator (parametric two-armed
+// spiral with bright nucleus, one full rotation per cycle). Three depth
+// layers below: far / mid / front, with lit windows and water shimmer.
 // ---------------------------------------------------------------------------
 
-const BIG_FIRE_ROWS = 10;
-const BIG_FIRE_COLS = 22;
+const SPIRAL_GROWS = 10;
+const SPIRAL_GCOLS = 45;
+const SPIRAL_OFF_ROW = 0;
+const SPIRAL_OFF_COL = Math.floor((COLS - SPIRAL_GCOLS) / 2);
 
-function makeBigFireArt(t: number): string[] {
-  const r = mulberry32(t * 19 + 11);
-  const seedHeat = MAX_HEAT;
+function makeSpiralFrame(t: number): string[] {
+  const grid = blank(ROWS, COLS);
+  const cx = SPIRAL_GCOLS / 2;
+  const cy = SPIRAL_GROWS / 2 - 0.5;
 
-  const heat: number[][] = Array.from(
-    { length: BIG_FIRE_ROWS + 2 },
-    () => Array(BIG_FIRE_COLS).fill(0)
-  );
-
-  for (let row = BIG_FIRE_ROWS; row < BIG_FIRE_ROWS + 2; row++) {
-    for (let c = 0; c < BIG_FIRE_COLS; c++) {
-      heat[row][c] = Math.max(0, seedHeat - Math.floor(r() * 2));
+  // Bright nucleus — small @ cluster at the spiral's center
+  for (let dy = -1; dy <= 1; dy++) {
+    for (let dx = -3; dx <= 3; dx++) {
+      const e = (dx * dx) / 9 + (dy * dy) / 1;
+      if (e <= 1) {
+        const gr = SPIRAL_OFF_ROW + Math.round(cy + dy);
+        const gc = SPIRAL_OFF_COL + Math.round(cx + dx);
+        if (gr >= 0 && gr < ROWS && gc >= 0 && gc < COLS) grid[gr][gc] = '@';
+      }
     }
   }
-  for (let row = BIG_FIRE_ROWS - 1; row >= 0; row--) {
-    for (let c = 0; c < BIG_FIRE_COLS; c++) {
-      const shift = Math.floor((r() - 0.5) * 4);
-      const srcCol = Math.max(0, Math.min(BIG_FIRE_COLS - 1, c + shift));
-      const cool = Math.floor(r() * 3);
-      heat[row][c] = Math.max(0, heat[row + 1][srcCol] - cool);
+
+  // Two spiral arms — full rotation per FRAMES cycle
+  const baseAngle = (t / FRAMES) * Math.PI * 2;
+  for (let arm = 0; arm < 2; arm++) {
+    const offset = arm * Math.PI;
+    for (let r = 1.5; r < 24; r += 0.3) {
+      const theta = baseAngle + offset + r * 0.32;
+      const x = cx + r * 0.95 * Math.cos(theta);
+      const y = cy + r * 0.45 * Math.sin(theta);
+      const gr = SPIRAL_OFF_ROW + Math.round(y);
+      const gc = SPIRAL_OFF_COL + Math.round(x);
+      if (gr < 0 || gr >= ROWS || gc < 0 || gc >= COLS) continue;
+      if (grid[gr][gc] !== ' ') continue;
+      grid[gr][gc] = r < 5 ? '*' : r < 13 ? "'" : '.';
     }
   }
-  const cycle = (t * Math.PI * 2) / FRAMES;
-  for (let row = 0; row < BIG_FIRE_ROWS; row++) {
-    const fromBottom = (BIG_FIRE_ROWS - 1 - row) / (BIG_FIRE_ROWS - 1);
-    const halfWidth = (BIG_FIRE_COLS / 2) * Math.pow(1 - fromBottom, 0.6);
-    const sway = Math.sin(cycle + fromBottom * 4.0) * (0.4 + fromBottom * 1.6);
-    const center = BIG_FIRE_COLS / 2 + sway;
-    const denom = Math.max(halfWidth, 0.5);
-    for (let c = 0; c < BIG_FIRE_COLS; c++) {
-      const d = Math.abs(c + 0.5 - center) / denom;
-      const falloff = Math.max(0, 1 - d * d);
-      heat[row][c] = Math.floor(heat[row][c] * falloff);
-    }
-  }
-  return heat.slice(0, BIG_FIRE_ROWS).map((row) =>
-    row.map((h) => HEAT_GLYPHS[Math.min(h, MAX_HEAT)]).join('')
-  );
+  return gridToArt(grid);
 }
 
-// Centered fire: COLS=64, BIG_FIRE_COLS=22, so left edge at col 21.
-// Vertical: fire rows 5-14, logs row 15, coals row 16.
-const BIG_FIRE_LEFT = 21;
-const BIG_FIRE_TOP = 5;
-const BIG_FIRE_LOGS  = '  _-=#|#|#|#|#|#|=-_  ';
-const BIG_FIRE_COALS = '   o@@o@@o@@o@@o@@o   ';
+export const SPIRAL_FRAMES: string[][] = Array.from(
+  { length: FRAMES },
+  (_, t) => makeSpiralFrame(t)
+);
 
-export const BIG_FIRE_FRAMES: string[][] = Array.from({ length: FRAMES }, (_, t) => {
-  const grid = blank(ROWS, COLS);
-  placeBlock(grid, makeBigFireArt(t), BIG_FIRE_TOP, BIG_FIRE_LEFT);
-  placeBlock(grid, [BIG_FIRE_LOGS],  BIG_FIRE_TOP + BIG_FIRE_ROWS,     BIG_FIRE_LEFT);
-  placeBlock(grid, [BIG_FIRE_COALS], BIG_FIRE_TOP + BIG_FIRE_ROWS + 1, BIG_FIRE_LEFT);
-  return gridToArt(grid);
-});
-
-// Smoke for the big fire — denser, taller column for the close-up.
-const BIG_FIRE_SMOKE_STREAMS = [
-  { col: 24, drift: -0.30, period: 9,  chars: "'~. " },
-  { col: 26, drift: -0.10, period: 7,  chars: "~. " },
-  { col: 28, drift:  0.20, period: 8,  chars: "'~." },
-  { col: 30, drift:  0.40, period: 10, chars: "~'.~" },
-  { col: 31, drift:  0.10, period: 6,  chars: "'." },
-  { col: 32, drift:  0.50, period: 8,  chars: "'~." },
-  { col: 34, drift:  0.30, period: 9,  chars: "~'.~" },
-  { col: 36, drift: -0.10, period: 11, chars: "'~. " },
-  { col: 38, drift: -0.40, period: 10, chars: "~. " }
+// === City buildings — generic rectangular silhouettes only ===
+const CITY_SKYSCRAPER = [
+  '  T  ', '  |  ', '  |  ',
+  '|:.:|', '|.:.|', '|:.:|', '|.:.|', '|:.:|', '|.:.|', '|___|'
+];
+const CITY_TALL_OFFICE = [
+  ' ____ ',
+  '|::::|', '|::::|', '|::::|', '|::::|', '|::::|', '|::::|',
+  '|____|'
+];
+const CITY_CORPORATE = [
+  ' _____ ',
+  '|:|:|:|', '|:|:|:|', '|:|:|:|', '|:|:|:|',
+  '|_|_|_|'
+];
+const CITY_OFFICE = [
+  ' ______ ',
+  '|::::::|', '|::::::|', '|::::::|',
+  '|______|'
+];
+const CITY_APARTMENT = [
+  ' ____ ',
+  '|:..:|', '|.::.|', '|:..:|',
+  '|____|'
+];
+const CITY_TALL_NARROW = [
+  ' __ ',
+  '|::|', '|::|', '|::|', '|::|', '|::|',
+  '|__|'
+];
+const CITY_SQUAT = [
+  ' ___ ',
+  '|:::|',
+  '|___|'
+];
+const CITY_HOTEL = [
+  ' _____ ',
+  '|:|:|:|', '|:|:|:|', '|:|:|:|', '|:|:|:|', '|:|:|:|', '|:|:|:|',
+  '|_____|'
 ];
 
-const BIG_FIRE_SMOKE_BASE_ROW = 4;
-const BIG_FIRE_SMOKE_HEIGHT = 4;
+// Build the front silhouette and collect lit-window positions in one pass
+// so the water shimmer can mirror them exactly.
+function buildCityFront(): { lit: string[]; positions: Array<[number, number]> } {
+  const g = blank(ROWS, COLS);
+  // Bottom-aligned to row 19 so buildings touch the water at row 20.
+  placeBlock(g, CITY_SQUAT,       17, 0);
+  placeBlock(g, CITY_APARTMENT,   15, 5);
+  placeBlock(g, CITY_TALL_NARROW, 13, 12);
+  placeBlock(g, CITY_OFFICE,      15, 17);
+  placeBlock(g, CITY_TALL_OFFICE, 12, 26);
+  placeBlock(g, CITY_SKYSCRAPER,  10, 35);
+  placeBlock(g, CITY_CORPORATE,   14, 41);
+  placeBlock(g, CITY_APARTMENT,   15, 49);
+  placeBlock(g, CITY_HOTEL,       12, 56);
+  const raw = gridToArt(g);
 
-export const BIG_FIRE_SMOKE_FRAMES: string[][] = Array.from({ length: FRAMES }, (_, t) => {
-  const grid = blank(ROWS, COLS);
-  for (let i = 0; i < BIG_FIRE_SMOKE_STREAMS.length; i++) {
-    const s = BIG_FIRE_SMOKE_STREAMS[i];
-    const phase = (t + i * 3) % s.period;
-    if (phase >= BIG_FIRE_SMOKE_HEIGHT) continue;
-    const row = BIG_FIRE_SMOKE_BASE_ROW - phase;
-    const col = Math.floor(s.col + phase * s.drift);
-    if (col < 0 || col >= COLS || row < 0) continue;
-    const ch = s.chars[phase % s.chars.length];
-    if (ch !== ' ') grid[row][col] = ch;
+  const r = mulberry32(7);
+  const positions: Array<[number, number]> = [];
+  const lit = raw.map((line, row) => {
+    let out = '';
+    for (let c = 0; c < line.length; c++) {
+      const ch = line[c];
+      if (ch === ':' && r() < 0.20) {
+        out += '*';
+        positions.push([row, c]);
+      } else if (ch === '.' && r() < 0.10) {
+        out += 'o';
+        positions.push([row, c]);
+      } else {
+        out += ch;
+      }
+    }
+    return out;
+  });
+  return { lit, positions };
+}
+
+const _cityFront = buildCityFront();
+export const CITY_FRONT: string[] = _cityFront.lit;
+
+// Mid-distance buildings — sparse peaks visible between front silhouettes.
+const CITY_MID_ART = [
+  '  ;:;        ;,;          ,;,         ;:;          ;,;       ',
+  '  ;:;   ;,;  ;:;   ;,;    ;:;   ;,;   ;:;    ;,;   ;:;   ;,; ',
+  '  ;:;   ;:;  ;:;   ;:;    ;:;   ;:;   ;:;    ;:;   ;:;   ;:; ',
+  '  ;:;   ;:;  ;:;   ;:;    ;:;   ;:;   ;:;    ;:;   ;:;   ;:; '
+];
+export const CITY_MID: string[] = (() => {
+  const g = blank(ROWS, COLS);
+  placeBlock(g, CITY_MID_ART, 16, 0);
+  return gridToArt(g);
+})();
+
+// Far-distance specks — hint at distant outskirts on the horizon.
+const CITY_FAR_ART = [
+  '. . , .   . , . , .   , . , . , . , .   , . , . , .   . , . , .',
+  ', , . , . . , . , . , . , . , . , . , . , . , . , . , . , . , .'
+];
+export const CITY_FAR: string[] = (() => {
+  const g = blank(ROWS, COLS);
+  placeBlock(g, CITY_FAR_ART, 17, 0);
+  return gridToArt(g);
+})();
+
+// Reflection shimmer — faint glints in the water below each lit window.
+export const CITY_SHIMMER: string[] = (() => {
+  const g = blank(ROWS, COLS);
+  const r = mulberry32(13);
+  for (const [, c] of _cityFront.positions) {
+    if (r() < 0.7) g[20][c] = r() < 0.5 ? "'" : '.';
+    if (r() < 0.3) g[21][c] = '.';
   }
-  return gridToArt(grid);
-});
+  return gridToArt(g);
+})();
+
+// Water — two rows of waves at the bottom of the canvas.
+export const CITY_WATER: string[] = (() => {
+  const g = blank(ROWS, COLS);
+  let r1 = '', r2 = '';
+  for (let c = 0; c < COLS; c++) {
+    r1 += (c + Math.floor(c / 7)) % 8 < 1 ? '_' : '~';
+    r2 += (c + 4 + Math.floor(c / 5)) % 9 < 1 ? '_' : '~';
+  }
+  g[20] = r1.split('');
+  g[21] = r2.split('');
+  return gridToArt(g);
+})();
 
 // ---------------------------------------------------------------------------
 // HERD — small four-legged silhouettes crossing a distant ridge. Used for
