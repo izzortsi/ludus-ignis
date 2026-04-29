@@ -1,6 +1,7 @@
 import { Show, createMemo, createSignal, onMount, onCleanup, createEffect } from 'solid-js';
 import {
-  COLS, ROWS, ROW_PX, FRAMES, TWINKLE_FRAMES,
+  FRAMES, TWINKLE_FRAMES,
+  CAMP_DIMS, RIO_DIMS, type SceneDims,
   STAR_FIELD, STARS_MED_FRAMES, STARS_BRIGHT_FRAMES, SKY_BOW,
   MOUNTAINS_FAR, MOUNTAINS_NEAR, GROUND,
   TRIBE_SLEEPING, TENDER, APPRENTICE,
@@ -9,8 +10,9 @@ import {
   BREEZE_FRAMES,
   CINDER_VESSEL, CINDER_FIRE_FRAMES, CINDER_KINDLE_FRAMES,
   CINDER_SMOKE_FRAMES, EMBER_FALL_FRAMES,
-  SPIRAL_FRAMES, CITY_FAR, CITY_MID, CITY_FRONT, CITY_SHIMMER, CITY_WATER,
-  HERD_FRAMES
+  RIO_SPIKES, RIO_CURL, RIO_LAND, RIO_WATER, RIO_CITY,
+  MIRROR_LEAK_BACK, MIRROR_LEAK_WATER, MIRROR_LEAK_OUTER,
+  MIRROR_LEAK_MID, MIRROR_LEAK_CORE, MIRROR_LEAK_HUSKS
 } from './scene-art';
 import { cinder } from '../../core/cinder/cinder-store';
 
@@ -157,17 +159,25 @@ export function IntroScene(props: Props) {
     () => phase() === 'text1' || phase() === 'text2' || phase() === 'text3'
   );
 
+  // Each scene declares its own canvas. Text phases reuse the camp dims so
+  // the stage doesn't reflow to nothing while the typewriter is running.
+  function dimsFor(p: Phase): SceneDims {
+    if (p === 'flashback1') return RIO_DIMS;
+    return CAMP_DIMS;
+  }
+  const dims = createMemo(() => dimsFor(phase()));
+
   return (
     <div class="intro-root" onClick={onClick}>
       <div
         class="intro-stage"
         style={{
-          width: `${COLS}ch`,
-          height: `${ROWS * ROW_PX}px`
+          '--cols': dims().cols,
+          '--rows': dims().rows
         }}
       >
         {/* sizing filler so the absolutely-positioned layers have a parent */}
-        <pre class="intro-filler">{Array(ROWS).fill(' '.repeat(COLS)).join('\n')}</pre>
+        <pre class="intro-filler">{Array(dims().rows).fill(' '.repeat(dims().cols)).join('\n')}</pre>
 
         {/* === camp scene — dawn / kindle / named === */}
         <Show when={isCampPhase()}>
@@ -202,15 +212,19 @@ export function IntroScene(props: Props) {
 
         {/* === flashbacks === */}
         <Show when={phase() === 'flashback1'}>
-          <Layer art={SPIRAL_FRAMES[f()]} className="intro-spiral" />
-          <Layer art={CITY_FAR} className="intro-city-far" />
-          <Layer art={CITY_MID} className="intro-city-mid" />
-          <Layer art={CITY_WATER} className="intro-city-water" />
-          <Layer art={CITY_SHIMMER} className="intro-city-shimmer" />
-          <Layer art={CITY_FRONT} className="intro-city-front" />
+          <Layer art={RIO_SPIKES} className="intro-rio-spikes" />
+          <Layer art={RIO_CURL}   className="intro-rio-curl" />
+          <Layer art={RIO_LAND}   className="intro-rio-land" />
+          <Layer art={RIO_WATER}  className="intro-rio-water" />
+          <Layer art={RIO_CITY}   className="intro-rio-city" />
         </Show>
         <Show when={phase() === 'flashback2'}>
-          <Layer art={HERD_FRAMES[f()]} className="intro-herd" />
+          <Layer art={MIRROR_LEAK_BACK} className="intro-mirror-back" />
+          <Layer art={MIRROR_LEAK_WATER} className="intro-mirror-water" />
+          <Layer art={MIRROR_LEAK_OUTER[f()]} className="intro-mirror-outer" />
+          <Layer art={MIRROR_LEAK_MID[f()]} className="intro-mirror-mid" />
+          <Layer art={MIRROR_LEAK_CORE[f()]} className="intro-mirror-core" />
+          <Layer art={MIRROR_LEAK_HUSKS} className="intro-mirror-husks" />
         </Show>
       </div>
 

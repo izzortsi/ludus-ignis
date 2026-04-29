@@ -7,19 +7,32 @@
 
 import { mulberry32 } from '../ascii/prng';
 
+// Default (camp) scene dimensions — used by everything except the portrait
+// flashback 1 (Rio + Miyake). Each scene declares its own dims via the
+// SceneDims interface below; the IntroScene reads them per phase.
 export const COLS = 64;
 export const ROWS = 22;
 export const ROW_PX = 14;
 export const FRAMES = 15;
+
+export interface SceneDims {
+  cols: number;
+  rows: number;
+  rowPx: number;
+}
+
+export const CAMP_DIMS: SceneDims = { cols: 64, rows: 22, rowPx: 14 };
+export const RIO_DIMS: SceneDims = { cols: 50, rows: 46, rowPx: 14 };
 
 function blank(rows: number, cols: number): string[][] {
   return Array.from({ length: rows }, () => Array(cols).fill(' '));
 }
 
 function gridToArt(grid: string[][]): string[] {
+  const cols = grid[0]?.length ?? 0;
   return grid.map((r) => {
     const s = r.join('');
-    return s.length >= COLS ? s.slice(0, COLS) : s + ' '.repeat(COLS - s.length);
+    return s.length >= cols ? s.slice(0, cols) : s + ' '.repeat(cols - s.length);
   });
 }
 
@@ -500,219 +513,285 @@ export const BREEZE_FRAMES: string[][] = Array.from({ length: FRAMES }, (_, t) =
 });
 
 // ---------------------------------------------------------------------------
-// FLASHBACK 1 — Miyake-class CME spiral over a sleeping city.
-// Spiral is adapted from the mochi galaxy generator (parametric two-armed
-// spiral with bright nucleus, one full rotation per cycle). Three depth
-// layers below: far / mid / front, with lit windows and water shimmer.
+// FLASHBACK 1 — Miyake-class CME spiral over Rio. Portrait canvas (RIO_DIMS)
+// reproducing rj_miyake3.png as a static woodcut: alternating black/white
+// wedge spikes radiating from a spiral curl, with Christ atop Corcovado on
+// the left, far hills + Sugarloaf on the right, the bay, and the skyline.
+// Five layers (spikes / curl / land / water / city) for independent styling.
 // ---------------------------------------------------------------------------
 
-const SPIRAL_GROWS = 10;
-const SPIRAL_GCOLS = 45;
-const SPIRAL_OFF_ROW = 0;
-const SPIRAL_OFF_COL = Math.floor((COLS - SPIRAL_GCOLS) / 2);
+const RIO_ASPECT = 1.75; // char-cell height / width — for screen-round shapes
 
-function makeSpiralFrame(t: number): string[] {
-  const grid = blank(ROWS, COLS);
-  const cx = SPIRAL_GCOLS / 2;
-  const cy = SPIRAL_GROWS / 2 - 0.5;
+function buildRioMiyakeLayers(): {
+  spikes: string[];
+  curl: string[];
+  land: string[];
+  water: string[];
+  city: string[];
+} {
+  const { cols, rows } = RIO_DIMS;
+  const SKY_LIMIT = 28; // sky region: rows 0..27
+  const cx = 24;
+  const cy = 13;
 
-  // Bright nucleus — small @ cluster at the spiral's center
-  for (let dy = -1; dy <= 1; dy++) {
-    for (let dx = -3; dx <= 3; dx++) {
-      const e = (dx * dx) / 9 + (dy * dy) / 1;
-      if (e <= 1) {
-        const gr = SPIRAL_OFF_ROW + Math.round(cy + dy);
-        const gc = SPIRAL_OFF_COL + Math.round(cx + dx);
-        if (gr >= 0 && gr < ROWS && gc >= 0 && gc < COLS) grid[gr][gc] = '@';
-      }
+  const spikesGrid = blank(rows, cols);
+  const curlGrid   = blank(rows, cols);
+  const landGrid   = blank(rows, cols);
+  const waterGrid  = blank(rows, cols);
+  const cityGrid   = blank(rows, cols);
+
+  // === RADIATING WEDGES ===
+  // Polar sweep: each cell is asked which wedge it belongs to. Even-indexed
+  // wedges fill (woodcut "ink"); odd-indexed are gaps (the white wedges).
+  const r = mulberry32(91);
+  const N_WEDGES = 24;
+  const INNER_R = 7;
+  const OUTER_R = 24;
+  const wedgeReach = Array.from({ length: N_WEDGES }, () => OUTER_R + (r() - 0.5) * 6);
+  for (let row = 0; row < SKY_LIMIT; row++) {
+    for (let col = 0; col < cols; col++) {
+      const dx = col - cx;
+      const dy = (row - cy) * RIO_ASPECT;
+      const rr = Math.sqrt(dx * dx + dy * dy);
+      if (rr < INNER_R) continue;
+      const ang = Math.atan2(dy, dx);
+      const wedgeIdx = Math.floor(((ang + Math.PI) / (Math.PI * 2)) * N_WEDGES) % N_WEDGES;
+      if (wedgeIdx % 2 !== 0) continue;
+      if (rr > wedgeReach[wedgeIdx]) continue;
+      const u = (rr - INNER_R) / (wedgeReach[wedgeIdx] - INNER_R);
+      spikesGrid[row][col] = u < 0.45 ? '#' : u < 0.78 ? '*' : '.';
     }
   }
 
-  // Two spiral arms — full rotation per FRAMES cycle
-  const baseAngle = (t / FRAMES) * Math.PI * 2;
-  for (let arm = 0; arm < 2; arm++) {
-    const offset = arm * Math.PI;
-    for (let r = 1.5; r < 24; r += 0.3) {
-      const theta = baseAngle + offset + r * 0.32;
-      const x = cx + r * 0.95 * Math.cos(theta);
-      const y = cy + r * 0.45 * Math.sin(theta);
-      const gr = SPIRAL_OFF_ROW + Math.round(y);
-      const gc = SPIRAL_OFF_COL + Math.round(x);
-      if (gr < 0 || gr >= ROWS || gc < 0 || gc >= COLS) continue;
-      if (grid[gr][gc] !== ' ') continue;
-      grid[gr][gc] = r < 5 ? '*' : r < 13 ? "'" : '.';
-    }
+  // === SPIRAL CURL ===
+  // Logarithmic spiral, 1.8 turns from r≈0.5 outward to ~6.5 — fills the
+  // INNER_R hole in the wedge field with a clean hooked eye.
+  for (let theta = 0; theta < Math.PI * 3.6; theta += 0.05) {
+    const rr = 0.5 * Math.exp(theta * 0.43);
+    if (rr > 6.5) break;
+    const x = cx + rr * Math.cos(theta);
+    const y = cy + (rr * Math.sin(theta)) / RIO_ASPECT;
+    const gr = Math.round(y);
+    const gc = Math.round(x);
+    if (gr >= 0 && gr < SKY_LIMIT && gc >= 0 && gc < cols) curlGrid[gr][gc] = '@';
+  }
+  curlGrid[cy][cx] = '@';
+
+  // === LAND — Christ on Corcovado (left), far hills (mid), Sugarloaf (right) ===
+  const corcovado = [
+    '      -T-            ',
+    '       |             ',
+    '      / \\            ',
+    '     /   \\           ',
+    '    /     \\          ',
+    '   /       \\         ',
+    '  /         \\___     ',
+    ' /              \\__  ',
+    '/                  \\_'
+  ];
+  placeBlock(landGrid, corcovado, 31, 0);
+
+  const farRidge = [
+    '                       ___      __     ',
+    '                   ___/   \\____/  \\___ '
+  ];
+  placeBlock(landGrid, farRidge, 38, 0);
+
+  const sugarloaf = [
+    '                                     ____     ',
+    '                                 ___/    \\__  ',
+    '                               _/            \\'
+  ];
+  placeBlock(landGrid, sugarloaf, 37, 0);
+
+  // === WATER — bay, two rows ===
+  for (let c = 0; c < cols; c++) {
+    waterGrid[41][c] = '~';
+    waterGrid[42][c] = '~';
+  }
+
+  // === CITY — varied skyline + standout towers + single grounding row ===
+  const peaks = '  #  ##   ###  ###    ##   ## ##   ##  ## #  ##  ##  ';
+  for (let c = 0; c < peaks.length && c < cols; c++) {
+    if (peaks[c] === '#') cityGrid[43][c] = '#';
+  }
+  const tallTowerCols = [13, 27, 38];
+  for (const tc of tallTowerCols) {
+    cityGrid[42][tc] = '#';
+    cityGrid[43][tc] = '#';
+  }
+  const skyline2 = ' ##### ### #### ## ##### ##### #### ## ## #### ##  ';
+  for (let c = 0; c < skyline2.length && c < cols; c++) {
+    if (skyline2[c] === '#') cityGrid[44][c] = '#';
+  }
+  for (let c = 0; c < cols; c++) cityGrid[45][c] = '#';
+
+  return {
+    spikes: gridToArt(spikesGrid),
+    curl:   gridToArt(curlGrid),
+    land:   gridToArt(landGrid),
+    water:  gridToArt(waterGrid),
+    city:   gridToArt(cityGrid)
+  };
+}
+
+const _rio = buildRioMiyakeLayers();
+export const RIO_SPIKES: string[] = _rio.spikes;
+export const RIO_CURL:   string[] = _rio.curl;
+export const RIO_LAND:   string[] = _rio.land;
+export const RIO_WATER:  string[] = _rio.water;
+export const RIO_CITY:   string[] = _rio.city;
+
+// ---------------------------------------------------------------------------
+// FLASHBACK 2 — mirror-life leak. A derelict coastal lab spills wrong-handed
+// biomatter through a broken outflow pipe into a freshwater pond. The plume
+// is built from three density bands (outer/mid/core); the densest core uses
+// only unpaired left-leaning glyphs as the visual encoding of broken
+// chirality (no `)`, no `>`, no `\` — symmetry is broken at the source).
+// Husks of dead birds drift on the surface and lie on the bank.
+// ---------------------------------------------------------------------------
+
+const MIRROR_RIDGE_ART = [
+  '___    ____         _____         ____         _____      ____ ',
+  '   \\__/    \\_______/     \\_______/    \\_______/     \\____/    '
+];
+
+const MIRROR_LAB_ART = [
+  '   _____ ',
+  '  |:|:|:|',
+  '  |.|:|.|',
+  '  |:|_|:|',
+  '  |_____|=\\__',
+  '              \\__',
+  '                 \\__'
+];
+
+const MIRROR_STAR_POSITIONS: ReadonlyArray<readonly [number, number]> = [
+  [0, 5],  [0, 22], [0, 39], [0, 57],
+  [1, 14], [1, 33], [1, 50],
+  [2, 8],  [2, 28], [2, 47], [2, 60],
+  [3, 18], [3, 41]
+];
+
+const MIRROR_SHORE_ROW = 13;
+
+export const MIRROR_LEAK_BACK: string[] = (() => {
+  const grid = blank(ROWS, COLS);
+  // Faint static stars overhead — same dim sky as the rest of the world.
+  for (const [r, c] of MIRROR_STAR_POSITIONS) grid[r][c] = '.';
+  // Distant ridges across the far shore.
+  placeBlock(grid, MIRROR_RIDGE_ART, 4, 0);
+  // Lab building on the near (bottom-left) bank, with broken outflow pipe
+  // descending toward the water.
+  placeBlock(grid, MIRROR_LAB_ART, 7, 6);
+  // Sparse shoreline grit at the bank — `,` chars where the lab footprint
+  // doesn't cover, so the player reads "this is a shore."
+  for (let c = 0; c < COLS; c++) {
+    if (c >= 6 && c <= 25) continue;
+    if ((c * 7 + 3) % 5 === 0) grid[MIRROR_SHORE_ROW][c] = ',';
   }
   return gridToArt(grid);
-}
-
-export const SPIRAL_FRAMES: string[][] = Array.from(
-  { length: FRAMES },
-  (_, t) => makeSpiralFrame(t)
-);
-
-// === City buildings — generic rectangular silhouettes only ===
-const CITY_SKYSCRAPER = [
-  '  T  ', '  |  ', '  |  ',
-  '|:.:|', '|.:.|', '|:.:|', '|.:.|', '|:.:|', '|.:.|', '|___|'
-];
-const CITY_TALL_OFFICE = [
-  ' ____ ',
-  '|::::|', '|::::|', '|::::|', '|::::|', '|::::|', '|::::|',
-  '|____|'
-];
-const CITY_CORPORATE = [
-  ' _____ ',
-  '|:|:|:|', '|:|:|:|', '|:|:|:|', '|:|:|:|',
-  '|_|_|_|'
-];
-const CITY_OFFICE = [
-  ' ______ ',
-  '|::::::|', '|::::::|', '|::::::|',
-  '|______|'
-];
-const CITY_APARTMENT = [
-  ' ____ ',
-  '|:..:|', '|.::.|', '|:..:|',
-  '|____|'
-];
-const CITY_TALL_NARROW = [
-  ' __ ',
-  '|::|', '|::|', '|::|', '|::|', '|::|',
-  '|__|'
-];
-const CITY_SQUAT = [
-  ' ___ ',
-  '|:::|',
-  '|___|'
-];
-const CITY_HOTEL = [
-  ' _____ ',
-  '|:|:|:|', '|:|:|:|', '|:|:|:|', '|:|:|:|', '|:|:|:|', '|:|:|:|',
-  '|_____|'
-];
-
-// Build the front silhouette and collect lit-window positions in one pass
-// so the water shimmer can mirror them exactly.
-function buildCityFront(): { lit: string[]; positions: Array<[number, number]> } {
-  const g = blank(ROWS, COLS);
-  // Bottom-aligned to row 19 so buildings touch the water at row 20.
-  placeBlock(g, CITY_SQUAT,       17, 0);
-  placeBlock(g, CITY_APARTMENT,   15, 5);
-  placeBlock(g, CITY_TALL_NARROW, 13, 12);
-  placeBlock(g, CITY_OFFICE,      15, 17);
-  placeBlock(g, CITY_TALL_OFFICE, 12, 26);
-  placeBlock(g, CITY_SKYSCRAPER,  10, 35);
-  placeBlock(g, CITY_CORPORATE,   14, 41);
-  placeBlock(g, CITY_APARTMENT,   15, 49);
-  placeBlock(g, CITY_HOTEL,       12, 56);
-  const raw = gridToArt(g);
-
-  const r = mulberry32(7);
-  const positions: Array<[number, number]> = [];
-  const lit = raw.map((line, row) => {
-    let out = '';
-    for (let c = 0; c < line.length; c++) {
-      const ch = line[c];
-      if (ch === ':' && r() < 0.20) {
-        out += '*';
-        positions.push([row, c]);
-      } else if (ch === '.' && r() < 0.10) {
-        out += 'o';
-        positions.push([row, c]);
-      } else {
-        out += ch;
-      }
-    }
-    return out;
-  });
-  return { lit, positions };
-}
-
-const _cityFront = buildCityFront();
-export const CITY_FRONT: string[] = _cityFront.lit;
-
-// Mid-distance buildings — sparse peaks visible between front silhouettes.
-const CITY_MID_ART = [
-  '  ;:;        ;,;          ,;,         ;:;          ;,;       ',
-  '  ;:;   ;,;  ;:;   ;,;    ;:;   ;,;   ;:;    ;,;   ;:;   ;,; ',
-  '  ;:;   ;:;  ;:;   ;:;    ;:;   ;:;   ;:;    ;:;   ;:;   ;:; ',
-  '  ;:;   ;:;  ;:;   ;:;    ;:;   ;:;   ;:;    ;:;   ;:;   ;:; '
-];
-export const CITY_MID: string[] = (() => {
-  const g = blank(ROWS, COLS);
-  placeBlock(g, CITY_MID_ART, 16, 0);
-  return gridToArt(g);
 })();
 
-// Far-distance specks — hint at distant outskirts on the horizon.
-const CITY_FAR_ART = [
-  '. . , .   . , . , .   , . , . , . , .   , . , . , .   . , . , .',
-  ', , . , . . , . , . , . , . , . , . , . , . , . , . , . , . , .'
-];
-export const CITY_FAR: string[] = (() => {
-  const g = blank(ROWS, COLS);
-  placeBlock(g, CITY_FAR_ART, 17, 0);
-  return gridToArt(g);
-})();
+// Water surface starts at row 14.
+const MIRROR_WATER_TOP_ROW = 14;
 
-// Reflection shimmer — faint glints in the water below each lit window.
-export const CITY_SHIMMER: string[] = (() => {
-  const g = blank(ROWS, COLS);
-  const r = mulberry32(13);
-  for (const [, c] of _cityFront.positions) {
-    if (r() < 0.7) g[20][c] = r() < 0.5 ? "'" : '.';
-    if (r() < 0.3) g[21][c] = '.';
-  }
-  return gridToArt(g);
-})();
-
-// Water — two rows of waves at the bottom of the canvas.
-export const CITY_WATER: string[] = (() => {
-  const g = blank(ROWS, COLS);
-  let r1 = '', r2 = '';
-  for (let c = 0; c < COLS; c++) {
-    r1 += (c + Math.floor(c / 7)) % 8 < 1 ? '_' : '~';
-    r2 += (c + 4 + Math.floor(c / 5)) % 9 < 1 ? '_' : '~';
-  }
-  g[20] = r1.split('');
-  g[21] = r2.split('');
-  return gridToArt(g);
-})();
-
-// ---------------------------------------------------------------------------
-// HERD — small four-legged silhouettes crossing a distant ridge. Used for
-// the prelude's second flashback ("the herd will pass through the western
-// valley"). Animation: each member shifts steadily right; spacing matches
-// FRAMES so the loop seams close cleanly.
-// ---------------------------------------------------------------------------
-
-const HERD_GLYPH = [
-  ',_,',
-  '/=\\'
-];
-
-const HERD_COUNT = 5;
-const HERD_GAP   = 14; // cols between members
-const HERD_BASE_ROW = 14;
-
-export const HERD_FRAMES: string[][] = Array.from({ length: FRAMES }, (_, t) => {
+export const MIRROR_LEAK_WATER: string[] = (() => {
   const grid = blank(ROWS, COLS);
-  // Distant ridge silhouette
-  placeBlock(grid, MOUNTAINS_FAR_ART, 9, 1);
-  // Ground line below the herd
-  const groundLine = '_'.repeat(COLS);
-  grid[HERD_BASE_ROW + 2] = groundLine.split('');
-  // Per-frame shift: sweeps HERD_GAP cols over FRAMES, so the loop joins.
-  const shift = (t * HERD_GAP) / FRAMES;
-  for (let i = 0; i < HERD_COUNT; i++) {
-    const col = Math.floor(-HERD_GAP + i * HERD_GAP + shift);
-    if (col >= -2 && col < COLS) {
-      placeBlock(grid, HERD_GLYPH, HERD_BASE_ROW, col);
+  for (let row = MIRROR_WATER_TOP_ROW; row < ROWS; row++) {
+    let line = '';
+    for (let c = 0; c < COLS; c++) {
+      const phase = (c + (row - MIRROR_WATER_TOP_ROW) * 3) % 7;
+      line += phase < 1 ? '_' : '~';
+    }
+    grid[row] = line.split('');
+  }
+  return gridToArt(grid);
+})();
+
+// Plume source at the point where the broken pipe meets the water.
+const MIRROR_SOURCE_ROW = 14;
+const MIRROR_SOURCE_COL = 24;
+
+function plumeDensity(row: number, col: number, t: number): number {
+  const dr = row - MIRROR_SOURCE_ROW;
+  const dc = col - MIRROR_SOURCE_COL;
+  // Asymmetric metric: weight upstream/upward distances heavily so the plume
+  // reads as a downstream comma-shape, not a symmetric circle.
+  const horiz = dc < 0 ? dc * 1.8 : dc;
+  const vert  = dr < 0 ? dr * 3.0 : dr;
+  // Squash horizontal so a round-on-grid shape reads as round-on-screen
+  // (character cells are taller than wide).
+  const d = Math.sqrt(vert * vert + (horiz * 0.55) * (horiz * 0.55));
+  // Slow breath: reach oscillates ±15% over the loop, so the plume "lives".
+  const breath = 1 + Math.sin((t / FRAMES) * Math.PI * 2) * 0.15;
+  return Math.max(0, 1 - d / (11 * breath));
+}
+
+// Outer faint halo — `.` at the edges of the bloom
+export const MIRROR_LEAK_OUTER: string[][] = Array.from({ length: FRAMES }, (_, t) => {
+  const grid = blank(ROWS, COLS);
+  const r = mulberry32(t * 41 + 11);
+  for (let row = MIRROR_WATER_TOP_ROW; row < ROWS; row++) {
+    for (let col = 0; col < COLS; col++) {
+      const d = plumeDensity(row, col, t);
+      if (d > 0.05 && d < 0.32 && r() < d * 1.4) {
+        grid[row][col] = '.';
+      }
     }
   }
   return gridToArt(grid);
 });
+
+// Mid plume — sickly mid-density chars
+export const MIRROR_LEAK_MID: string[][] = Array.from({ length: FRAMES }, (_, t) => {
+  const grid = blank(ROWS, COLS);
+  const r = mulberry32(t * 47 + 19);
+  for (let row = MIRROR_WATER_TOP_ROW; row < ROWS; row++) {
+    for (let col = 0; col < COLS; col++) {
+      const d = plumeDensity(row, col, t);
+      if (d > 0.32 && d < 0.62 && r() < d * 1.1) {
+        grid[row][col] = r() < 0.5 ? ':' : ';';
+      }
+    }
+  }
+  return gridToArt(grid);
+});
+
+// Wrong-handed core — only left-leaning glyphs (`(`, `<`, `/`); the absence
+// of their pairs (`)`, `>`, `\`) is the signature of broken chirality.
+const MIRROR_CORE_GLYPHS = ['(', '<', '/'];
+
+export const MIRROR_LEAK_CORE: string[][] = Array.from({ length: FRAMES }, (_, t) => {
+  const grid = blank(ROWS, COLS);
+  const r = mulberry32(t * 53 + 23);
+  for (let row = MIRROR_WATER_TOP_ROW; row < ROWS; row++) {
+    for (let col = 0; col < COLS; col++) {
+      const d = plumeDensity(row, col, t);
+      if (d > 0.62 && r() < d) {
+        const pick = Math.floor(r() * MIRROR_CORE_GLYPHS.length);
+        grid[row][col] = MIRROR_CORE_GLYPHS[pick];
+      }
+    }
+  }
+  return gridToArt(grid);
+});
+
+// Husks — a few dead birds on the bank, a few floating in affected water.
+const MIRROR_HUSK_POSITIONS: ReadonlyArray<readonly [number, number]> = [
+  [13, 3],   // on bank far left
+  [13, 50],  // on bank far right
+  [13, 59],  // on bank far right
+  [15, 35],  // floating mid-plume
+  [16, 42],  // floating downstream edge
+  [17, 49]   // floating far downstream
+];
+
+export const MIRROR_LEAK_HUSKS: string[] = (() => {
+  const grid = blank(ROWS, COLS);
+  for (const [r, c] of MIRROR_HUSK_POSITIONS) grid[r][c] = 'v';
+  return gridToArt(grid);
+})();
 
 // ---------------------------------------------------------------------------
 // EMBER FALL — a single * glyph traces a path from the Hearth's apex down

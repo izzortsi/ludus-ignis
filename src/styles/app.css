@@ -429,8 +429,14 @@ html, body {
 .intro-stage {
   position: relative;
   font-family: 'Menlo', 'Consolas', 'Courier New', monospace;
-  font-size: 0.85rem;
-  line-height: 14px;
+  /* Font size shrinks on narrow viewports so var(--cols) chars always fit
+     in 98vw. 0.6 is the char-width-to-font-size ratio for monospace. */
+  font-size: min(0.85rem, calc(98vw / var(--cols) / 0.6));
+  /* Line-height in em so vertical scale follows font-size; 1.05 keeps the
+     1.75:1 cell aspect (height:width) used by the art generators. */
+  line-height: 1.05em;
+  width: calc(1ch * var(--cols));
+  height: calc(1lh * var(--rows));
   flex-shrink: 0;
 }
 
@@ -598,29 +604,55 @@ html, body {
 
 /* === flashback layers === */
 
-/* Flashback 1 — Miyake-class CME spiral over a city */
-.intro-spiral {
+/* Flashback 1 — Miyake-class CME spiral over Rio (rj_miyake3 reproduction) */
+.intro-rio-spikes {
   color: rgba(255, 240, 200, 0.95);
   text-shadow:
-    0 0 6px rgba(255, 240, 200, 0.85),
-    0 0 16px rgba(255, 200, 120, 0.55),
-    0 0 32px rgba(255, 180, 80, 0.3);
+    0 0 4px rgba(255, 240, 200, 0.7),
+    0 0 12px rgba(255, 200, 120, 0.4);
 }
-.intro-city-far    { color: rgba(160, 150, 140, 0.35); }
-.intro-city-mid    { color: rgba(180, 170, 155, 0.55); }
-.intro-city-front  {
+.intro-rio-curl {
+  color: rgba(255, 245, 210, 1);
+  text-shadow:
+    0 0 5px rgba(255, 240, 200, 0.85),
+    0 0 14px rgba(255, 190, 100, 0.5);
+}
+.intro-rio-land {
   color: rgba(220, 200, 170, 0.95);
-  text-shadow: 0 0 3px rgba(255, 220, 150, 0.4);
+  text-shadow: 0 0 2px rgba(220, 200, 170, 0.4);
 }
-.intro-city-shimmer {
-  color: rgba(255, 215, 130, 0.65);
-  text-shadow: 0 0 4px rgba(255, 200, 100, 0.5);
+.intro-rio-water {
+  color: rgba(80, 110, 140, 0.7);
 }
-.intro-city-water  { color: rgba(80, 110, 140, 0.7); }
+.intro-rio-city {
+  color: rgba(200, 180, 150, 0.9);
+  text-shadow: 0 0 3px rgba(255, 220, 150, 0.35);
+}
 
-.intro-herd {
-  color: rgba(212, 184, 150, 0.85);
-  text-shadow: 0 0 3px rgba(212, 184, 150, 0.4);
+/* Flashback 2 — mirror-life leak from a coastal lab into a pond */
+.intro-mirror-back {
+  color: rgba(160, 160, 165, 0.7);
+  text-shadow: 0 0 2px rgba(160, 160, 165, 0.3);
+}
+.intro-mirror-water {
+  color: rgba(70, 100, 130, 0.7);
+}
+.intro-mirror-outer {
+  color: rgba(150, 200, 130, 0.45);
+}
+.intro-mirror-mid {
+  color: rgba(140, 220, 110, 0.75);
+  text-shadow: 0 0 3px rgba(140, 220, 110, 0.4);
+}
+.intro-mirror-core {
+  color: rgba(180, 255, 130, 0.95);
+  text-shadow:
+    0 0 4px rgba(180, 255, 130, 0.85),
+    0 0 10px rgba(120, 220, 90, 0.55);
+}
+.intro-mirror-husks {
+  color: rgba(180, 130, 110, 0.85);
+  text-shadow: 0 0 3px rgba(180, 130, 110, 0.4);
 }
 
 /* === prelude typewriter === */
