@@ -1,4 +1,4 @@
-# Render blueprint for probgame (static site).
+# Render blueprint for Ludus Ignis (static site).
 #
 # To deploy:
 #   1. Push this repo to GitHub.
@@ -12,7 +12,7 @@
 
 services:
   - type: web
-    name: probgame
+    name: ludus-ignis
     runtime: static
     buildCommand: npm ci && npm run build
     staticPublishPath: ./dist

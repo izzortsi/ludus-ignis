@@ -8,9 +8,9 @@ export default defineConfig({
     VitePWA({
       registerType: 'autoUpdate',
       manifest: {
-        name: 'probgame',
-        short_name: 'probgame',
-        description: 'Aprende probabilidade com o teu Cinder.',
+        name: 'Ludus Ignis',
+        short_name: 'Ludus Ignis',
+        description: 'Aprenda probabilidade com a sua Brasa.',
         theme_color: '#1a0f08',
         background_color: '#0a0604',
         display: 'standalone',

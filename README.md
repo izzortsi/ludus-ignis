@@ -1,6 +1,6 @@
-# probgame
+# Ludus Ignis
 
-Probability theory taught by a stranded plasma intelligence in a small fire.
+*Game of Fire.* Probability theory taught by a stranded plasma intelligence in a small fire.
 
 A web-based learning game (Portuguese-first) that pairs a probability curriculum with a tamagotchi-like companion (the **Cinder**) that must be kept alive through daily study. The Cinder also reads the chirality of any sample brought to it — *A Leitura* — making Bayesian inference a daily survival ritual.
 

@@ -1,4 +1,4 @@
-# probgame — World Bible
+# Ludus Ignis — World Bible
 
 Status: working draft, iteration 3.
 Genre: hard-SF post-collapse with an unreliable narrator (the child protagonist) and a reliable one (the world's environmental record).
