@@ -1,7 +1,7 @@
 import { Show, createMemo, createSignal, onMount, onCleanup, createEffect } from 'solid-js';
 import {
   FRAMES, TWINKLE_FRAMES,
-  CAMP_DIMS, RIO_DIMS, type SceneDims,
+  CAMP_DIMS, RIO_DIMS, MIRROR_DIMS, type SceneDims,
   STAR_FIELD, STARS_MED_FRAMES, STARS_BRIGHT_FRAMES, SKY_BOW,
   MOUNTAINS_FAR, MOUNTAINS_NEAR, GROUND,
   TRIBE_SLEEPING, TENDER, APPRENTICE,
@@ -163,6 +163,7 @@ export function IntroScene(props: Props) {
   // the stage doesn't reflow to nothing while the typewriter is running.
   function dimsFor(p: Phase): SceneDims {
     if (p === 'flashback1') return RIO_DIMS;
+    if (p === 'flashback2') return MIRROR_DIMS;
     return CAMP_DIMS;
   }
   const dims = createMemo(() => dimsFor(phase()));
