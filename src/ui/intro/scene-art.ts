@@ -221,11 +221,13 @@ const APPRENTICE_FIGURE = [
 
 export const TRIBE_SLEEPING: string[] = (() => {
   const grid = blank(ROWS, COLS);
-  // Sleeping figures scattered around the camp
+  // Sleeping figures scattered around the camp. Right-side ones sit further
+  // out so they don't crowd the apprentice + new Cinder vessel that appear
+  // to the right of the Hearth in the kindle/named phases.
   placeBlock(grid, SLEEPING_RIGHT, 16, 5);
   placeBlock(grid, SLEEPING_RIGHT, 18, 11);
-  placeBlock(grid, SLEEPING_LEFT,  16, 50);
-  placeBlock(grid, SLEEPING_LEFT,  18, 55);
+  placeBlock(grid, SLEEPING_LEFT,  16, 56);
+  placeBlock(grid, SLEEPING_LEFT,  18, 57);
   return gridToArt(grid);
 })();
 
@@ -237,7 +239,9 @@ export const TENDER: string[] = (() => {
 
 export const APPRENTICE: string[] = (() => {
   const grid = blank(ROWS, COLS);
-  placeBlock(grid, APPRENTICE_FIGURE, 13, 38);
+  // Right of the Hearth cart (which ends at col 45). The reaching-arm
+  // glyph at col 49 points toward the new Cinder vessel at col 50+.
+  placeBlock(grid, APPRENTICE_FIGURE, 13, 47);
   return gridToArt(grid);
 })();
 
@@ -327,7 +331,8 @@ const CINDER_VESSEL_ART = [
 
 export const CINDER_VESSEL: string[] = (() => {
   const grid = blank(ROWS, COLS);
-  placeBlock(grid, CINDER_VESSEL_ART, 17, 39);
+  // Right of the apprentice; the kindling fire emerges just above its rim.
+  placeBlock(grid, CINDER_VESSEL_ART, 17, 50);
   return gridToArt(grid);
 })();
 
@@ -362,10 +367,11 @@ function makeCinderFireArt(t: number, intensity: number): string[] {
   );
 }
 
-// Cinder fire frames — for "kindled" steady state
+// Cinder fire frames — for "kindled" steady state, sitting on top of the
+// vessel at col 50 with fire bottom at row 16 just above the vessel rim.
 export const CINDER_FIRE_FRAMES: string[][] = Array.from({ length: FRAMES }, (_, t) => {
   const grid = blank(ROWS, COLS);
-  placeBlock(grid, makeCinderFireArt(t, 0.6), 14, 39);
+  placeBlock(grid, makeCinderFireArt(t, 0.6), 14, 50);
   return gridToArt(grid);
 });
 
@@ -374,7 +380,7 @@ export const CINDER_KINDLE_FRAMES: string[][] = Array.from({ length: FRAMES }, (
   const grid = blank(ROWS, COLS);
   // intensity ramps from 0 to 0.6 over the frame range
   const intensity = Math.min(0.6, (t / (FRAMES - 1)) * 0.6);
-  placeBlock(grid, makeCinderFireArt(t, intensity), 14, 39);
+  placeBlock(grid, makeCinderFireArt(t, intensity), 14, 50);
   return gridToArt(grid);
 });
 
@@ -450,8 +456,8 @@ export const HEARTH_EMBER_FRAMES: string[][] = Array.from({ length: FRAMES }, (_
 // ---------------------------------------------------------------------------
 
 const CINDER_SMOKE_STREAMS = [
-  { col: 41, drift: 0.20, period: 8,  chars: "'." },
-  { col: 40, drift: 0.35, period: 10, chars: "'.~" }
+  { col: 52, drift: 0.20, period: 8,  chars: "'." },
+  { col: 51, drift: 0.35, period: 10, chars: "'.~" }
 ];
 
 const CINDER_SMOKE_BASE_ROW = 12;
@@ -498,14 +504,15 @@ export const BREEZE_FRAMES: string[][] = Array.from({ length: FRAMES }, (_, t) =
 // into the apprentice's bronze vessel, kindling the new Cinder.
 // ---------------------------------------------------------------------------
 
-// The path is a parametric curve from (row=10, col=36) to (row=16, col=41).
+// The path is a parametric arc from the Hearth fire's right side down into
+// the apprentice's vessel at col 52.
 export const EMBER_FALL_FRAMES: string[][] = Array.from({ length: FRAMES }, (_, t) => {
   const grid = blank(ROWS, COLS);
   const u = t / (FRAMES - 1); // 0..1
-  // Curve: parabolic arc, falling
-  const startRow = 10, startCol = 36;
-  const endRow = 16, endCol = 41;
-  const row = Math.round(startRow + (endRow - startRow) * u + Math.sin(u * Math.PI) * -1.5);
+  const startRow = 10, startCol = 41;
+  const endRow = 17, endCol = 52;
+  // Slight upward arc mid-flight, then descent into the vessel
+  const row = Math.round(startRow + (endRow - startRow) * u + Math.sin(u * Math.PI) * -2);
   const col = Math.round(startCol + (endCol - startCol) * u);
   if (row >= 0 && row < ROWS && col >= 0 && col < COLS) grid[row][col] = '*';
   return gridToArt(grid);
