@@ -10,7 +10,7 @@ import {
   BREEZE_FRAMES,
   CINDER_VESSEL, CINDER_FIRE_FRAMES, CINDER_KINDLE_FRAMES,
   CINDER_SMOKE_FRAMES, EMBER_FALL_FRAMES,
-  RIO_SPIKES, RIO_CURL, RIO_LAND, RIO_WATER, RIO_CITY,
+  RIO_MIYAKE,
   MIRROR_LEAK_BACK, MIRROR_LEAK_WATER, MIRROR_LEAK_OUTER,
   MIRROR_LEAK_MID, MIRROR_LEAK_CORE, MIRROR_LEAK_HUSKS
 } from './scene-art';
@@ -212,11 +212,7 @@ export function IntroScene(props: Props) {
 
         {/* === flashbacks === */}
         <Show when={phase() === 'flashback1'}>
-          <Layer art={RIO_SPIKES} className="intro-rio-spikes" />
-          <Layer art={RIO_CURL}   className="intro-rio-curl" />
-          <Layer art={RIO_LAND}   className="intro-rio-land" />
-          <Layer art={RIO_WATER}  className="intro-rio-water" />
-          <Layer art={RIO_CITY}   className="intro-rio-city" />
+          <Layer art={RIO_MIYAKE} className="intro-rio" />
         </Show>
         <Show when={phase() === 'flashback2'}>
           <Layer art={MIRROR_LEAK_BACK} className="intro-mirror-back" />

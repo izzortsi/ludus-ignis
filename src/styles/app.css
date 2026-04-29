@@ -429,11 +429,15 @@ html, body {
 .intro-stage {
   position: relative;
   font-family: 'Menlo', 'Consolas', 'Courier New', monospace;
-  /* Font size shrinks on narrow viewports so var(--cols) chars always fit
-     in 98vw. 0.6 is the char-width-to-font-size ratio for monospace. */
-  font-size: min(0.85rem, calc(98vw / var(--cols) / 0.6));
-  /* Line-height in em so vertical scale follows font-size; 1.05 keeps the
-     1.75:1 cell aspect (height:width) used by the art generators. */
+  /* Scale font so the whole canvas fits in BOTH viewport dimensions:
+     - 98vw / cols / 0.6  → cap by width  (0.6 = monospace char-width/font-size)
+     - 92vh / rows / 1.05 → cap by height (1.05 = our line-height in em)
+     0.85rem is the desktop ceiling so big screens don't oversize. */
+  font-size: min(
+    0.85rem,
+    calc(98vw / var(--cols) / 0.6),
+    calc(92vh / var(--rows) / 1.05)
+  );
   line-height: 1.05em;
   width: calc(1ch * var(--cols));
   height: calc(1lh * var(--rows));
@@ -604,29 +608,14 @@ html, body {
 
 /* === flashback layers === */
 
-/* Flashback 1 — Miyake-class CME spiral over Rio (rj_miyake3 reproduction) */
-.intro-rio-spikes {
-  color: rgba(255, 240, 200, 0.95);
+/* Flashback 1 — Miyake-class CME spiral over Rio (rj_miyake3 reproduction).
+   Single layer, density-mapped: the glyph ramp itself encodes intensity, so
+   one warm-paper color carries the whole woodcut feel. */
+.intro-rio {
+  color: rgba(235, 215, 175, 0.95);
   text-shadow:
-    0 0 4px rgba(255, 240, 200, 0.7),
-    0 0 12px rgba(255, 200, 120, 0.4);
-}
-.intro-rio-curl {
-  color: rgba(255, 245, 210, 1);
-  text-shadow:
-    0 0 5px rgba(255, 240, 200, 0.85),
-    0 0 14px rgba(255, 190, 100, 0.5);
-}
-.intro-rio-land {
-  color: rgba(220, 200, 170, 0.95);
-  text-shadow: 0 0 2px rgba(220, 200, 170, 0.4);
-}
-.intro-rio-water {
-  color: rgba(80, 110, 140, 0.7);
-}
-.intro-rio-city {
-  color: rgba(200, 180, 150, 0.9);
-  text-shadow: 0 0 3px rgba(255, 220, 150, 0.35);
+    0 0 2px rgba(255, 230, 180, 0.35),
+    0 0 8px rgba(255, 200, 120, 0.18);
 }
 
 /* Flashback 2 — mirror-life leak from a coastal lab into a pond */
