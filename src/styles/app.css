@@ -75,6 +75,9 @@ html, body {
   flex-shrink: 0;
   cursor: pointer;
   user-select: none;
+  /* Prevent the browser from interpreting touch drag as a page scroll;
+     the map handles its own pointer events for hold-to-walk. */
+  touch-action: none;
 }
 
 .map-filler {

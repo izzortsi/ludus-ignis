@@ -96,37 +96,61 @@ export function CampMap() {
     return lines.join('\n');
   });
 
-  // Tap → grid cell. We snap to the nearest cell using the stage's
-  // bounding rect; the stage uses ch/lh units so the cell aspect matches
-  // var(--cols) × var(--rows) exactly.
-  function onTap(e: MouseEvent) {
-    const stage = e.currentTarget as HTMLDivElement;
+  // Tap-and-hold movement. Pointer down → set target; while held → target
+  // follows the pointer; on release → stop unless heading to an
+  // interactable (in which case finish the walk + open the dialog).
+
+  let isHolding = false;
+
+  function cellAt(e: PointerEvent, stage: HTMLDivElement): { row: number; col: number } | null {
     const rect = stage.getBoundingClientRect();
     const col = Math.floor(((e.clientX - rect.left) / rect.width)  * MAP_DIMS.cols);
     const row = Math.floor(((e.clientY - rect.top)  / rect.height) * MAP_DIMS.rows);
+    if (row < 0 || row >= MAP_DIMS.rows || col < 0 || col >= MAP_DIMS.cols) return null;
+    return { row, col };
+  }
 
-    if (row < 0 || row >= MAP_DIMS.rows || col < 0 || col >= MAP_DIMS.cols) return;
-
-    const target = interactableAt(row, col);
-    if (target) {
-      const ap = approachFor(target);
-      setTarget(ap.row, ap.col, target);
+  function setTargetForCell(row: number, col: number) {
+    const id = interactableAt(row, col);
+    if (id) {
+      const ap = approachFor(id);
+      setTarget(ap.row, ap.col, id);
       return;
     }
-
-    // Free move — only set target if the tapped cell (or a nearby fallback)
-    // is walkable.
     if (isWalkable(row, col)) {
       setTarget(row, col, null);
       return;
     }
-    // Try a few nearby cells before giving up
+    // Try a few nearby cells if the exact tap landed on a tree/etc.
     for (const [dr, dc] of [[0,1],[0,-1],[1,0],[-1,0],[1,1],[1,-1],[-1,1],[-1,-1]]) {
       if (isWalkable(row + dr, col + dc)) {
         setTarget(row + dr, col + dc, null);
         return;
       }
     }
+  }
+
+  function onPointerDown(e: PointerEvent) {
+    isHolding = true;
+    const stage = e.currentTarget as HTMLDivElement;
+    stage.setPointerCapture(e.pointerId);
+    const cell = cellAt(e, stage);
+    if (cell) setTargetForCell(cell.row, cell.col);
+  }
+
+  function onPointerMove(e: PointerEvent) {
+    if (!isHolding) return;
+    const stage = e.currentTarget as HTMLDivElement;
+    const cell = cellAt(e, stage);
+    if (cell) setTargetForCell(cell.row, cell.col);
+  }
+
+  function endHold() {
+    isHolding = false;
+    // If walking toward an interactable, keep going (don't cancel mid-walk).
+    if (apprentice.intent !== null) return;
+    // Otherwise stop where we are.
+    clearTarget();
   }
 
   function closeDialog() {
@@ -138,7 +162,10 @@ export function CampMap() {
       <div
         class="map-stage"
         style={{ '--cols': MAP_DIMS.cols, '--rows': MAP_DIMS.rows }}
-        onClick={onTap}
+        onPointerDown={onPointerDown}
+        onPointerMove={onPointerMove}
+        onPointerUp={endHold}
+        onPointerCancel={endHold}
       >
         <pre class="map-filler">{Array(MAP_DIMS.rows).fill(' '.repeat(MAP_DIMS.cols)).join('\n')}</pre>
         <pre class="map-layer map-terrain">{TERRAIN.join('\n')}</pre>
