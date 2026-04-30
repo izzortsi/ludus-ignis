@@ -2,6 +2,7 @@ import { createSignal, createMemo, Show, For } from 'solid-js';
 import { MapDialog } from './MapDialog';
 import { CinderView } from '../components/CinderView';
 import { Math as MathRender } from '../components/Math';
+import katex from 'katex';
 import { currentLesson, lessonState, recordPracticeCorrect } from '../../core/lessons/lesson-store';
 import {
   exerciseState, loadNextExercise, selectAnswer, clearExercise
@@ -193,16 +194,38 @@ export function CinderDialog(props: Props) {
 
 // Tiny inline markup for theory paragraphs:
 //   *italic*  → <em>
-//   $tex$     → inline math (very small subset; we render via KaTeX manually
-//                if needed, but for now keep paragraphs text-only and let
-//                "math" sections handle full equations).
+//   $tex$     → inline math rendered by KaTeX (renderToString → HTML)
+//
+// We escape HTML on the surrounding text but feed the math chunk straight
+// to KaTeX (it does its own escaping). Bad LaTeX falls back to a plain
+// <code> so the paragraph still reads.
 function renderInlineMarkup(s: string): string {
-  // Escape HTML
-  const escaped = s
+  // Split into alternating non-math and math chunks so HTML escaping never
+  // touches the LaTeX source.
+  const parts: string[] = [];
+  let lastIdx = 0;
+  const re = /\$([^$]+)\$/g;
+  let match: RegExpExecArray | null;
+  while ((match = re.exec(s)) !== null) {
+    parts.push(escapeAndItalics(s.slice(lastIdx, match.index)));
+    try {
+      parts.push(katex.renderToString(match[1], { throwOnError: false, displayMode: false }));
+    } catch {
+      parts.push(`<code class="math-inline-text">${escapeHtml(match[1])}</code>`);
+    }
+    lastIdx = match.index + match[0].length;
+  }
+  parts.push(escapeAndItalics(s.slice(lastIdx)));
+  return parts.join('');
+}
+
+function escapeHtml(s: string): string {
+  return s
     .replace(/&/g, '&amp;')
     .replace(/</g, '&lt;')
     .replace(/>/g, '&gt;');
-  return escaped
-    .replace(/\*([^*]+)\*/g, '<em>$1</em>')
-    .replace(/\$([^$]+)\$/g, '<code class="math-inline-text">$1</code>');
+}
+
+function escapeAndItalics(s: string): string {
+  return escapeHtml(s).replace(/\*([^*]+)\*/g, '<em>$1</em>');
 }
