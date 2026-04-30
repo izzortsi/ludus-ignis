@@ -1,6 +1,7 @@
 import { createSignal, onMount, onCleanup, createEffect, createMemo, Show } from 'solid-js';
 import {
-  TERRAIN, MAP_DIMS,
+  TERRAIN, MAP_DIMS, FRAMES,
+  HEARTH_FIRE_FRAMES, CINDER_FIRE_FRAMES,
   isWalkable, interactableAt, approachFor,
   type InteractableId
 } from './map-art';
@@ -12,6 +13,7 @@ import { ElderFireDialog } from './ElderFireDialog';
 import { CinderDialog } from './CinderDialog';
 
 const STEP_MS = 140;
+const FIRE_TICK_MS = 120;
 const SPRITE_FRAMES = ['ô', 'Ô']; // alternating walk-cycle glyph
 
 function sign(n: number): number {
@@ -20,12 +22,20 @@ function sign(n: number): number {
 
 export function CampMap() {
   const [walkTick, setWalkTick] = createSignal(0);
+  const [fireTick, setFireTick] = createSignal(0);
   const [dialog, setDialog] = createSignal<InteractableId | null>(null);
 
   // Persist position whenever it changes (cheap; 1-2 writes per second
   // during a walk, then idle).
   createEffect(() => {
     persistApprentice({ row: apprentice.row, col: apprentice.col });
+  });
+
+  // Fire animation tick — independent of walk loop so flames flicker even
+  // when standing still.
+  onMount(() => {
+    const id = window.setInterval(() => setFireTick((t) => (t + 1) % FRAMES), FIRE_TICK_MS);
+    onCleanup(() => clearInterval(id));
   });
 
   // Walk loop — ticks while target is set; stepping toward target one cell
@@ -132,6 +142,8 @@ export function CampMap() {
       >
         <pre class="map-filler">{Array(MAP_DIMS.rows).fill(' '.repeat(MAP_DIMS.cols)).join('\n')}</pre>
         <pre class="map-layer map-terrain">{TERRAIN.join('\n')}</pre>
+        <pre class="map-layer map-hearth-fire">{HEARTH_FIRE_FRAMES[fireTick()]}</pre>
+        <pre class="map-layer map-cinder-fire">{CINDER_FIRE_FRAMES[fireTick()]}</pre>
         <pre class="map-layer map-apprentice">{sprite()}</pre>
       </div>
 
