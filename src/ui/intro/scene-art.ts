@@ -19,9 +19,10 @@ export interface SceneDims {
 }
 
 // Camp scene (dawn / kindle / named) — animated, layered, present-day.
-// Portrait 50×80 fits modern phones cleanly; vertical room lets the hearth
-// fire & smoke rise dramatically through the composition.
-export const CAMP_DIMS: SceneDims = { cols: 50, rows: 80, rowPx: 14 };
+// 64×80 portrait: height stays at 80 (room for tall hearth fire and rising
+// smoke); width bumped from 50 to 64 so the canvas fills closer to full
+// phone width (the previous 50 left ~40% of an iPhone SE empty on sides).
+export const CAMP_DIMS: SceneDims = { cols: 64, rows: 80, rowPx: 14 };
 
 // Mirror leak (flashback 2) — dense static reproduction matching the Rio
 // flashback's woodcut style.
@@ -34,6 +35,11 @@ export const RIO_DIMS: SceneDims = { cols: 115, rows: 109, rowPx: 14 };
 // static density-mapped arrays now — they don't need short aliases.
 const C_COLS = CAMP_DIMS.cols;
 const C_ROWS = CAMP_DIMS.rows;
+
+// All camp art was originally laid out for a 50-col canvas. CAMP_OFFSET
+// shifts every placement right so the original composition stays centered
+// when CAMP_DIMS.cols is wider than 50.
+const CAMP_OFFSET = Math.floor((C_COLS - 50) / 2);
 
 function blank(rows: number, cols: number): string[][] {
   return Array.from({ length: rows }, () => Array(cols).fill(' '));
@@ -85,37 +91,37 @@ const SKY_BOW_CELLS: Set<string> = (() => {
   return cells;
 })();
 
-// Stars scattered through the sky region. Each row gets ~2 stars at varied
-// columns; stars overlapping the sky-bow band are filtered out so the band
-// reads as a clean diagonal.
+// Stars scattered through the sky region. Each row gets ~3 stars across the
+// full canvas width (cols 0..C_COLS-2); stars overlapping the sky-bow band
+// are filtered out below so the band reads as a clean diagonal.
 const STAR_POSITIONS_RAW: ReadonlyArray<readonly [number, number]> = [
-  [0, 5],  [0, 22], [0, 38],
-  [1, 14], [1, 31], [1, 45],
-  [2, 9],  [2, 26], [2, 42],
-  [3, 17], [3, 35], [3, 48],
-  [4, 4],  [4, 22], [4, 39],
-  [5, 12], [5, 30], [5, 46],
-  [6, 7],  [6, 25], [6, 42],
-  [7, 16], [7, 34], [7, 49],
-  [8, 3],  [8, 20], [8, 38],
-  [9, 11], [9, 29], [9, 46],
-  [10, 6], [10, 24], [10, 40],
-  [11, 14], [11, 32], [11, 48],
-  [12, 8], [12, 27], [12, 43],
-  [13, 18], [13, 36],
-  [14, 4], [14, 22], [14, 41],
-  [15, 12], [15, 30], [15, 46],
-  [16, 7], [16, 25], [16, 39],
-  [17, 16], [17, 33], [17, 47],
-  [18, 5], [18, 22], [18, 41],
-  [19, 12], [19, 30], [19, 45],
-  [20, 8], [20, 27], [20, 43],
-  [21, 17], [21, 34], [21, 48],
-  [22, 4], [22, 21], [22, 39],
-  [23, 13], [23, 31], [23, 46],
-  [24, 9], [24, 26], [24, 42],
-  [25, 18], [25, 36],
-  [26, 6], [26, 24], [26, 40]
+  [0, 5],  [0, 22], [0, 38], [0, 55],
+  [1, 14], [1, 31], [1, 45], [1, 60],
+  [2, 9],  [2, 26], [2, 42], [2, 57],
+  [3, 17], [3, 35], [3, 48], [3, 61],
+  [4, 4],  [4, 22], [4, 39], [4, 54],
+  [5, 12], [5, 30], [5, 46], [5, 59],
+  [6, 7],  [6, 25], [6, 42], [6, 57],
+  [7, 16], [7, 34], [7, 49], [7, 61],
+  [8, 3],  [8, 20], [8, 38], [8, 53],
+  [9, 11], [9, 29], [9, 46], [9, 58],
+  [10, 6], [10, 24], [10, 40], [10, 55],
+  [11, 14], [11, 32], [11, 48], [11, 60],
+  [12, 8], [12, 27], [12, 43], [12, 56],
+  [13, 18], [13, 36], [13, 52],
+  [14, 4], [14, 22], [14, 41], [14, 57],
+  [15, 12], [15, 30], [15, 46], [15, 60],
+  [16, 7], [16, 25], [16, 39], [16, 54],
+  [17, 16], [17, 33], [17, 47], [17, 61],
+  [18, 5], [18, 22], [18, 41], [18, 56],
+  [19, 12], [19, 30], [19, 45], [19, 58],
+  [20, 8], [20, 27], [20, 43], [20, 57],
+  [21, 17], [21, 34], [21, 48], [21, 60],
+  [22, 4], [22, 21], [22, 39], [22, 54],
+  [23, 13], [23, 31], [23, 46], [23, 59],
+  [24, 9], [24, 26], [24, 42], [24, 56],
+  [25, 18], [25, 36], [25, 52],
+  [26, 6], [26, 24], [26, 40], [26, 55]
 ];
 
 // Filter with a one-cell buffer so stars don't sit immediately adjacent
@@ -216,13 +222,13 @@ const MOUNTAINS_NEAR_ART = [
 
 export const MOUNTAINS_FAR: string[] = (() => {
   const grid = blank(C_ROWS, C_COLS);
-  placeBlock(grid, MOUNTAINS_FAR_ART, 28, 1);
+  placeBlock(grid, MOUNTAINS_FAR_ART, 28, 1 + CAMP_OFFSET);
   return gridToArt(grid);
 })();
 
 export const MOUNTAINS_NEAR: string[] = (() => {
   const grid = blank(C_ROWS, C_COLS);
-  placeBlock(grid, MOUNTAINS_NEAR_ART, 31, 1);
+  placeBlock(grid, MOUNTAINS_NEAR_ART, 31, 1 + CAMP_OFFSET);
   return gridToArt(grid);
 })();
 
@@ -264,25 +270,25 @@ export const TRIBE_SLEEPING: string[] = (() => {
   // Sleeping figures scattered around the camp. Positioned around the
   // hearth so they don't overlap the tender/apprentice positions which
   // appear in kindle/named phases.
-  placeBlock(grid, SLEEPING_RIGHT, 70, 1);
-  placeBlock(grid, SLEEPING_RIGHT, 73, 4);
-  placeBlock(grid, SLEEPING_LEFT,  70, 41);
-  placeBlock(grid, SLEEPING_LEFT,  73, 38);
+  placeBlock(grid, SLEEPING_RIGHT, 70, 1  + CAMP_OFFSET);
+  placeBlock(grid, SLEEPING_RIGHT, 73, 4  + CAMP_OFFSET);
+  placeBlock(grid, SLEEPING_LEFT,  70, 41 + CAMP_OFFSET);
+  placeBlock(grid, SLEEPING_LEFT,  73, 38 + CAMP_OFFSET);
   return gridToArt(grid);
 })();
 
 export const TENDER: string[] = (() => {
   const grid = blank(C_ROWS, C_COLS);
-  // Left of the Hearth cart (cart spans cols 16-32). Stands on ground.
-  placeBlock(grid, TENDER_FIGURE, 67, 9);
+  // Left of the Hearth cart (cart spans cols 16-32 + offset). Stands on ground.
+  placeBlock(grid, TENDER_FIGURE, 67, 9 + CAMP_OFFSET);
   return gridToArt(grid);
 })();
 
 export const APPRENTICE: string[] = (() => {
   const grid = blank(C_ROWS, C_COLS);
   // Right of the Hearth cart. Reaching-arm glyph (/|.) points toward the
-  // new Cinder vessel that appears one row down at col 38+.
-  placeBlock(grid, APPRENTICE_FIGURE, 67, 35);
+  // new Cinder vessel that appears one row down.
+  placeBlock(grid, APPRENTICE_FIGURE, 67, 35 + CAMP_OFFSET);
   return gridToArt(grid);
 })();
 
@@ -299,8 +305,8 @@ const HEARTH_CART_ART = [
   '  [/  O     O  \\]  '
 ];
 
-const HEARTH_CART_COL = 16; // cart left edge → spans cols 16..34
-const HEARTH_CART_ROW = 64; // cart top row
+const HEARTH_CART_COL = 16 + CAMP_OFFSET; // cart left edge → spans 19 cols
+const HEARTH_CART_ROW = 64;                // cart top row
 
 export const HEARTH_CART: string[] = (() => {
   const grid = blank(C_ROWS, C_COLS);
@@ -379,7 +385,7 @@ const CINDER_VESSEL_ART = [
 ];
 
 const CINDER_VESSEL_ROW = 70;
-const CINDER_VESSEL_COL = 38;
+const CINDER_VESSEL_COL = 38 + CAMP_OFFSET;
 
 export const CINDER_VESSEL: string[] = (() => {
   const grid = blank(C_ROWS, C_COLS);
@@ -440,15 +446,15 @@ export const CINDER_KINDLE_FRAMES: string[][] = Array.from({ length: FRAMES }, (
 // ---------------------------------------------------------------------------
 
 const HEARTH_SMOKE_STREAMS = [
-  { col: 19, drift: -0.30, period: 22, chars: "'~ " },
-  { col: 21, drift: -0.15, period: 18, chars: "~. " },
-  { col: 23, drift:  0.15, period: 20, chars: "'~." },
-  { col: 24, drift:  0.05, period: 17, chars: "'." },
-  { col: 25, drift:  0.30, period: 23, chars: "~'.~" },
-  { col: 26, drift:  0.00, period: 16, chars: "'~" },
-  { col: 27, drift:  0.40, period: 19, chars: "'~." },
-  { col: 29, drift: -0.10, period: 21, chars: "'~. " },
-  { col: 31, drift: -0.25, period: 22, chars: "~." }
+  { col: 19 + CAMP_OFFSET, drift: -0.30, period: 22, chars: "'~ " },
+  { col: 21 + CAMP_OFFSET, drift: -0.15, period: 18, chars: "~. " },
+  { col: 23 + CAMP_OFFSET, drift:  0.15, period: 20, chars: "'~." },
+  { col: 24 + CAMP_OFFSET, drift:  0.05, period: 17, chars: "'." },
+  { col: 25 + CAMP_OFFSET, drift:  0.30, period: 23, chars: "~'.~" },
+  { col: 26 + CAMP_OFFSET, drift:  0.00, period: 16, chars: "'~" },
+  { col: 27 + CAMP_OFFSET, drift:  0.40, period: 19, chars: "'~." },
+  { col: 29 + CAMP_OFFSET, drift: -0.10, period: 21, chars: "'~. " },
+  { col: 31 + CAMP_OFFSET, drift: -0.25, period: 22, chars: "~." }
 ];
 
 const HEARTH_SMOKE_BASE_ROW = HEARTH_FIRE_TOP - 1; // row 51 (just above fire)
@@ -475,14 +481,14 @@ export const HEARTH_SMOKE_FRAMES: string[][] = Array.from({ length: FRAMES }, (_
 // ---------------------------------------------------------------------------
 
 const HEARTH_EMBER_SPARKS = [
-  { col: 22, drift:  0.25, period: 13, chars: "*'." },
-  { col: 23, drift: -0.15, period: 15, chars: "*'." },
-  { col: 24, drift: -0.05, period: 16, chars: "*'." },
-  { col: 25, drift:  0.30, period: 12, chars: "*'." },
-  { col: 26, drift:  0.15, period: 14, chars: "*'." },
-  { col: 27, drift: -0.20, period: 17, chars: "*'." },
-  { col: 28, drift: -0.05, period: 11, chars: "*'." },
-  { col: 29, drift:  0.35, period: 18, chars: "*'." }
+  { col: 22 + CAMP_OFFSET, drift:  0.25, period: 13, chars: "*'." },
+  { col: 23 + CAMP_OFFSET, drift: -0.15, period: 15, chars: "*'." },
+  { col: 24 + CAMP_OFFSET, drift: -0.05, period: 16, chars: "*'." },
+  { col: 25 + CAMP_OFFSET, drift:  0.30, period: 12, chars: "*'." },
+  { col: 26 + CAMP_OFFSET, drift:  0.15, period: 14, chars: "*'." },
+  { col: 27 + CAMP_OFFSET, drift: -0.20, period: 17, chars: "*'." },
+  { col: 28 + CAMP_OFFSET, drift: -0.05, period: 11, chars: "*'." },
+  { col: 29 + CAMP_OFFSET, drift:  0.35, period: 18, chars: "*'." }
 ];
 
 const HEARTH_EMBER_BASE_ROW = HEARTH_FIRE_TOP; // row 52
@@ -508,8 +514,8 @@ export const HEARTH_EMBER_FRAMES: string[][] = Array.from({ length: FRAMES }, (_
 // ---------------------------------------------------------------------------
 
 const CINDER_SMOKE_STREAMS = [
-  { col: 40, drift: 0.20, period: 8,  chars: "'." },
-  { col: 39, drift: 0.35, period: 10, chars: "'.~" }
+  { col: 40 + CAMP_OFFSET, drift: 0.20, period: 8,  chars: "'." },
+  { col: 39 + CAMP_OFFSET, drift: 0.35, period: 10, chars: "'.~" }
 ];
 
 const CINDER_SMOKE_BASE_ROW = CINDER_FIRE_TOP - 1; // row 66
@@ -537,8 +543,8 @@ export const CINDER_SMOKE_FRAMES: string[][] = Array.from({ length: FRAMES }, (_
 
 const BREEZE_PARTICLES = [
   { row: C_ROWS - 1, period: 14, drift: 1, startCol: 0  },
-  { row: C_ROWS - 1, period: 11, drift: 1, startCol: 18 },
-  { row: C_ROWS - 2, period: 16, drift: 1, startCol: 35 }
+  { row: C_ROWS - 1, period: 11, drift: 1, startCol: 22 },
+  { row: C_ROWS - 2, period: 16, drift: 1, startCol: 44 }
 ];
 
 export const BREEZE_FRAMES: string[][] = Array.from({ length: FRAMES }, (_, t) => {
@@ -803,8 +809,8 @@ export const MIRROR_LEAK: string[] = [
 export const EMBER_FALL_FRAMES: string[][] = Array.from({ length: FRAMES }, (_, t) => {
   const grid = blank(C_ROWS, C_COLS);
   const u = t / (FRAMES - 1);
-  const startRow = 54, startCol = 30;
-  const endRow = 70, endCol = 40;
+  const startRow = 54, startCol = 30 + CAMP_OFFSET;
+  const endRow = 70, endCol = 40 + CAMP_OFFSET;
   // Slight upward arc mid-flight (the spark leaps before falling).
   const row = Math.round(startRow + (endRow - startRow) * u + Math.sin(u * Math.PI) * -3);
   const col = Math.round(startCol + (endCol - startCol) * u);
