@@ -1,9 +1,5 @@
 import { onMount, onCleanup, createEffect, createSignal, Show } from 'solid-js';
-import { CinderView } from './ui/components/CinderView';
-import { StudyView } from './ui/components/StudyView';
-import { ReadingView } from './ui/components/ReadingView';
-import { TribeView } from './ui/components/TribeView';
-import { SkyView } from './ui/components/SkyView';
+import { CampMap } from './ui/map/CampMap';
 import { IntroScene } from './ui/intro/IntroScene';
 import { startClock, stopClock } from './core/world/clock';
 import {
@@ -84,11 +80,7 @@ export function App() {
         ← introdução
       </button>
       <main class="app">
-        <CinderView />
-        <StudyView />
-        <ReadingView />
-        <TribeView />
-        <SkyView />
+        <CampMap />
       </main>
     </Show>
   );
