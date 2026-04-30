@@ -1,4 +1,5 @@
 import { Show, createMemo, createSignal, onMount, onCleanup, createEffect } from 'solid-js';
+import { Typewriter } from '../components/Typewriter';
 import {
   FRAMES, TWINKLE_FRAMES,
   CAMP_DIMS, RIO_DIMS, MIRROR_DIMS, type SceneDims,
@@ -67,42 +68,12 @@ function Layer(props: LayerProps) {
   );
 }
 
-// Typewriter — reveals text char by char. Restarts when text changes.
-function Typewriter(props: { text: string }) {
-  const [shown, setShown] = createSignal(0);
-  let intervalId: number | null = null;
-
-  function clearTimer() {
-    if (intervalId !== null) {
-      clearInterval(intervalId);
-      intervalId = null;
-    }
-  }
-
-  createEffect(() => {
-    const text = props.text;
-    setShown(0);
-    clearTimer();
-    intervalId = window.setInterval(() => {
-      setShown((n) => {
-        if (n >= text.length) {
-          clearTimer();
-          return n;
-        }
-        return n + 1;
-      });
-    }, TYPE_MS);
-  });
-
-  onCleanup(clearTimer);
-
-  const isDone = createMemo(() => shown() >= props.text.length);
-
+// Intro wraps the shared <Typewriter> in its own positioning container.
+function IntroTypewriter(props: { text: string }) {
   return (
     <div class="intro-typewriter">
       <p class="intro-typewriter-text">
-        {props.text.slice(0, shown())}
-        {!isDone() && <span class="intro-cursor">_</span>}
+        <Typewriter text={props.text} speedMs={TYPE_MS} />
       </p>
     </div>
   );
@@ -220,7 +191,7 @@ export function IntroScene(props: Props) {
 
       {/* === text overlays === */}
       <Show when={isTextPhase()}>
-        <Typewriter text={TEXTS[phase()]!} />
+        <IntroTypewriter text={TEXTS[phase()]!} />
       </Show>
 
       <Show when={phase() === 'dawn'}>
