@@ -431,12 +431,13 @@ html, body {
   font-family: 'Menlo', 'Consolas', 'Courier New', monospace;
   /* Scale font so the whole canvas fits in BOTH viewport dimensions:
      - 98vw / cols / 0.6  → cap by width  (0.6 = monospace char-width/font-size)
-     - 92vh / rows / 1.05 → cap by height (1.05 = our line-height in em)
+     - 85vh / rows / 1.05 → cap by height, leaving 15vh for the skip hint,
+       naming button, and bottom safe-area on phones
      0.85rem is the desktop ceiling so big screens don't oversize. */
   font-size: min(
     0.85rem,
     calc(98vw / var(--cols) / 0.6),
-    calc(92vh / var(--rows) / 1.05)
+    calc(85vh / var(--rows) / 1.05)
   );
   line-height: 1.05em;
   width: calc(1ch * var(--cols));

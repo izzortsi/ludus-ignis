@@ -19,10 +19,11 @@ export interface SceneDims {
 }
 
 // Camp scene (dawn / kindle / named) — animated, layered, present-day.
-// 64×80 portrait: height stays at 80 (room for tall hearth fire and rising
-// smoke); width bumped from 50 to 64 so the canvas fills closer to full
-// phone width (the previous 50 left ~40% of an iPhone SE empty on sides).
-export const CAMP_DIMS: SceneDims = { cols: 64, rows: 80, rowPx: 14 };
+// 72×58: tightened from the previous 64×80 so the canvas fills phone width
+// while leaving enough room below for the skip hint + Begin button without
+// vertical scroll on the smallest mainstream phones (iPhone SE 375×667).
+// Vertical compression cuts pure-sky rows and trims smoke/ember rise.
+export const CAMP_DIMS: SceneDims = { cols: 72, rows: 58, rowPx: 14 };
 
 // Mirror leak (flashback 2) — dense static reproduction matching the Rio
 // flashback's woodcut style.
@@ -73,8 +74,8 @@ function placeBlock(grid: string[][], block: string[], row: number, col: number)
 
 // Sky-bow cell occupancy — diagonal across the upper sky. Computed early so
 // STAR_POSITIONS can filter out any star that would land on the band.
-const SKY_BOW_START_ROW = 2;
-const SKY_BOW_END_ROW   = 16;
+const SKY_BOW_START_ROW = 1;
+const SKY_BOW_END_ROW   = 13;
 const SKY_BOW_SLOPE     = (SKY_BOW_END_ROW - SKY_BOW_START_ROW) / (C_COLS - 1);
 
 const SKY_BOW_CELLS: Set<string> = (() => {
@@ -91,37 +92,26 @@ const SKY_BOW_CELLS: Set<string> = (() => {
   return cells;
 })();
 
-// Stars scattered through the sky region. Each row gets ~3 stars across the
-// full canvas width (cols 0..C_COLS-2); stars overlapping the sky-bow band
-// are filtered out below so the band reads as a clean diagonal.
+// Stars scattered through the sky region. Each row gets ~5 stars across the
+// full 72-col canvas width; stars overlapping the sky-bow band are filtered
+// out below so the band reads as a clean diagonal. Sky region is rows 0..15.
 const STAR_POSITIONS_RAW: ReadonlyArray<readonly [number, number]> = [
-  [0, 5],  [0, 22], [0, 38], [0, 55],
-  [1, 14], [1, 31], [1, 45], [1, 60],
-  [2, 9],  [2, 26], [2, 42], [2, 57],
-  [3, 17], [3, 35], [3, 48], [3, 61],
-  [4, 4],  [4, 22], [4, 39], [4, 54],
-  [5, 12], [5, 30], [5, 46], [5, 59],
-  [6, 7],  [6, 25], [6, 42], [6, 57],
-  [7, 16], [7, 34], [7, 49], [7, 61],
-  [8, 3],  [8, 20], [8, 38], [8, 53],
-  [9, 11], [9, 29], [9, 46], [9, 58],
-  [10, 6], [10, 24], [10, 40], [10, 55],
-  [11, 14], [11, 32], [11, 48], [11, 60],
-  [12, 8], [12, 27], [12, 43], [12, 56],
-  [13, 18], [13, 36], [13, 52],
-  [14, 4], [14, 22], [14, 41], [14, 57],
-  [15, 12], [15, 30], [15, 46], [15, 60],
-  [16, 7], [16, 25], [16, 39], [16, 54],
-  [17, 16], [17, 33], [17, 47], [17, 61],
-  [18, 5], [18, 22], [18, 41], [18, 56],
-  [19, 12], [19, 30], [19, 45], [19, 58],
-  [20, 8], [20, 27], [20, 43], [20, 57],
-  [21, 17], [21, 34], [21, 48], [21, 60],
-  [22, 4], [22, 21], [22, 39], [22, 54],
-  [23, 13], [23, 31], [23, 46], [23, 59],
-  [24, 9], [24, 26], [24, 42], [24, 56],
-  [25, 18], [25, 36], [25, 52],
-  [26, 6], [26, 24], [26, 40], [26, 55]
+  [0, 5],  [0, 22], [0, 38], [0, 55], [0, 67],
+  [1, 14], [1, 31], [1, 45], [1, 60], [1, 70],
+  [2, 9],  [2, 26], [2, 42], [2, 57], [2, 68],
+  [3, 17], [3, 35], [3, 48], [3, 61], [3, 70],
+  [4, 4],  [4, 22], [4, 39], [4, 54], [4, 65],
+  [5, 12], [5, 30], [5, 46], [5, 59], [5, 69],
+  [6, 7],  [6, 25], [6, 42], [6, 57], [6, 67],
+  [7, 16], [7, 34], [7, 49], [7, 61], [7, 70],
+  [8, 3],  [8, 20], [8, 38], [8, 53], [8, 64],
+  [9, 11], [9, 29], [9, 46], [9, 58], [9, 68],
+  [10, 6], [10, 24], [10, 40], [10, 55], [10, 65],
+  [11, 14], [11, 32], [11, 48], [11, 60], [11, 70],
+  [12, 8], [12, 27], [12, 43], [12, 56], [12, 66],
+  [13, 18], [13, 36], [13, 52], [13, 64],
+  [14, 4], [14, 22], [14, 41], [14, 57], [14, 68],
+  [15, 12], [15, 30], [15, 46], [15, 60], [15, 70]
 ];
 
 // Filter with a one-cell buffer so stars don't sit immediately adjacent
@@ -204,7 +194,8 @@ export const SKY_BOW: string[] = (() => {
 
 // ---------------------------------------------------------------------------
 // LAND — far mountains, near foothills (with yellowed-tree glyphs), ground.
-// Portrait: horizon at row 28; foothills at rows 31-34; ground at row 78.
+// Tightened layout: horizon at row 16; foothills at rows 19-22; ground at
+// the bottom two rows of the canvas.
 // ---------------------------------------------------------------------------
 
 const MOUNTAINS_FAR_ART = [
@@ -222,13 +213,13 @@ const MOUNTAINS_NEAR_ART = [
 
 export const MOUNTAINS_FAR: string[] = (() => {
   const grid = blank(C_ROWS, C_COLS);
-  placeBlock(grid, MOUNTAINS_FAR_ART, 28, 1 + CAMP_OFFSET);
+  placeBlock(grid, MOUNTAINS_FAR_ART, 16, 1 + CAMP_OFFSET);
   return gridToArt(grid);
 })();
 
 export const MOUNTAINS_NEAR: string[] = (() => {
   const grid = blank(C_ROWS, C_COLS);
-  placeBlock(grid, MOUNTAINS_NEAR_ART, 31, 1 + CAMP_OFFSET);
+  placeBlock(grid, MOUNTAINS_NEAR_ART, 19, 1 + CAMP_OFFSET);
   return gridToArt(grid);
 })();
 
@@ -270,17 +261,17 @@ export const TRIBE_SLEEPING: string[] = (() => {
   // Sleeping figures scattered around the camp. Positioned around the
   // hearth so they don't overlap the tender/apprentice positions which
   // appear in kindle/named phases.
-  placeBlock(grid, SLEEPING_RIGHT, 70, 1  + CAMP_OFFSET);
-  placeBlock(grid, SLEEPING_RIGHT, 73, 4  + CAMP_OFFSET);
-  placeBlock(grid, SLEEPING_LEFT,  70, 41 + CAMP_OFFSET);
-  placeBlock(grid, SLEEPING_LEFT,  73, 38 + CAMP_OFFSET);
+  placeBlock(grid, SLEEPING_RIGHT, 50, 1  + CAMP_OFFSET);
+  placeBlock(grid, SLEEPING_RIGHT, 53, 4  + CAMP_OFFSET);
+  placeBlock(grid, SLEEPING_LEFT,  50, 41 + CAMP_OFFSET);
+  placeBlock(grid, SLEEPING_LEFT,  53, 38 + CAMP_OFFSET);
   return gridToArt(grid);
 })();
 
 export const TENDER: string[] = (() => {
   const grid = blank(C_ROWS, C_COLS);
   // Left of the Hearth cart (cart spans cols 16-32 + offset). Stands on ground.
-  placeBlock(grid, TENDER_FIGURE, 67, 9 + CAMP_OFFSET);
+  placeBlock(grid, TENDER_FIGURE, 45, 9 + CAMP_OFFSET);
   return gridToArt(grid);
 })();
 
@@ -288,7 +279,7 @@ export const APPRENTICE: string[] = (() => {
   const grid = blank(C_ROWS, C_COLS);
   // Right of the Hearth cart. Reaching-arm glyph (/|.) points toward the
   // new Cinder vessel that appears one row down.
-  placeBlock(grid, APPRENTICE_FIGURE, 67, 35 + CAMP_OFFSET);
+  placeBlock(grid, APPRENTICE_FIGURE, 45, 35 + CAMP_OFFSET);
   return gridToArt(grid);
 })();
 
@@ -306,7 +297,7 @@ const HEARTH_CART_ART = [
 ];
 
 const HEARTH_CART_COL = 16 + CAMP_OFFSET; // cart left edge → spans 19 cols
-const HEARTH_CART_ROW = 64;                // cart top row
+const HEARTH_CART_ROW = 45;                // cart top row (4 rows tall, ends 48)
 
 export const HEARTH_CART: string[] = (() => {
   const grid = blank(C_ROWS, C_COLS);
@@ -384,7 +375,7 @@ const CINDER_VESSEL_ART = [
   ' \\_/ '
 ];
 
-const CINDER_VESSEL_ROW = 70;
+const CINDER_VESSEL_ROW = 49;
 const CINDER_VESSEL_COL = 38 + CAMP_OFFSET;
 
 export const CINDER_VESSEL: string[] = (() => {
@@ -440,9 +431,8 @@ export const CINDER_KINDLE_FRAMES: string[][] = Array.from({ length: FRAMES }, (
 });
 
 // ---------------------------------------------------------------------------
-// HEARTH SMOKE — drifting particles above the Hearth fire. Portrait gives
-// far more vertical room: smoke rises 18 rows from above the fire (row 51)
-// up into the sky region (~row 33).
+// HEARTH SMOKE — drifting particles above the Hearth fire. Tightened layout
+// rises 10 rows from above the fire up to just above the foothills.
 // ---------------------------------------------------------------------------
 
 const HEARTH_SMOKE_STREAMS = [
@@ -457,8 +447,8 @@ const HEARTH_SMOKE_STREAMS = [
   { col: 31 + CAMP_OFFSET, drift: -0.25, period: 22, chars: "~." }
 ];
 
-const HEARTH_SMOKE_BASE_ROW = HEARTH_FIRE_TOP - 1; // row 51 (just above fire)
-const HEARTH_SMOKE_HEIGHT = 18;
+const HEARTH_SMOKE_BASE_ROW = HEARTH_FIRE_TOP - 1; // just above fire
+const HEARTH_SMOKE_HEIGHT = 10;
 
 export const HEARTH_SMOKE_FRAMES: string[][] = Array.from({ length: FRAMES }, (_, t) => {
   const grid = blank(C_ROWS, C_COLS);
@@ -477,7 +467,7 @@ export const HEARTH_SMOKE_FRAMES: string[][] = Array.from({ length: FRAMES }, (_
 
 // ---------------------------------------------------------------------------
 // HEARTH EMBERS — bright sparks rising above the fire. Brighter, rise less
-// than smoke (10 rows vs 18). Origins clustered around the fire's apex.
+// than smoke. Origins clustered around the fire's apex.
 // ---------------------------------------------------------------------------
 
 const HEARTH_EMBER_SPARKS = [
@@ -491,8 +481,8 @@ const HEARTH_EMBER_SPARKS = [
   { col: 29 + CAMP_OFFSET, drift:  0.35, period: 18, chars: "*'." }
 ];
 
-const HEARTH_EMBER_BASE_ROW = HEARTH_FIRE_TOP; // row 52
-const HEARTH_EMBER_HEIGHT = 10;
+const HEARTH_EMBER_BASE_ROW = HEARTH_FIRE_TOP;
+const HEARTH_EMBER_HEIGHT = 7;
 
 export const HEARTH_EMBER_FRAMES: string[][] = Array.from({ length: FRAMES }, (_, t) => {
   const grid = blank(C_ROWS, C_COLS);
@@ -802,15 +792,14 @@ export const MIRROR_LEAK: string[] = [
 // ---------------------------------------------------------------------------
 // EMBER FALL — a single * glyph traces a path from the Hearth's apex down
 // into the apprentice's bronze vessel, kindling the new Cinder. Arc from
-// the upper-right of the hearth fire (row 54, col 30) over and down into
-// the cinder vessel (row 70, col 40).
+// the upper-right of the hearth fire over and down into the cinder vessel.
 // ---------------------------------------------------------------------------
 
 export const EMBER_FALL_FRAMES: string[][] = Array.from({ length: FRAMES }, (_, t) => {
   const grid = blank(C_ROWS, C_COLS);
   const u = t / (FRAMES - 1);
-  const startRow = 54, startCol = 30 + CAMP_OFFSET;
-  const endRow = 70, endCol = 40 + CAMP_OFFSET;
+  const startRow = HEARTH_FIRE_TOP + 1, startCol = 30 + CAMP_OFFSET;
+  const endRow = CINDER_VESSEL_ROW,     endCol = 40 + CAMP_OFFSET;
   // Slight upward arc mid-flight (the spark leaps before falling).
   const row = Math.round(startRow + (endRow - startRow) * u + Math.sin(u * Math.PI) * -3);
   const col = Math.round(startCol + (endCol - startCol) * u);
