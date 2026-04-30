@@ -1,50 +1,51 @@
 import { createSignal, createMemo, Show } from 'solid-js';
 import { Typewriter } from '../components/Typewriter';
-
-// Phase 1 stub: a single hardcoded parable, broken into paragraphs so each
-// types out one at a time. The final entry is a *directive* — the Elder
-// pointing the Apprentice toward their Cinder for the formal practice.
-// Phase 2 will switch on lesson topic and chain the test back to the Elder.
-const PARABLE_TITLE = 'Duas flechas';
-const PARABLE_PARAGRAPHS = [
-  'Solto uma flecha para o leste. Tu soltas uma para o oeste. Que a minha encontre o veado não diz nada sobre se a tua encontrará. Os ventos que as carregam são ventos diferentes. Os destinos estão desentrelaçados.',
-  'Pois bem: se uma em três das minhas flechas atinge, e uma em quatro das tuas, qual é a chance de ambos voltarmos com carne? Uma em três, multiplicada por uma em quatro. Uma em doze. O número fica menor. Uma conjunção de fortunas alheias entre si encolhe ao multiplicar.',
-  'Por isso um bando que depende de três golpes de sorte separados é um bando que muitas vezes passa fome. E por isso um caçador bom em uma coisa difícil é muito mais raro do que um caçador bom em uma coisa fácil — porque a sua habilidade é a conjunção de muitas habilidades pequenas, e conjunções multiplicam.',
-  'Mas cuidado. Alguns destinos não estão desentrelaçados. Se vem tempestade, ambas as flechas voam na chuva, e a falha de uma vira notícia sobre a outra. Antes de multiplicar, procura o vento que toca os dois. A ilusão da independência é o erro mais caro que uma pessoa pensante pode cometer.'
-];
-
-const ELDER_DIRECTIVE =
-  'Vai agora ao teu Cinder. Os números pesam o que eu disse — deixa que ele te ensine. Quando voltares, te provo.';
-
-const ALL_PARTS: ReadonlyArray<string> = [...PARABLE_PARAGRAPHS, ELDER_DIRECTIVE];
-const DIRECTIVE_IDX = ALL_PARTS.length - 1;
+import { currentLesson, lessonState, markParableHeard } from '../../core/lessons/lesson-store';
 
 interface Props {
   onClose: () => void;
 }
 
-// Bottom-overlay speech panel. Map remains visible behind. Tap the LEFT
-// half of the panel to go back to the previous paragraph (shown instantly
-// without typewriter); tap the RIGHT half to skip the current paragraph
-// to its end OR advance to the next; final right-tap closes.
+// Bottom-overlay speech panel where the Elder Fire (the Hearth) tells the
+// current lesson's parable, then closes with a directive pointing the
+// Apprentice to the Cinder. Tap LEFT half = back; tap RIGHT half = skip
+// current paragraph if typing, else advance / close.
+//
+// Phase 2 wiring: reads the parable from the lesson store; the directive
+// is the lesson's directive line (final "paragraph"); on close we mark the
+// lesson stage as 'studying' so the Cinder knows the apprentice was sent.
 export function ElderFireDialog(props: Props) {
+  const lesson = createMemo(() => currentLesson());
+  const allParts = createMemo(() => [
+    ...lesson().parable.paragraphs,
+    lesson().parable.directive
+  ]);
+  const directiveIdx = createMemo(() => allParts().length - 1);
+
   const [paragraphIdx, setParagraphIdx] = createSignal(0);
   const [skip, setSkip] = createSignal(false);
   const [paragraphDone, setParagraphDone] = createSignal(false);
   const [instant, setInstant] = createSignal(false);
 
-  const currentText = createMemo(() => ALL_PARTS[paragraphIdx()]);
-  const isLastParagraph = createMemo(() => paragraphIdx() >= ALL_PARTS.length - 1);
-  const isDirective = createMemo(() => paragraphIdx() === DIRECTIVE_IDX);
+  const currentText = createMemo(() => allParts()[paragraphIdx()]);
+  const isDirective = createMemo(() => paragraphIdx() === directiveIdx());
   const canGoBack = createMemo(() => paragraphIdx() > 0);
+
+  function close() {
+    // Closing the directive means the Apprentice has heard the parable and
+    // been pointed at the Cinder. Advance lesson stage so the Cinder will
+    // teach (and not just be a study panel).
+    if (isDirective()) markParableHeard();
+    props.onClose();
+  }
 
   function goForward() {
     if (!paragraphDone()) {
       setSkip(true);
       return;
     }
-    if (isLastParagraph()) {
-      props.onClose();
+    if (isDirective()) {
+      close();
       return;
     }
     setSkip(false);
@@ -68,6 +69,12 @@ export function ElderFireDialog(props: Props) {
     if (isLeftHalf) goBack(); else goForward();
   }
 
+  const stageHint = createMemo(() => {
+    if (lessonState.stage === 'practiced') return ' (pronto para a prova)';
+    if (lessonState.stage === 'studying') return ' (estudando)';
+    return '';
+  });
+
   return (
     <div
       class="speech-panel"
@@ -76,8 +83,8 @@ export function ElderFireDialog(props: Props) {
     >
       <div class="speech-header">
         <span class="speech-speaker">Fogo Ancião</span>
-        <span class="speech-title">— {PARABLE_TITLE}</span>
-        <span class="speech-progress">{paragraphIdx() + 1}/{ALL_PARTS.length}</span>
+        <span class="speech-title">— {lesson().parable.title}{stageHint()}</span>
+        <span class="speech-progress">{paragraphIdx() + 1}/{allParts().length}</span>
       </div>
       <p class={`speech-text ${isDirective() ? 'is-directive' : ''}`}>
         <Show

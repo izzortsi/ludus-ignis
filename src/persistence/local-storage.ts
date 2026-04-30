@@ -1,11 +1,13 @@
 import { CinderState } from '../core/cinder/cinder-model';
 import { TribeState } from '../core/tribe/tribe-model';
+import type { LessonStage } from '../core/lessons/lesson-model';
 
 const CINDER_KEY     = 'probgame.cinder.v1';
 const TRIBE_KEY      = 'probgame.tribe.v1';
 const KNOWLEDGE_KEY  = 'probgame.knowledge.v1';
 const INTRO_KEY      = 'probgame.intro.seen.v1';
 const APPRENTICE_KEY = 'probgame.apprentice.v1';
+const LESSON_KEY     = 'probgame.lesson.v1';
 
 function persistJson<T>(key: string, value: T): void {
   try {
@@ -74,10 +76,24 @@ export function restoreApprentice(): PersistedApprentice | null {
   return restoreJson<PersistedApprentice>(APPRENTICE_KEY);
 }
 
+export interface PersistedLesson {
+  currentLessonId: string;
+  stage: LessonStage;
+  practiceCorrect: number;
+}
+
+export function persistLesson(state: PersistedLesson): void {
+  persistJson(LESSON_KEY, state);
+}
+export function restoreLesson(): PersistedLesson | null {
+  return restoreJson<PersistedLesson>(LESSON_KEY);
+}
+
 export function clearAll(): void {
   localStorage.removeItem(CINDER_KEY);
   localStorage.removeItem(TRIBE_KEY);
   localStorage.removeItem(KNOWLEDGE_KEY);
   localStorage.removeItem(INTRO_KEY);
   localStorage.removeItem(APPRENTICE_KEY);
+  localStorage.removeItem(LESSON_KEY);
 }

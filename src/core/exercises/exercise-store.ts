@@ -16,14 +16,23 @@ const [exerciseState, setExerciseState] = createStore<ExerciseState>({
 
 export const POOL: Exercise[] = ALL_EXERCISES;
 
-export function loadNextExercise(): void {
+// Load a random exercise. If `family` is given, restricts the pool to that
+// family — used by lesson-driven practice so the Cinder asks questions
+// matching what the Elder Fire just talked about.
+export function loadNextExercise(family?: number): void {
   const prev = exerciseState.current?.id;
-  const next = randomExercise(POOL, prev);
+  const pool = family != null ? POOL.filter((e) => e.family === family) : POOL;
+  if (pool.length === 0) return;
+  const next = randomExercise(pool, prev);
   setExerciseState({
     current: next,
     selectedIndex: null,
     result: null
   });
+}
+
+export function clearExercise(): void {
+  setExerciseState({ current: null, selectedIndex: null, result: null });
 }
 
 export function selectAnswer(index: number): void {

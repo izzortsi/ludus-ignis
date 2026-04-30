@@ -9,12 +9,14 @@ import {
   persistTribe,
   restoreKnowledgeFromStorage,
   persistKnowledge,
+  persistLesson,
   isIntroSeen,
   setIntroSeen
 } from './persistence/local-storage';
 import { cinder, setCinder } from './core/cinder/cinder-store';
 import { tribe, restoreTribe } from './core/tribe/tribe-store';
 import { knowledge, restoreKnowledge } from './core/knowledge/knowledge-store';
+import { lessonState } from './core/lessons/lesson-store';
 
 export function App() {
   // Restore from local storage on first load. A returning player (Cinder
@@ -62,6 +64,14 @@ export function App() {
       perFamilyStreak: { ...knowledge.perFamilyStreak },
       revealedConcepts: { ...knowledge.revealedConcepts },
       pendingReveal: knowledge.pendingReveal
+    });
+  });
+
+  createEffect(() => {
+    persistLesson({
+      currentLessonId: lessonState.currentLessonId,
+      stage: lessonState.stage,
+      practiceCorrect: lessonState.practiceCorrect
     });
   });
 
