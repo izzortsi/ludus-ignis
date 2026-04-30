@@ -15,20 +15,23 @@ interface Props {
   onClose: () => void;
 }
 
-// Bottom-overlay speech panel. Map remains visible behind it; the Apprentice
-// is standing at the Hearth approach cell while the Elder Fire speaks.
-// Tap the panel to skip the current paragraph or advance to the next.
+// Bottom-overlay speech panel. Map remains visible behind. Tap the LEFT
+// half of the panel to go back to the previous paragraph (shown instantly
+// without typewriter); tap the RIGHT half to skip the current paragraph
+// to its end OR advance to the next; final right-tap closes.
 export function ElderFireDialog(props: Props) {
   const [paragraphIdx, setParagraphIdx] = createSignal(0);
   const [skip, setSkip] = createSignal(false);
   const [paragraphDone, setParagraphDone] = createSignal(false);
+  const [instant, setInstant] = createSignal(false);
 
   const currentText = createMemo(() => PARABLE_PARAGRAPHS[paragraphIdx()]);
   const isLastParagraph = createMemo(() => paragraphIdx() >= PARABLE_PARAGRAPHS.length - 1);
+  const canGoBack = createMemo(() => paragraphIdx() > 0);
 
-  function advance() {
+  function goForward() {
     if (!paragraphDone()) {
-      setSkip(true);  // skip current paragraph to its end
+      setSkip(true);
       return;
     }
     if (isLastParagraph()) {
@@ -36,14 +39,30 @@ export function ElderFireDialog(props: Props) {
       return;
     }
     setSkip(false);
+    setInstant(false);
     setParagraphDone(false);
     setParagraphIdx((i) => i + 1);
+  }
+
+  function goBack() {
+    if (!canGoBack()) return;
+    setSkip(false);
+    setInstant(true);
+    setParagraphDone(true);
+    setParagraphIdx((i) => i - 1);
+  }
+
+  function onTap(e: MouseEvent) {
+    const stage = e.currentTarget as HTMLDivElement;
+    const rect = stage.getBoundingClientRect();
+    const isLeftHalf = (e.clientX - rect.left) < rect.width / 2;
+    if (isLeftHalf) goBack(); else goForward();
   }
 
   return (
     <div
       class="speech-panel"
-      onClick={advance}
+      onClick={onTap}
       onPointerDown={(e) => e.stopPropagation()}
     >
       <div class="speech-header">
@@ -52,18 +71,30 @@ export function ElderFireDialog(props: Props) {
         <span class="speech-progress">{paragraphIdx() + 1}/{PARABLE_PARAGRAPHS.length}</span>
       </div>
       <p class="speech-text">
-        <Typewriter
-          text={currentText()}
-          speedMs={28}
-          skip={skip()}
-          onDone={() => setParagraphDone(true)}
-        />
+        <Show
+          when={instant()}
+          fallback={
+            <Typewriter
+              text={currentText()}
+              speedMs={28}
+              skip={skip()}
+              onDone={() => setParagraphDone(true)}
+            />
+          }
+        >
+          {currentText()}
+        </Show>
       </p>
-      <Show when={paragraphDone()}>
-        <div class="speech-advance-hint">
-          {isLastParagraph() ? 'toque para fechar' : 'toque para continuar'}
-        </div>
-      </Show>
+      <div class="speech-nav">
+        <span class="speech-nav-back">
+          <Show when={canGoBack()}>← voltar</Show>
+        </span>
+        <span class="speech-nav-forward">
+          <Show when={paragraphDone()}>
+            {isLastParagraph() ? 'fechar →' : 'avançar →'}
+          </Show>
+        </span>
+      </div>
     </div>
   );
 }

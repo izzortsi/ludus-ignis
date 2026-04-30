@@ -270,12 +270,24 @@ html, body {
   51%, 100% { opacity: 0; }
 }
 
-.speech-advance-hint {
+.speech-nav {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
   margin-top: 0.6rem;
-  text-align: right;
   font-size: 0.75rem;
-  color: rgba(220, 200, 160, 0.6);
   font-style: italic;
+  color: rgba(220, 200, 160, 0.65);
+  min-height: 1.1em;
+}
+
+.speech-nav-back,
+.speech-nav-forward {
+  display: inline-block;
+}
+
+.speech-nav-forward {
+  /* Pulsing prompt — draws the eye when a paragraph is ready to advance. */
   animation: typewriter-blink 1.4s step-end infinite;
 }
 
