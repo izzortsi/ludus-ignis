@@ -7,6 +7,10 @@ interface LessonState {
   currentLessonId: string;
   stage: LessonStage;
   practiceCorrect: number;
+  /** Whether the Cinder has done its spontaneous theory walk-through yet
+   *  for the current lesson. Persisted, so re-opening Cinder after the
+   *  walk-through doesn't replay it. */
+  theoryIntroduced: boolean;
 }
 
 function initial(): LessonState {
@@ -17,14 +21,16 @@ function initial(): LessonState {
       return {
         currentLessonId: saved.currentLessonId,
         stage: saved.stage,
-        practiceCorrect: saved.practiceCorrect
+        practiceCorrect: saved.practiceCorrect,
+        theoryIntroduced: saved.theoryIntroduced ?? false
       };
     }
   }
   return {
     currentLessonId: ALL_LESSONS[0].id,
     stage: 'parable',
-    practiceCorrect: 0
+    practiceCorrect: 0,
+    theoryIntroduced: false
   };
 }
 
@@ -54,4 +60,12 @@ export function recordPracticeCorrect(): void {
 
 export function isReadyForTest(): boolean {
   return lessonState.stage === 'practiced';
+}
+
+// Called when the Cinder finishes (or the player skips) the spontaneous
+// theory walk-through. Subsequent opens skip directly to the hub.
+export function markTheoryIntroduced(): void {
+  if (!lessonState.theoryIntroduced) {
+    setLessonState('theoryIntroduced', true);
+  }
 }

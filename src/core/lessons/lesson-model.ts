@@ -14,9 +14,13 @@ export interface ParableContent {
   directive: string;
 }
 
-export interface TheorySection {
-  type: 'paragraph' | 'math';
-  content: string;  // for 'math': LaTeX source rendered by KaTeX
+// Each theory page is a single sentence/idea with an optional equation
+// directly under it. This pairs each math statement with the prose that
+// introduces it — reads cleanly both in static reference view and in the
+// Cinder's conversational walk-through.
+export interface TheoryPage {
+  text: string;        // inline markup supported: *italic*, $latex$
+  math?: string;       // optional display equation (LaTeX, rendered by KaTeX)
 }
 
 export interface Lesson {
@@ -24,7 +28,9 @@ export interface Lesson {
   /** Index into the 18-family taxonomy from the bible (§14). */
   family: number;
   parable: ParableContent;
-  theory: TheorySection[];
+  /** Cinder's conversational lead-in lines before the formal theory. */
+  cinderIntro: string[];
+  theory: TheoryPage[];
   /** Number of correct answers required at the Cinder before "practiced". */
   practiceTarget: number;
 }

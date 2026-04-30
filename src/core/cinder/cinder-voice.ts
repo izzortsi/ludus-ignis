@@ -2,6 +2,38 @@
 // All text in Brazilian Portuguese (você-form, BR vocabulary).
 
 import { CinderPersonality, CinderReadingManner } from './cinder-model';
+import type { LessonStage } from '../lessons/lesson-model';
+
+// --- hub greeting -----------------------------------------------------------
+// What the Cinder says when its modal opens (after the spontaneous theory
+// walk-through has already happened). Personality + lesson stage modulate
+// the phrasing.
+
+export function hubGreeting(personality: CinderPersonality, stage: LessonStage): string {
+  if (stage === 'studying') {
+    switch (personality) {
+      case 'warm':    return 'Voltaste. Que queres? Posso rever a teoria contigo, ou pesar uns números.';
+      case 'laconic': return 'Hm? Teoria, prática, ou parábola.';
+      case 'playful': return 'De volta! Teoria de novo, ou já vamos pesar?';
+      case 'severe':  return 'Ainda não terminamos. Escolhe: teoria, prática, ou parábola.';
+    }
+  }
+  if (stage === 'practiced') {
+    switch (personality) {
+      case 'warm':    return 'Estás pronto, parece. Queres rever antes de ele te provar?';
+      case 'laconic': return 'Pronto. Revê, ou vai.';
+      case 'playful': return 'Conseguiste! Queres dar uma última olhada antes da prova?';
+      case 'severe':  return 'Preparado. Se queres rever, revê.';
+    }
+  }
+  // tested or other
+  switch (personality) {
+    case 'warm':    return 'Aguardamos. Mas se queres rever o que falamos, fica à vontade.';
+    case 'laconic': return 'Espera.';
+    case 'playful': return 'Esperando o próximo!';
+    case 'severe':  return 'Aguarda.';
+  }
+}
 
 // --- exercise framing -------------------------------------------------------
 

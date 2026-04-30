@@ -71,7 +71,8 @@ export function App() {
     persistLesson({
       currentLessonId: lessonState.currentLessonId,
       stage: lessonState.stage,
-      practiceCorrect: lessonState.practiceCorrect
+      practiceCorrect: lessonState.practiceCorrect,
+      theoryIntroduced: lessonState.theoryIntroduced
     });
   });
 

@@ -80,6 +80,7 @@ export interface PersistedLesson {
   currentLessonId: string;
   stage: LessonStage;
   practiceCorrect: number;
+  theoryIntroduced: boolean;
 }
 
 export function persistLesson(state: PersistedLesson): void {

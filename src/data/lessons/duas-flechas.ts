@@ -17,44 +17,30 @@ export const duasFlechas: Lesson = {
     directive:
       'Vai agora ao teu Cinder. Os números pesam o que eu disse — deixa que ele te ensine. Quando voltares, te provo.'
   },
+  cinderIntro: [
+    'Ouvi o que ele te disse, lá fora. Vê comigo agora — aqui pesamos.',
+    'Quando ele falou de fortunas desentrelaçadas, falava do que vamos chamar de *eventos independentes*. Arruma comigo isso em palavras precisas.'
+  ],
   theory: [
     {
-      type: 'paragraph',
-      content:
-        'Dois eventos são *independentes* quando saber que um aconteceu não muda a probabilidade do outro. As flechas do leste e do oeste, ditas pelo Fogo Ancião, são independentes: o vento de uma não toca a outra.'
+      text: 'Dois eventos são *independentes* quando saber que um aconteceu não muda a probabilidade do outro. As flechas do leste e do oeste, ditas pelo Fogo Ancião, são independentes: o vento de uma não toca a outra.'
     },
     {
-      type: 'paragraph',
-      content:
-        'Se A e B são independentes, a probabilidade de ambos acontecerem é o produto das probabilidades individuais:'
+      text: 'Se A e B são independentes, a probabilidade de ambos acontecerem é o produto das probabilidades individuais:',
+      math: 'P(A \\cap B) = P(A) \\cdot P(B)'
     },
     {
-      type: 'math',
-      content: 'P(A \\cap B) = P(A) \\cdot P(B)'
+      text: 'É a regra que ele chamou de "conjunção que encolhe ao multiplicar". Cada fator está entre 0 e 1, então o produto é menor do que qualquer um dos fatores. Por isso conjunções de fortunas alheias entre si ficam pequenas depressa.'
     },
     {
-      type: 'paragraph',
-      content:
-        'É a regra que o Fogo Ancião chamou de "conjunção que encolhe ao multiplicar". Cada fator é um número entre 0 e 1, então o produto é menor do que qualquer um dos fatores. Por isso conjunções de fortunas alheias entre si ficam pequenas depressa.'
+      text: 'Quando os eventos *não* são independentes — quando há um vento que toca os dois — multiplicar ingenuamente leva à resposta errada. Para esses casos, usa-se a probabilidade condicional:',
+      math: 'P(A \\cap B) = P(A) \\cdot P(B \\mid A)'
     },
     {
-      type: 'paragraph',
-      content:
-        'Quando os eventos *não* são independentes — quando há um vento que toca os dois — multiplicar ingenuamente leva à resposta errada. Para esses casos, usa-se a probabilidade condicional:'
+      text: 'O símbolo $P(B \\mid A)$ lê-se *probabilidade de B dado A*: a chance de B acontecer quando já se sabe que A aconteceu. Quando A e B são independentes, $P(B \\mid A) = P(B)$ e a fórmula longa vira a curta.'
     },
     {
-      type: 'math',
-      content: 'P(A \\cap B) = P(A) \\cdot P(B \\mid A)'
-    },
-    {
-      type: 'paragraph',
-      content:
-        'O símbolo $P(B \\mid A)$ lê-se *probabilidade de B dado A*: a chance de B acontecer quando já se sabe que A aconteceu. Quando A e B são independentes, $P(B \\mid A) = P(B)$ e voltamos à fórmula simples.'
-    },
-    {
-      type: 'paragraph',
-      content:
-        'O teste, então, antes de multiplicar: existe algo que toca os dois? Se existe, a multiplicação simples mente.'
+      text: 'O teste, então, antes de multiplicar: existe algo que toca os dois? Se existe, a multiplicação simples mente.'
     }
   ],
   practiceTarget: 3

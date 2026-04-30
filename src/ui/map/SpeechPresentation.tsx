@@ -1,0 +1,166 @@
+import { createSignal, createMemo, Show } from 'solid-js';
+import { Typewriter } from '../components/Typewriter';
+import { Math as MathRender } from '../components/Math';
+import katex from 'katex';
+
+export interface SpeechPart {
+  text: string;
+  /** Optional display equation rendered under the text via KaTeX. */
+  math?: string;
+  /** Visual variant for special parts (e.g., directive: italic + centered). */
+  variant?: 'directive';
+}
+
+interface Props {
+  speaker: string;
+  /** Title shown beside the speaker name (e.g., parable title). */
+  title?: string;
+  parts: SpeechPart[];
+  /** Right-bottom hint text on the last part. Default: "fechar →". */
+  finalHint?: string;
+  /** Right-bottom hint while typing. Default: empty (just cursor pulses). */
+  midHint?: string;
+  /** Text inside the small "skip" link (top-right). If omitted, no skip. */
+  skipLabel?: string;
+  /** Called on close (last-tap or skip). */
+  onClose: () => void;
+}
+
+// Bottom-overlay speech panel reused by both the Elder Fire (parable) and
+// the Cinder (spontaneous theory walk-through). Tap LEFT half = back; tap
+// RIGHT half = skip-current-paragraph if typing, else advance / close.
+export function SpeechPresentation(props: Props) {
+  const [partIdx, setPartIdx] = createSignal(0);
+  const [skip, setSkip] = createSignal(false);
+  const [partDone, setPartDone] = createSignal(false);
+  const [instant, setInstant] = createSignal(false);
+
+  const currentPart = createMemo(() => props.parts[partIdx()]);
+  const isLastPart = createMemo(() => partIdx() >= props.parts.length - 1);
+  const canGoBack = createMemo(() => partIdx() > 0);
+
+  function goForward() {
+    if (!partDone()) {
+      setSkip(true);
+      return;
+    }
+    if (isLastPart()) {
+      props.onClose();
+      return;
+    }
+    setSkip(false);
+    setInstant(false);
+    setPartDone(false);
+    setPartIdx((i) => i + 1);
+  }
+
+  function goBack() {
+    if (!canGoBack()) return;
+    setSkip(false);
+    setInstant(true);
+    setPartDone(true);
+    setPartIdx((i) => i - 1);
+  }
+
+  function onTap(e: MouseEvent) {
+    const stage = e.currentTarget as HTMLDivElement;
+    const rect = stage.getBoundingClientRect();
+    const isLeftHalf = (e.clientX - rect.left) < rect.width / 2;
+    if (isLeftHalf) goBack(); else goForward();
+  }
+
+  function onSkipClick(e: MouseEvent) {
+    e.stopPropagation();
+    props.onClose();
+  }
+
+  return (
+    <div
+      class="speech-panel"
+      onClick={onTap}
+      onPointerDown={(e) => e.stopPropagation()}
+    >
+      <div class="speech-header">
+        <span class="speech-speaker">{props.speaker}</span>
+        <Show when={props.title}>
+          <span class="speech-title">— {props.title}</span>
+        </Show>
+        <span class="speech-progress">
+          {partIdx() + 1}/{props.parts.length}
+        </span>
+        <Show when={props.skipLabel}>
+          <button class="speech-skip" onClick={onSkipClick}>{props.skipLabel}</button>
+        </Show>
+      </div>
+      <p class={`speech-text ${currentPart().variant === 'directive' ? 'is-directive' : ''}`}>
+        <Show
+          when={instant() || partDone()}
+          fallback={
+            <Typewriter
+              text={currentPart().text}
+              speedMs={28}
+              skip={skip()}
+              onDone={() => setPartDone(true)}
+            />
+          }
+        >
+          {/* Once the text is fully revealed (or we're in instant/back mode),
+              swap to the markup-rendered version so inline italics and inline
+              math (`$\mid$`, etc.) actually render. */}
+          <span innerHTML={renderInlineMarkup(currentPart().text)} />
+        </Show>
+      </p>
+      {/* Display equation: only show once the text is fully revealed so the
+          eye lands on the prose first, the equation second. */}
+      <Show when={currentPart().math && partDone()}>
+        <MathRender tex={currentPart().math!} />
+      </Show>
+      <div class="speech-nav">
+        <span class="speech-nav-back">
+          <Show when={canGoBack()}>← voltar</Show>
+        </span>
+        <span class="speech-nav-forward">
+          <Show when={partDone()}>
+            {isLastPart() ? (props.finalHint ?? 'fechar →') : 'avançar →'}
+          </Show>
+        </span>
+      </div>
+    </div>
+  );
+}
+
+// === inline markup (shared with the Cinder static theory render) ===
+//   *italic*  → <em>
+//   $tex$     → KaTeX inline math (renderToString)
+
+export function renderInlineMarkup(s: string): string {
+  const parts: string[] = [];
+  let lastIdx = 0;
+  const re = /\$([^$]+)\$/g;
+  let match: RegExpExecArray | null;
+  while ((match = re.exec(s)) !== null) {
+    parts.push(escapeAndItalics(s.slice(lastIdx, match.index)));
+    try {
+      parts.push(katex.renderToString(match[1], {
+        throwOnError: false,
+        displayMode: false
+      }));
+    } catch {
+      parts.push(`<code class="math-inline-text">${escapeHtml(match[1])}</code>`);
+    }
+    lastIdx = match.index + match[0].length;
+  }
+  parts.push(escapeAndItalics(s.slice(lastIdx)));
+  return parts.join('');
+}
+
+function escapeHtml(s: string): string {
+  return s
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;');
+}
+
+function escapeAndItalics(s: string): string {
+  return escapeHtml(s).replace(/\*([^*]+)\*/g, '<em>$1</em>');
+}

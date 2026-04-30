@@ -2,15 +2,18 @@ import { createSignal, createMemo, Show, For } from 'solid-js';
 import { MapDialog } from './MapDialog';
 import { CinderView } from '../components/CinderView';
 import { Math as MathRender } from '../components/Math';
-import katex from 'katex';
-import { currentLesson, lessonState, recordPracticeCorrect } from '../../core/lessons/lesson-store';
+import { SpeechPresentation, type SpeechPart, renderInlineMarkup } from './SpeechPresentation';
+import {
+  currentLesson, lessonState,
+  recordPracticeCorrect, markTheoryIntroduced
+} from '../../core/lessons/lesson-store';
 import {
   exerciseState, loadNextExercise, selectAnswer, clearExercise
 } from '../../core/exercises/exercise-store';
 import { vitalityGainOnCorrect, VITALITY_PENALTY_ON_WRONG } from '../../core/exercises/exercise-model';
 import { feedCinder } from '../../core/cinder/cinder-model';
 import { cinder, setCinder } from '../../core/cinder/cinder-store';
-import { exerciseIntro, correctFeedback, wrongFeedback } from '../../core/cinder/cinder-voice';
+import { exerciseIntro, correctFeedback, wrongFeedback, hubGreeting } from '../../core/cinder/cinder-voice';
 import { knowledge, recordCorrect, recordWrong, dismissReveal } from '../../core/knowledge/knowledge-store';
 import { RevealPanel } from '../components/RevealPanel';
 
@@ -18,36 +21,172 @@ interface Props {
   onClose: () => void;
 }
 
-type CinderMode = 'theory' | 'practice';
-
 const REVEAL_VITALITY_BONUS = 10;
 
+type HubView = 'hub' | 'teoria' | 'pratica' | 'parabola';
+
 export function CinderDialog(props: Props) {
-  const lesson = createMemo(() => currentLesson());
-  // If the apprentice hasn't yet heard the parable, the Cinder doesn't
-  // teach — it just shows status. Otherwise theory first, then practice.
-  const stageHasHeardElder = createMemo(
-    () => lessonState.stage !== 'parable'
+  // Spontaneous walk-through: parable was heard, theory hasn't been
+  // introduced yet. Renders without the modal frame, like the Elder's
+  // speech panel — keeps visual identity ("the Cinder is speaking to me").
+  const showSpontaneous = createMemo(
+    () => lessonState.stage !== 'parable' && !lessonState.theoryIntroduced
   );
 
-  const [mode, setMode] = createSignal<CinderMode>('theory');
+  return (
+    <Show when={!showSpontaneous()} fallback={<CinderSpontaneous {...props} />}>
+      <CinderHub {...props} />
+    </Show>
+  );
+}
 
-  function startPractice() {
-    clearExercise();
-    loadNextExercise(lesson().family);
-    setMode('practice');
+// === Spontaneous walk-through (first visit after parable) ===================
+
+function CinderSpontaneous(props: Props) {
+  const lesson = createMemo(() => currentLesson());
+  const parts = createMemo<SpeechPart[]>(() => [
+    ...lesson().cinderIntro.map((t): SpeechPart => ({ text: t })),
+    ...lesson().theory.map((p): SpeechPart => ({ text: p.text, math: p.math }))
+  ]);
+
+  function onFinish() {
+    // Marking the theory as introduced flips showSpontaneous() in the
+    // parent — the speech panel disappears and the hub modal renders.
+    markTheoryIntroduced();
   }
 
-  function backToTheory() {
-    clearExercise();
-    setMode('theory');
-  }
+  // Suppress the unused-prop warning while keeping the signature uniform.
+  void props;
+
+  return (
+    <SpeechPresentation
+      speaker={cinder.name}
+      title="estudo"
+      parts={parts()}
+      finalHint="vamos praticar →"
+      skipLabel="pular"
+      onClose={onFinish}
+    />
+  );
+}
+
+// === Hub modal (default after walk-through) =================================
+
+function CinderHub(props: Props) {
+  const lesson = createMemo(() => currentLesson());
+  const [view, setView] = createSignal<HubView>('hub');
 
   function onClose() {
     clearExercise();
     props.onClose();
   }
 
+  function backToHub() {
+    clearExercise();
+    setView('hub');
+  }
+
+  return (
+    <MapDialog title={`Cinder — ${cinder.name}`} onClose={onClose}>
+      <CinderView />
+
+      <Show when={lessonState.stage === 'parable'}>
+        <p class="cinder-no-lesson">
+          O Cinder está quieto. <em>Vai primeiro até o Fogo Ancião.</em>
+        </p>
+      </Show>
+
+      <Show when={lessonState.stage !== 'parable' && view() === 'hub'}>
+        <div class="cinder-hub">
+          <p class="cinder-greeting">{hubGreeting(cinder.personality, lessonState.stage)}</p>
+          <div class="cinder-hub-options">
+            <button class="cinder-hub-option" onClick={() => setView('teoria')}>
+              <span class="cinder-hub-option-label">Teoria</span>
+              <span class="cinder-hub-option-desc">rever o que ensinei</span>
+            </button>
+            <button class="cinder-hub-option" onClick={() => {
+              clearExercise();
+              loadNextExercise(lesson().family);
+              setView('pratica');
+            }}>
+              <span class="cinder-hub-option-label">Prática</span>
+              <span class="cinder-hub-option-desc">questões da família</span>
+            </button>
+            <button class="cinder-hub-option" onClick={() => setView('parabola')}>
+              <span class="cinder-hub-option-label">Parábola</span>
+              <span class="cinder-hub-option-desc">o que ele te disse</span>
+            </button>
+          </div>
+          <Show when={lessonState.stage === 'practiced'}>
+            <p class="cinder-practiced-hint">
+              <em>O Fogo Ancião espera te provar.</em>
+            </p>
+          </Show>
+        </div>
+      </Show>
+
+      <Show when={view() === 'teoria'}>
+        <TheoryView lesson={lesson()} onBack={backToHub} />
+      </Show>
+      <Show when={view() === 'pratica'}>
+        <PracticeView lesson={lesson()} onBack={backToHub} />
+      </Show>
+      <Show when={view() === 'parabola'}>
+        <ParableView lesson={lesson()} onBack={backToHub} />
+      </Show>
+    </MapDialog>
+  );
+}
+
+// === Sub-views ==============================================================
+
+function BackLink(props: { onBack: () => void }) {
+  return (
+    <button class="cinder-back-link" onClick={props.onBack}>← voltar</button>
+  );
+}
+
+function TheoryView(props: { lesson: ReturnType<typeof currentLesson>; onBack: () => void }) {
+  return (
+    <div class="cinder-section">
+      <BackLink onBack={props.onBack} />
+      <div class="cinder-section-header">
+        <span class="cinder-section-label">teoria</span>
+        <span class="cinder-section-meta">{props.lesson.parable.title} — família {props.lesson.family}</span>
+      </div>
+      <For each={props.lesson.theory}>
+        {(page) => (
+          <div class="cinder-theory-page">
+            <p class="cinder-theory-paragraph" innerHTML={renderInlineMarkup(page.text)} />
+            <Show when={page.math}>
+              <MathRender tex={page.math!} />
+            </Show>
+          </div>
+        )}
+      </For>
+    </div>
+  );
+}
+
+function ParableView(props: { lesson: ReturnType<typeof currentLesson>; onBack: () => void }) {
+  return (
+    <div class="cinder-section">
+      <BackLink onBack={props.onBack} />
+      <div class="cinder-section-header">
+        <span class="cinder-section-label">parábola</span>
+        <span class="cinder-section-meta">{props.lesson.parable.title}</span>
+      </div>
+      <For each={props.lesson.parable.paragraphs}>
+        {(p) => <p class="cinder-parable-paragraph">{p}</p>}
+      </For>
+      <p class="cinder-parable-paragraph is-directive">
+        <em>{props.lesson.parable.directive}</em>
+      </p>
+    </div>
+  );
+}
+
+function PracticeView(props: { lesson: ReturnType<typeof currentLesson>; onBack: () => void }) {
   function onSelect(index: number) {
     const ex = exerciseState.current;
     if (!ex || exerciseState.result !== null) return;
@@ -60,8 +199,7 @@ export function CinderDialog(props: Props) {
       if (newlyRevealed) {
         setCinder(feedCinder(cinder, REVEAL_VITALITY_BONUS));
       }
-      // Lesson-side bookkeeping: counts toward this lesson's practice target.
-      if (ex.family === lesson().family) {
+      if (ex.family === props.lesson.family) {
         recordPracticeCorrect();
       }
     } else {
@@ -72,160 +210,83 @@ export function CinderDialog(props: Props) {
 
   function onDismissReveal() {
     dismissReveal();
-    loadNextExercise(lesson().family);
+    loadNextExercise(props.lesson.family);
   }
+
+  const target = createMemo(() => props.lesson.practiceTarget);
+  const correct = createMemo(() => Math.min(lessonState.practiceCorrect, target()));
 
   return (
-    <MapDialog title={`Cinder — ${cinder.name}`} onClose={onClose}>
-      <CinderView />
-
-      {/* Apprentice hasn't heard the Elder yet — Cinder has nothing to teach. */}
-      <Show when={!stageHasHeardElder()}>
-        <p class="cinder-no-lesson">
-          O Cinder está quieto. <em>Vai primeiro até o Fogo Ancião.</em>
-        </p>
-      </Show>
-
-      <Show when={stageHasHeardElder() && mode() === 'theory'}>
-        <div class="cinder-theory">
-          <div class="cinder-theory-header">
-            <span class="cinder-theory-label">teoria</span>
-            <span class="cinder-theory-family">{lesson().parable.title} — família {lesson().family}</span>
-          </div>
-          <For each={lesson().theory}>
-            {(section) => (
-              <Show
-                when={section.type === 'math'}
-                fallback={<p class="cinder-theory-paragraph" innerHTML={renderInlineMarkup(section.content)} />}
-              >
-                <MathRender tex={section.content} />
-              </Show>
-            )}
-          </For>
-          <button class="cinder-cta" onClick={startPractice}>
-            praticar →
+    <div class="cinder-section">
+      <BackLink onBack={props.onBack} />
+      <div class="cinder-section-header">
+        <span class="cinder-section-label">prática</span>
+        <span class="cinder-section-meta">{correct()}/{target()} corretas</span>
+      </div>
+      <Show
+        when={exerciseState.current}
+        fallback={
+          <button class="cinder-cta" onClick={() => loadNextExercise(props.lesson.family)}>
+            pedir uma questão →
           </button>
-        </div>
-      </Show>
-
-      <Show when={stageHasHeardElder() && mode() === 'practice'}>
-        <div class="cinder-practice">
-          <div class="cinder-practice-header">
-            <span class="cinder-practice-label">prática</span>
-            <span class="cinder-practice-progress">
-              {Math.min(lessonState.practiceCorrect, lesson().practiceTarget)}/{lesson().practiceTarget} corretas
-            </span>
-          </div>
-          <Show
-            when={exerciseState.current}
-            fallback={
-              <button class="cinder-cta" onClick={() => loadNextExercise(lesson().family)}>
-                pedir uma questão →
-              </button>
-            }
-          >
-            {(ex) => (
-              <>
-                <p class="study-intro">{exerciseIntro(cinder.personality)}</p>
-                <p class="study-statement">{ex().statement}</p>
-                <div class="study-options">
-                  <For each={ex().options}>
-                    {(opt, i) => {
-                      const classes = () => {
-                        const sel = exerciseState.selectedIndex;
-                        const cls: string[] = ['study-option'];
-                        if (sel === i()) {
-                          cls.push(exerciseState.result === 'correct' ? 'is-correct' : 'is-wrong');
-                        }
-                        if (exerciseState.result !== null && i() === ex().correctIndex && sel !== i()) {
-                          cls.push('is-truth');
-                        }
-                        return cls.join(' ');
-                      };
-                      return (
-                        <button
-                          class={classes()}
-                          disabled={exerciseState.selectedIndex !== null}
-                          onClick={() => onSelect(i())}
-                        >
-                          {opt}
-                        </button>
-                      );
-                    }}
-                  </For>
-                </div>
-                <Show when={exerciseState.result === 'correct'}>
-                  <p class="study-feedback is-correct">
-                    {correctFeedback(cinder.personality)} +{vitalityGainOnCorrect(ex().difficulty)} vitalidade.
-                  </p>
-                </Show>
-                <Show when={exerciseState.result === 'wrong'}>
-                  <p class="study-feedback is-wrong">
-                    {wrongFeedback(cinder.personality)} −{VITALITY_PENALTY_ON_WRONG} vitalidade.
-                  </p>
-                </Show>
-                <Show when={knowledge.pendingReveal}>
-                  <RevealPanel concept={knowledge.pendingReveal!} onDismiss={onDismissReveal} />
-                </Show>
-                <Show when={exerciseState.result !== null && !knowledge.pendingReveal}>
-                  <button class="cinder-cta" onClick={() => loadNextExercise(lesson().family)}>
-                    próxima →
-                  </button>
-                </Show>
-              </>
-            )}
-          </Show>
-
-          <div class="cinder-practice-footer">
-            <button class="cinder-cta-secondary" onClick={backToTheory}>
-              ← rever teoria
-            </button>
-            <Show when={lessonState.stage === 'practiced'}>
-              <p class="cinder-practiced-hint">
-                <em>O Fogo Ancião espera te provar.</em>
+        }
+      >
+        {(ex) => (
+          <>
+            <p class="study-intro">{exerciseIntro(cinder.personality)}</p>
+            <p class="study-statement">{ex().statement}</p>
+            <div class="study-options">
+              <For each={ex().options}>
+                {(opt, i) => {
+                  const classes = () => {
+                    const sel = exerciseState.selectedIndex;
+                    const cls: string[] = ['study-option'];
+                    if (sel === i()) {
+                      cls.push(exerciseState.result === 'correct' ? 'is-correct' : 'is-wrong');
+                    }
+                    if (exerciseState.result !== null && i() === ex().correctIndex && sel !== i()) {
+                      cls.push('is-truth');
+                    }
+                    return cls.join(' ');
+                  };
+                  return (
+                    <button
+                      class={classes()}
+                      disabled={exerciseState.selectedIndex !== null}
+                      onClick={() => onSelect(i())}
+                    >
+                      {opt}
+                    </button>
+                  );
+                }}
+              </For>
+            </div>
+            <Show when={exerciseState.result === 'correct'}>
+              <p class="study-feedback is-correct">
+                {correctFeedback(cinder.personality)} +{vitalityGainOnCorrect(ex().difficulty)} vitalidade.
               </p>
             </Show>
-          </div>
-        </div>
+            <Show when={exerciseState.result === 'wrong'}>
+              <p class="study-feedback is-wrong">
+                {wrongFeedback(cinder.personality)} −{VITALITY_PENALTY_ON_WRONG} vitalidade.
+              </p>
+            </Show>
+            <Show when={knowledge.pendingReveal}>
+              <RevealPanel concept={knowledge.pendingReveal!} onDismiss={onDismissReveal} />
+            </Show>
+            <Show when={exerciseState.result !== null && !knowledge.pendingReveal}>
+              <button class="cinder-cta" onClick={() => loadNextExercise(props.lesson.family)}>
+                próxima →
+              </button>
+            </Show>
+          </>
+        )}
       </Show>
-    </MapDialog>
+      <Show when={lessonState.stage === 'practiced'}>
+        <p class="cinder-practiced-hint">
+          <em>O Fogo Ancião espera te provar.</em>
+        </p>
+      </Show>
+    </div>
   );
-}
-
-// Tiny inline markup for theory paragraphs:
-//   *italic*  → <em>
-//   $tex$     → inline math rendered by KaTeX (renderToString → HTML)
-//
-// We escape HTML on the surrounding text but feed the math chunk straight
-// to KaTeX (it does its own escaping). Bad LaTeX falls back to a plain
-// <code> so the paragraph still reads.
-function renderInlineMarkup(s: string): string {
-  // Split into alternating non-math and math chunks so HTML escaping never
-  // touches the LaTeX source.
-  const parts: string[] = [];
-  let lastIdx = 0;
-  const re = /\$([^$]+)\$/g;
-  let match: RegExpExecArray | null;
-  while ((match = re.exec(s)) !== null) {
-    parts.push(escapeAndItalics(s.slice(lastIdx, match.index)));
-    try {
-      parts.push(katex.renderToString(match[1], { throwOnError: false, displayMode: false }));
-    } catch {
-      parts.push(`<code class="math-inline-text">${escapeHtml(match[1])}</code>`);
-    }
-    lastIdx = match.index + match[0].length;
-  }
-  parts.push(escapeAndItalics(s.slice(lastIdx)));
-  return parts.join('');
-}
-
-function escapeHtml(s: string): string {
-  return s
-    .replace(/&/g, '&amp;')
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;');
-}
-
-function escapeAndItalics(s: string): string {
-  return escapeHtml(s).replace(/\*([^*]+)\*/g, '<em>$1</em>');
 }
