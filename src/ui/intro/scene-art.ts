@@ -1,9 +1,9 @@
 // Intro scene ASCII art.
 //
 // Present-day only. The world is what the apprentice has always known —
-// every visible anomaly (sky-bow overhead, yellowed trees, red dawn sun,
-// the Hearth riding in its bronze cart) is just normal. Nothing about
-// "before" is shown or explained.
+// every visible anomaly (the green spiral aurora overhead, yellowed trees,
+// red dawn sun, the Hearth riding in its bronze cart) is just normal.
+// Nothing about "before" is shown or explained.
 
 import { mulberry32 } from '../ascii/prng';
 
@@ -68,33 +68,66 @@ function placeBlock(grid: string[][], block: string[], row: number, col: number)
 }
 
 // ---------------------------------------------------------------------------
-// SKY — stars (twinkling) and the sky-bow (Earth ring). Portrait camp.
+// SKY — stars (twinkling) and the green spiral aurora. Portrait camp.
 // Sky region is rows 0..27; mountains begin at row 28.
 // ---------------------------------------------------------------------------
 
-// Sky-bow cell occupancy — diagonal across the upper sky. Computed early so
-// STAR_POSITIONS can filter out any star that would land on the band.
-const SKY_BOW_START_ROW = 1;
-const SKY_BOW_END_ROW   = 13;
-const SKY_BOW_SLOPE     = (SKY_BOW_END_ROW - SKY_BOW_START_ROW) / (C_COLS - 1);
+// Aurora spiral — two-arm Archimedean spiral squished vertically (factor
+// AURORA_Y_SCALE) to read as round despite the ~2:1 cell aspect ratio.
+// Cells carry an intensity value 0..1 that maps to a sparse glyph ramp,
+// so the core reads dense and outer arms feather out.
+const AURORA_CENTER_ROW = 7;
+const AURORA_CENTER_COL = Math.floor(C_COLS / 2);
+const AURORA_Y_SCALE    = 0.5;
+const AURORA_MAX_THETA  = 4.5 * Math.PI;
+const AURORA_A          = 0.8;
+const AURORA_B          = 0.95;
+const AURORA_ARMS       = 2;
+const AURORA_SKY_ROWS   = 16;
 
-const SKY_BOW_CELLS: Set<string> = (() => {
-  const cells = new Set<string>();
-  for (let c = 0; c < C_COLS; c++) {
-    const base = SKY_BOW_START_ROW + SKY_BOW_SLOPE * c;
-    const r0 = Math.floor(base) - 1;
-    const r1 = Math.floor(base);
-    const r2 = Math.floor(base) + 1;
-    if (r0 >= 0 && r0 < C_ROWS && c % 3 === 0) cells.add(`${r0},${c}`);
-    if (r1 >= 0 && r1 < C_ROWS)                cells.add(`${r1},${c}`);
-    if (r2 >= 0 && r2 < C_ROWS && c % 2 === 0) cells.add(`${r2},${c}`);
+const AURORA_CELLS: Map<string, number> = (() => {
+  const cells = new Map<string, number>();
+  for (let arm = 0; arm < AURORA_ARMS; arm++) {
+    const armPhase = (arm * 2 * Math.PI) / AURORA_ARMS;
+    for (let theta = 0; theta <= AURORA_MAX_THETA; theta += 0.025) {
+      const r = AURORA_A + AURORA_B * theta;
+      const x = r * Math.cos(theta + armPhase);
+      const y = r * Math.sin(theta + armPhase) * AURORA_Y_SCALE;
+      const col = Math.round(AURORA_CENTER_COL + x);
+      const row = Math.round(AURORA_CENTER_ROW + y);
+      if (col < 0 || col >= C_COLS) continue;
+      if (row < 0 || row >= AURORA_SKY_ROWS) continue;
+      const intensity = 1 - 0.80 * (theta / AURORA_MAX_THETA);
+      const key = `${row},${col}`;
+      const prev = cells.get(key) ?? 0;
+      if (intensity > prev) cells.set(key, intensity);
+    }
   }
   return cells;
 })();
 
+// Cells dense enough that overlapping a star glyph would muddle the spiral.
+const AURORA_CORE_CELLS: Set<string> = (() => {
+  const set = new Set<string>();
+  for (const [key, intensity] of AURORA_CELLS) {
+    if (intensity >= 0.4) set.add(key);
+  }
+  return set;
+})();
+
+// Sparse density ramp: bright core, then faint outer wisps. Cells below
+// the floor get no glyph at all, so the spiral feathers off cleanly.
+function auroraGlyph(intensity: number): string | null {
+  if (intensity >= 0.70) return '*';
+  if (intensity >= 0.50) return ':';
+  if (intensity >= 0.30) return '\'';
+  if (intensity >= 0.10) return '.';
+  return null;
+}
+
 // Stars scattered through the sky region. Each row gets ~5 stars across the
-// full 72-col canvas width; stars overlapping the sky-bow band are filtered
-// out below so the band reads as a clean diagonal. Sky region is rows 0..15.
+// full 72-col canvas width; stars overlapping the aurora's dense core are
+// filtered out below so the spiral reads cleanly. Sky region is rows 0..15.
 const STAR_POSITIONS_RAW: ReadonlyArray<readonly [number, number]> = [
   [0, 5],  [0, 22], [0, 38], [0, 55], [0, 67],
   [1, 14], [1, 31], [1, 45], [1, 60], [1, 70],
@@ -114,19 +147,15 @@ const STAR_POSITIONS_RAW: ReadonlyArray<readonly [number, number]> = [
   [15, 12], [15, 30], [15, 46], [15, 60], [15, 70]
 ];
 
-// Filter with a one-cell buffer so stars don't sit immediately adjacent
-// to the band either — keeps the diagonal visually clean on both sides.
-function isNearSkyBow(row: number, col: number, buffer: number = 1): boolean {
-  for (let dr = -buffer; dr <= buffer; dr++) {
-    for (let dc = -buffer; dc <= buffer; dc++) {
-      if (SKY_BOW_CELLS.has(`${row + dr},${col + dc}`)) return true;
-    }
-  }
-  return false;
+// Filter with a zero-cell buffer against the dense aurora core so stars
+// don't pile glyphs on top of the brightest spiral cells. Faint outer
+// tendrils mix harmlessly with stars.
+function isOnAuroraCore(row: number, col: number): boolean {
+  return AURORA_CORE_CELLS.has(`${row},${col}`);
 }
 
 const STAR_POSITIONS: ReadonlyArray<readonly [number, number]> =
-  STAR_POSITIONS_RAW.filter(([r, c]) => !isNearSkyBow(r, c, 1));
+  STAR_POSITIONS_RAW.filter(([r, c]) => !isOnAuroraCore(r, c));
 
 export const STAR_FIELD: string[] = (() => {
   const grid = blank(C_ROWS, C_COLS);
@@ -180,17 +209,48 @@ export const STARS_BRIGHT_FRAMES: string[][] = Array.from({ length: TWINKLE_FRAM
   return gridToArt(grid);
 });
 
-// Sky-bow art — Earth ring crossing the sky as a clear diagonal slope from
-// upper-left to lower-right. The protagonist's culture calls it the "long
-// road"; the player infers what it actually is.
-export const SKY_BOW: string[] = (() => {
-  const grid = blank(C_ROWS, C_COLS);
-  for (const cell of SKY_BOW_CELLS) {
-    const [r, c] = cell.split(',').map(Number);
-    grid[r][c] = '.';
+// Aurora-spiral art — the green spiral that hangs in the upper sky. The
+// protagonist's culture takes it for granted; the player infers what it
+// actually is (residue of the Miyake-class CME shown in flashback 1).
+//
+// The arm geometry stays fixed; what flows is the brightness, a sine wave
+// in `theta - wavePhase` that marches the bright glyphs outward along
+// each arm. One full wave per AURORA_FRAMES, so the loop is seamless.
+export const AURORA_FRAMES_COUNT = 60;
+
+export const AURORA_FRAMES: string[][] = Array.from(
+  { length: AURORA_FRAMES_COUNT },
+  (_, t) => {
+    const wavePhase = 2 * Math.PI * (t / AURORA_FRAMES_COUNT);
+    const cells = new Map<string, number>();
+    for (let arm = 0; arm < AURORA_ARMS; arm++) {
+      const armPhase = (arm * 2 * Math.PI) / AURORA_ARMS;
+      for (let theta = 0; theta <= AURORA_MAX_THETA; theta += 0.025) {
+        const r = AURORA_A + AURORA_B * theta;
+        const x = r * Math.cos(theta + armPhase);
+        const y = r * Math.sin(theta + armPhase) * AURORA_Y_SCALE;
+        const col = Math.round(AURORA_CENTER_COL + x);
+        const row = Math.round(AURORA_CENTER_ROW + y);
+        if (col < 0 || col >= C_COLS) continue;
+        if (row < 0 || row >= AURORA_SKY_ROWS) continue;
+        const baseIntensity = 1 - 0.80 * (theta / AURORA_MAX_THETA);
+        const wave = 0.5 + 0.5 * Math.sin(theta - wavePhase);
+        const intensity = baseIntensity * (0.05 + 0.95 * wave);
+        const key = `${row},${col}`;
+        const prev = cells.get(key) ?? 0;
+        if (intensity > prev) cells.set(key, intensity);
+      }
+    }
+    const grid = blank(C_ROWS, C_COLS);
+    for (const [key, intensity] of cells) {
+      const g = auroraGlyph(intensity);
+      if (g === null) continue;
+      const [r, c] = key.split(',').map(Number);
+      grid[r][c] = g;
+    }
+    return gridToArt(grid);
   }
-  return gridToArt(grid);
-})();
+);
 
 // ---------------------------------------------------------------------------
 // LAND — far mountains, near foothills (with yellowed-tree glyphs), ground.
@@ -198,28 +258,32 @@ export const SKY_BOW: string[] = (() => {
 // the bottom two rows of the canvas.
 // ---------------------------------------------------------------------------
 
+// 72-col silhouettes: span the full camp canvas edge-to-edge so the land
+// reaches as wide as the sky. Far range = 4 angular peaks (3-wide and
+// 5-wide tops alternating); near range = a rolling 5-hill foothill
+// silhouette with asterisk trees on top of each hill.
 const MOUNTAINS_FAR_ART = [
-  '      ___          _____            ___       ',
-  '  ___/   \\___    _/     \\___    ___/   \\__    ',
-  '_/            \\__/           \\__/            \\_'
+  '       ___              _____              ___              _____       ',
+  '   ___/   \\___        _/     \\___      ___/   \\___        _/     \\___   ',
+  '__/           \\______/           \\____/           \\______/           \\__'
 ];
 
 const MOUNTAINS_NEAR_ART = [
-  '                                              ',
-  '   *          *               *           *   ',
-  ' ,_*_,    ,_*_*_,         ,_*_,        ,_*_,  ',
-  '/      __/      \\___    _/     \\__   _/     \\_'
+  '                                                                        ',
+  '            *              *            *              *           *    ',
+  '          ,_*_,          ,_*_,        ,_*_,          ,_*_,       ,_*_,  ',
+  '/      __/     \\___    _/    \\__   _/     \\____   __/    \\___   _/     \\'
 ];
 
 export const MOUNTAINS_FAR: string[] = (() => {
   const grid = blank(C_ROWS, C_COLS);
-  placeBlock(grid, MOUNTAINS_FAR_ART, 16, 1 + CAMP_OFFSET);
+  placeBlock(grid, MOUNTAINS_FAR_ART, 16, 0);
   return gridToArt(grid);
 })();
 
 export const MOUNTAINS_NEAR: string[] = (() => {
   const grid = blank(C_ROWS, C_COLS);
-  placeBlock(grid, MOUNTAINS_NEAR_ART, 19, 1 + CAMP_OFFSET);
+  placeBlock(grid, MOUNTAINS_NEAR_ART, 19, 0);
   return gridToArt(grid);
 })();
 
@@ -236,82 +300,470 @@ export const GROUND: string[] = (() => {
 })();
 
 // ---------------------------------------------------------------------------
-// TRIBE — the camp at dawn. Sleeping figures + the standing Hearth-Tender.
+// TRIBE — figures gathered around the Hearth for the initiation ritual.
+//   * Tender:     hooded elder with a staff (4-col sprite, ceremonial)
+//   * Apprentice: 3-row simpler young figure (still, holds vessel)
+//   * Drummer:    one of the front-row dancers, has [O] hip drum
+//   * Tribe:      4-row dancers with variable heads (___, .o., ~o~)
+//   * Back row:   3-row smaller figures further back/up (depth)
+// Each figure has 2 dance poses; the dance toggles every 2 ticks per
+// figure with its own phase offset, so the tribe is never in lockstep.
 // ---------------------------------------------------------------------------
 
-const SLEEPING_LEFT  = ['o>~~~~~'];
-const SLEEPING_RIGHT = ['~~~~~<o'];
+interface FigureSprite {
+  still:   string[];
+  walkA?:  string[];   // optional — only walkers need walking poses
+  walkB?:  string[];
+  danceA:  string[];
+  danceB:  string[];
+}
 
-const TENDER_FIGURE = [
-  ',-.',
-  '(o)',
-  '/|\\',
-  '/ \\'
-];
+interface FigurePosition {
+  col:          number;
+  row:          number;
+  sprite:       FigureSprite;
+  phaseOffset:  number;   // dance/walk phase, ticks
+}
 
-const APPRENTICE_FIGURE = [
-  ',-.',
-  '(o)',
-  '/|.',
-  '/ \\'
-];
+const FIGURE_ROW    = 45;       // front-row standing-figure top row
+const BACK_ROW      = 42;       // back-row figure top row (3-row tall, smaller)
+const APPR_ROW      = 46;       // apprentice top row (3-row, feet at row 48)
 
-export const TRIBE_SLEEPING: string[] = (() => {
-  const grid = blank(C_ROWS, C_COLS);
-  // Sleeping figures scattered around the camp. Positioned around the
-  // hearth so they don't overlap the tender/apprentice positions which
-  // appear in kindle/named phases.
-  placeBlock(grid, SLEEPING_RIGHT, 50, 1  + CAMP_OFFSET);
-  placeBlock(grid, SLEEPING_RIGHT, 53, 4  + CAMP_OFFSET);
-  placeBlock(grid, SLEEPING_LEFT,  50, 41 + CAMP_OFFSET);
-  placeBlock(grid, SLEEPING_LEFT,  53, 38 + CAMP_OFFSET);
-  return gridToArt(grid);
-})();
+const TENDER_COL     = 5  + CAMP_OFFSET;  // canvas col 16
+const APPRENTICE_COL = 41 + CAMP_OFFSET;  // canvas col 52
 
+// Hooded elder with vertical staff on the right edge (4-col sprite).
+const TENDER_SPRITE: FigureSprite = {
+  still:  ['/^\\|', '(o)|',  '/|\\|', '/ \\|'],
+  walkA:  ['/^\\|', '(o)|',  '/|\\|', '/ \\|'],   // legs spread (planted)
+  walkB:  ['/^\\|', '(o)|',  '/|\\|', '| ||'],   // legs together (mid-step)
+  danceA: ['/^\\|', '(o)|',  '\\|/|', '/ \\|'],
+  danceB: ['/^\\|', '(o)|',  '-|-|',  '| ||']
+};
+
+// Younger figure: 3 rows, no head decoration, reaching-arm glyph (/|.)
+// points to the Cinder vessel one row down. Apprentice never dances.
+const APPRENTICE_SPRITE: FigureSprite = {
+  still:  [',o,', '/|.', '/ \\'],
+  walkA:  [',o,', '/|\\', '/ \\'],   // arms straight, legs spread (walking)
+  walkB:  [',o,', '/|\\', '| |'],   // arms straight, legs together
+  danceA: [',o,', '/|.', '/ \\'],
+  danceB: [',o,', '/|.', '/ \\']
+};
+
+// Drummer: arms swap on dance (drumming motion); legs are replaced by the
+// drum, so no leg swap.
+const DRUMMER_SPRITE: FigureSprite = {
+  still:  [',-.', '(o)', '/|\\', '[O]'],
+  walkA:  [',-.', '(o)', '/|\\', '[O]'],
+  walkB:  [',-.', '(o)', '/|\\', '[o]'],   // drum bobs slightly while walking
+  danceA: [',-.', '(o)', '\\|/', '[O]'],
+  danceB: [',-.', '(o)', '-|-',  '[O]']
+};
+
+// Generic 4-row tribe figure with a custom head — body/arms/legs identical
+// across the tribe, only the head varies for visual diversity.
+function tribeSprite(head: string): FigureSprite {
+  return {
+    still:  [head, '(o)', '/|\\', '/ \\'],
+    walkA:  [head, '(o)', '/|\\', '/ \\'],
+    walkB:  [head, '(o)', '/|\\', '| |'],
+    danceA: [head, '(o)', '\\|/', '/ \\'],
+    danceB: [head, '(o)', '-|-',  '| |']
+  };
+}
+
+const TRIBE_HEAD_FLAT  = tribeSprite('___');
+const TRIBE_HEAD_TUFT  = tribeSprite('.o.');
+const TRIBE_HEAD_WAVE  = tribeSprite('~o~');
+
+// Back-row 3-row sprites: smaller (no full body), suggest distance.
+function backRowSprite(head: string): FigureSprite {
+  return {
+    still:  [head, '/|\\', '/ \\'],
+    danceA: [head, '\\|/', '/ \\'],
+    danceB: [head, '-|-',  '| |']
+  };
+}
+
+const BACK_HEAD_PEAK = backRowSprite('/^\\');
+const BACK_HEAD_DOT  = backRowSprite(',o,');
+const BACK_HEAD_FACE = backRowSprite('(o)');
+const BACK_HEAD_TUFT = backRowSprite('.o.');
+
+// Far-back 2-row sprites: 1-col silhouette of head + body. Too distant to
+// dance — they hold their pose. Variety in head/body chars suggests many
+// individuals rather than copies.
+function farSprite(head: string, body: string): FigureSprite {
+  const still = [head, body];
+  return { still, danceA: still, danceB: still };
+}
+
+const FAR_OT = farSprite('o', 'T');
+const FAR_DT = farSprite('.', 'T');
+const FAR_OY = farSprite('o', 'Y');
+const FAR_OI = farSprite('o', '|');
+const FAR_BT = farSprite('O', 'T');
+const FAR_DY = farSprite('.', 'Y');
+const FAR_BI = farSprite('O', '|');
+
+// Standalone exports for layers rendered separately.
 export const TENDER: string[] = (() => {
   const grid = blank(C_ROWS, C_COLS);
-  // Left of the Hearth cart (cart spans cols 16-32 + offset). Stands on ground.
-  placeBlock(grid, TENDER_FIGURE, 45, 9 + CAMP_OFFSET);
+  placeBlock(grid, TENDER_SPRITE.still, FIGURE_ROW, TENDER_COL);
   return gridToArt(grid);
 })();
 
 export const APPRENTICE: string[] = (() => {
   const grid = blank(C_ROWS, C_COLS);
-  // Right of the Hearth cart. Reaching-arm glyph (/|.) points toward the
-  // new Cinder vessel that appears one row down.
-  placeBlock(grid, APPRENTICE_FIGURE, 45, 35 + CAMP_OFFSET);
+  placeBlock(grid, APPRENTICE_SPRITE.still, APPR_ROW, APPRENTICE_COL);
   return gridToArt(grid);
 })();
 
-// ---------------------------------------------------------------------------
-// HEARTH — the tribe's central never-extinguished fire, riding in a bronze
-// cart. Portrait: cart at row 64, tall flames (12 rows) rise into the
-// middle of the canvas, smoke drifts higher still.
-// ---------------------------------------------------------------------------
+// === Bed scene (wake_dream phase) ==========================================
+// Apprentice in bed, just woken from a dream. Inside a hut: peaked roof,
+// vertical wall outlines, bed in the centre with the Apprentice sitting
+// up. Dim atmosphere — no aurora/stars rendered in this phase.
 
-const HEARTH_CART_ART = [
-  '   _____________   ',
-  '  [|           |]  ',
-  '  [|___________|]  ',
-  '  [/  O     O  \\]  '
+const HUT_FRAME_ART = [
+  '              .              ',     // a single distant star through the smoke hole
+  '             /.\\             ',
+  '            /   \\            ',
+  '           /     \\           ',
+  '          /       \\          ',
+  '         /         \\         ',
+  '        /           \\        ',
+  '       /             \\       ',
+  '      /               \\      ',
+  '     /                 \\     ',
+  '    /                   \\    ',
+  '   /                     \\   ',
+  '  /                       \\  ',
+  ' /                         \\ ',
+  '/___________________________\\'
 ];
 
-const HEARTH_CART_COL = 16 + CAMP_OFFSET; // cart left edge → spans 19 cols
-const HEARTH_CART_ROW = 45;                // cart top row (4 rows tall, ends 48)
+const APPR_IN_BED_ART = [
+  '   ,o,    ',     // head, awake
+  '  /===\\   ',     // blanket draped over body
+  ' /=====\\  ',     // wider blanket
+  '[_______]'      // bed frame
+];
 
-export const HEARTH_CART: string[] = (() => {
+const HUT_FRAME_ROW   = 18;                                    // peak high in canvas
+const HUT_FRAME_COL   = Math.floor((C_COLS - HUT_FRAME_ART[0].length) / 2);
+const APPR_BED_ROW    = HUT_FRAME_ROW + HUT_FRAME_ART.length - APPR_IN_BED_ART.length - 1;
+const APPR_BED_COL    = Math.floor((C_COLS - APPR_IN_BED_ART[0].length) / 2);
+
+export const HUT_FRAME: string[] = (() => {
   const grid = blank(C_ROWS, C_COLS);
-  placeBlock(grid, HEARTH_CART_ART, HEARTH_CART_ROW, HEARTH_CART_COL);
+  placeBlock(grid, HUT_FRAME_ART, HUT_FRAME_ROW, HUT_FRAME_COL);
   return gridToArt(grid);
 })();
 
-// Hearth fire — taller and slimmer than landscape: 12 rows × 11 cols. Fire
-// bottom sits one row above the cart (row 63); flames rise to row 52.
-const HEARTH_FIRE_ROWS = 12;
-const HEARTH_FIRE_COLS = 11;
-const HEARTH_FIRE_BOTTOM = HEARTH_CART_ROW - 1;          // row 63
-const HEARTH_FIRE_TOP    = HEARTH_FIRE_BOTTOM - HEARTH_FIRE_ROWS + 1; // row 52
-const HEARTH_FIRE_COL    = HEARTH_CART_COL + 4;          // centered above cart
+export const APPRENTICE_IN_BED: string[] = (() => {
+  const grid = blank(C_ROWS, C_COLS);
+  placeBlock(grid, APPR_IN_BED_ART, APPR_BED_ROW, APPR_BED_COL);
+  return gridToArt(grid);
+})();
+
+// === Sun (test_morning sandbox phase) ======================================
+// Simple sun sprite for the daylight test scene — single big glyph with
+// rays. Placed in the upper-right sky region, well clear of the mountains
+// and the camp composition below.
+
+const SUN_ART = [
+  '\\ | /',
+  '- O -',
+  '/ | \\'
+];
+const SUN_ROW = 4;
+const SUN_COL = 56;
+
+export const SUN: string[] = (() => {
+  const grid = blank(C_ROWS, C_COLS);
+  placeBlock(grid, SUN_ART, SUN_ROW, SUN_COL);
+  return gridToArt(grid);
+})();
+
+// === Tribe layout ==========================================================
+// Three depth tiers, totaling 19 figures + Apprentice + Tender (rendered
+// separately) = 21 people gathered around the Hearth.
+//   * Tier 1 (FRONT_TRIBE)   — rows 45-48, 4-row sprites, 4 dancers + Drummer
+//   * Tier 2 (BACK_TRIBE)    — rows 42-44, 3-row sprites, 6 figures
+//   * Tier 3 (FAR_TRIBE)     — rows 39-40, 2-row 1-col silhouettes, 8 figures
+//
+// PhaseOffsets for animated figures (tiers 1+2 + Tender) are unique values
+// spread across [0, 14], so each transitions at a different tick within the
+// 15-frame cycle. Tier 3 figures don't dance — they hold a still pose.
+
+const FAR_ROW = 39;  // tier 3 top row (2 rows tall, occupies rows 39-40)
+
+const FRONT_TRIBE: FigurePosition[] = [
+  { col:  4, row: FIGURE_ROW, sprite: TRIBE_HEAD_FLAT, phaseOffset:  0 },
+  { col: 11, row: FIGURE_ROW, sprite: DRUMMER_SPRITE,  phaseOffset:  8 },
+  { col: 60, row: FIGURE_ROW, sprite: TRIBE_HEAD_TUFT, phaseOffset:  4 },
+  { col: 66, row: FIGURE_ROW, sprite: TRIBE_HEAD_WAVE, phaseOffset: 12 }
+];
+
+const BACK_TRIBE: FigurePosition[] = [
+  { col:  1, row: BACK_ROW, sprite: BACK_HEAD_FACE, phaseOffset:  3 },
+  { col:  8, row: BACK_ROW, sprite: BACK_HEAD_DOT,  phaseOffset:  2 },
+  { col: 19, row: BACK_ROW, sprite: BACK_HEAD_TUFT, phaseOffset:  9 },
+  { col: 56, row: BACK_ROW, sprite: BACK_HEAD_DOT,  phaseOffset:  5 },
+  { col: 63, row: BACK_ROW, sprite: BACK_HEAD_PEAK, phaseOffset:  6 },
+  { col: 69, row: BACK_ROW, sprite: BACK_HEAD_FACE, phaseOffset: 13 }
+];
+
+// Tier 3 — far-back 2-row 1-col silhouettes. Distributed across the cols
+// outside the fire region (fire spans canvas cols 22-50). Each is a single
+// `head/body` glyph pair. PhaseOffset is unused (no dance) but kept on the
+// type for uniformity.
+const FAR_TRIBE: FigurePosition[] = [
+  { col:  3, row: FAR_ROW, sprite: FAR_OT, phaseOffset: 0 },
+  { col:  7, row: FAR_ROW, sprite: FAR_DY, phaseOffset: 0 },
+  { col: 14, row: FAR_ROW, sprite: FAR_OI, phaseOffset: 0 },
+  { col: 20, row: FAR_ROW, sprite: FAR_BT, phaseOffset: 0 },
+  { col: 53, row: FAR_ROW, sprite: FAR_OY, phaseOffset: 0 },
+  { col: 58, row: FAR_ROW, sprite: FAR_DT, phaseOffset: 0 },
+  { col: 65, row: FAR_ROW, sprite: FAR_OI, phaseOffset: 0 },
+  { col: 70, row: FAR_ROW, sprite: FAR_BI, phaseOffset: 0 }
+];
+
+// Tender as a dancing figure (used in named only; in earlier phases the
+// standalone TENDER layer is rendered instead).
+const TENDER_DANCING: FigurePosition = {
+  col: TENDER_COL, row: FIGURE_ROW, sprite: TENDER_SPRITE, phaseOffset: 10
+};
+
+// === Arriving (still composition for kindle) ===============================
+// All three tiers rendered in their resting `still` pose. Tender is its own
+// layer; Apprentice + vessel join in the kindle phase.
+export const ARRIVING_TRIBE: string[] = (() => {
+  const grid = blank(C_ROWS, C_COLS);
+  for (const fp of [...FRONT_TRIBE, ...BACK_TRIBE, ...FAR_TRIBE]) {
+    placeBlock(grid, fp.sprite.still, fp.row, fp.col);
+  }
+  return gridToArt(grid);
+})();
+
+// === Walk-in animation =====================================================
+// Only the four front-row dancers walk in (Drummer at col 11 is one of
+// them). Tender + back-row + far-row figures appear instantly at the start
+// of the arriving phase (Tender is the keeper of the fire; mid- and far-
+// back tiers are observing from a distance, already gathered). Walkers
+// slide at 1 col/tick from off-canvas, alternate walkA/walkB every 2 ticks,
+// then snap to `still` once arrived.
+
+interface Walker {
+  startCol:    number;
+  position:    FigurePosition;
+  delay:       number;
+}
+
+const ARRIVING_WALKERS: Walker[] = [
+  { startCol: -5,  position: FRONT_TRIBE[0], delay: 12 },  // far-left
+  { startCol: -10, position: FRONT_TRIBE[1], delay:  0 },  // mid-left (drummer)
+  { startCol: 75,  position: FRONT_TRIBE[2], delay:  0 },  // mid-right
+  { startCol: 80,  position: FRONT_TRIBE[3], delay:  6 }   // far-right
+];
+
+export const WALKING_FRAMES_COUNT = 30;
+
+// Far-row pop schedule: figures appear one at a time (alternating left-
+// right) at FAR_POP_INTERVAL tick intervals, instead of all at once. Order
+// is by position-index pair (0 then last, 1 then 2nd-last, etc) so the
+// crowd fills in symmetrically.
+const FAR_POP_INTERVAL = 3;
+const FAR_POP_TICKS: number[] = (() => {
+  const ticks = new Array(FAR_TRIBE.length).fill(0);
+  // Pair indices outward-in: [0, last, 1, last-1, 2, last-2, ...]
+  const order: number[] = [];
+  for (let i = 0; i < Math.ceil(FAR_TRIBE.length / 2); i++) {
+    order.push(i);
+    if (FAR_TRIBE.length - 1 - i !== i) order.push(FAR_TRIBE.length - 1 - i);
+  }
+  for (let k = 0; k < order.length; k++) {
+    ticks[order[k]] = k * FAR_POP_INTERVAL;
+  }
+  return ticks;
+})();
+
+// Back-row pop schedule: a couple appear instantly at t=0 (the closest to
+// the apprentice's view), the rest pop in shortly after — gives the
+// arriving phase a sense of the back tier filling out alongside the front.
+const BACK_POP_INTERVAL = 4;
+const BACK_POP_TICKS: number[] = BACK_TRIBE.map((_, i) => i * BACK_POP_INTERVAL);
+
+export const WALKING_FRAMES: string[][] = Array.from({ length: WALKING_FRAMES_COUNT }, (_, t) => {
+  const grid = blank(C_ROWS, C_COLS);
+
+  // Back-row figures pop in over time.
+  for (let i = 0; i < BACK_TRIBE.length; i++) {
+    if (t >= BACK_POP_TICKS[i]) {
+      placeBlock(grid, BACK_TRIBE[i].sprite.still, BACK_TRIBE[i].row, BACK_TRIBE[i].col);
+    }
+  }
+
+  // Far-row figures pop in one at a time (alternating left-right).
+  for (let i = 0; i < FAR_TRIBE.length; i++) {
+    if (t >= FAR_POP_TICKS[i]) {
+      placeBlock(grid, FAR_TRIBE[i].sprite.still, FAR_TRIBE[i].row, FAR_TRIBE[i].col);
+    }
+  }
+
+  for (const w of ARRIVING_WALKERS) {
+    const adjT = Math.max(0, t - w.delay);
+    const targetCol = w.position.col;
+    const direction = targetCol > w.startCol ? 1 : -1;
+    const distance = Math.abs(targetCol - w.startCol);
+    const traveled = Math.min(distance, adjT);
+    const col = w.startCol + direction * traveled;
+    const stillWalking = adjT > 0 && traveled < distance;
+    const sprite = w.position.sprite;
+    const pose = stillWalking
+      ? (((adjT >> 1) % 2 === 0 ? sprite.walkA : sprite.walkB) ?? sprite.still)
+      : sprite.still;
+    placeBlock(grid, pose, w.position.row, col);
+  }
+  return gridToArt(grid);
+});
+
+// === Walking to the fire (Tender + Apprentice approach) ====================
+// Phase 2 of the intro: the Tender leads the Apprentice in from off-canvas
+// left to their final ritual positions. Tender stops first at col 16 (left
+// of the fire); Apprentice continues past the fire to col 52 (right of
+// it). Apprentice's layer should render BEFORE the fire layer in JSX so
+// the fire eclipses the Apprentice while she walks past — narratively the
+// Apprentice walks behind the fire from camera POV.
+
+const WALK_PAIR_TENDER_START = -5;     // off-canvas left
+const WALK_PAIR_APPR_START   = -10;
+const WALK_PAIR_TENDER_TARGET = TENDER_COL;       // 16
+const WALK_PAIR_APPR_TARGET   = APPRENTICE_COL;   // 52
+const WALK_PAIR_SPEED         = 2;     // cols per tick (faster than arriving)
+const WALK_PAIR_APPR_DELAY    = 0;     // both start at the same tick
+
+const _walkPairTenderTicks = Math.ceil(
+  Math.abs(WALK_PAIR_TENDER_TARGET - WALK_PAIR_TENDER_START) / WALK_PAIR_SPEED
+);
+const _walkPairApprTicks = Math.ceil(
+  Math.abs(WALK_PAIR_APPR_TARGET - WALK_PAIR_APPR_START) / WALK_PAIR_SPEED
+);
+export const WALK_PAIR_FRAMES_COUNT = Math.max(_walkPairTenderTicks, _walkPairApprTicks) + 4;
+
+function makeWalkPairFrame(t: number, who: 'tender' | 'appr'): { col: number; pose: string[] } {
+  const startCol  = who === 'tender' ? WALK_PAIR_TENDER_START  : WALK_PAIR_APPR_START;
+  const targetCol = who === 'tender' ? WALK_PAIR_TENDER_TARGET : WALK_PAIR_APPR_TARGET;
+  const sprite    = who === 'tender' ? TENDER_SPRITE           : APPRENTICE_SPRITE;
+  const delay     = who === 'tender' ? 0                       : WALK_PAIR_APPR_DELAY;
+  const adjT      = Math.max(0, t - delay);
+  const direction = targetCol > startCol ? 1 : -1;
+  const distance  = Math.abs(targetCol - startCol);
+  const traveled  = Math.min(distance, adjT * WALK_PAIR_SPEED);
+  const col       = startCol + direction * traveled;
+  const stillWalking = adjT > 0 && traveled < distance;
+  const pose = stillWalking
+    ? (((adjT >> 1) % 2 === 0 ? sprite.walkA : sprite.walkB) ?? sprite.still)
+    : sprite.still;
+  return { col, pose };
+}
+
+// Apprentice is fully hidden ("behind the bonfire") whenever her sprite
+// would overlap any column the fire occupies. The fire only fills rows
+// 24-46, so without this masking the lower body would poke out below
+// the flames at the apprentice's standing rows (46-48). Hiding cleanly
+// reads as "she walks past the fire, momentarily out of sight".
+//
+// Hardcoded canvas range — HEARTH_FIRE_COL/HEARTH_FIRE_COLS are declared
+// later in this file (initialization order) so we can't reference them
+// here. They evaluate to: HEARTH_PIT_COL + 1 = 22, and 29 cols wide.
+const FIRE_LEFT_CANVAS  = 22;
+const FIRE_RIGHT_CANVAS = 22 + 29 - 1;   // 50
+const APPR_WIDTH        = APPRENTICE_SPRITE.still[0].length;
+
+function isApprBehindFire(col: number): boolean {
+  const left = col;
+  const right = col + APPR_WIDTH - 1;
+  return right >= FIRE_LEFT_CANVAS && left <= FIRE_RIGHT_CANVAS;
+}
+
+// Two layers: WALK_PAIR_BEHIND (Apprentice — masked while behind the
+// flames) and WALK_PAIR_FRONT (Tender — never enters the fire region).
+export const WALK_PAIR_BEHIND_FRAMES: string[][] = Array.from({ length: WALK_PAIR_FRAMES_COUNT }, (_, t) => {
+  const grid = blank(C_ROWS, C_COLS);
+  const a = makeWalkPairFrame(t, 'appr');
+  if (!isApprBehindFire(a.col)) {
+    placeBlock(grid, a.pose, APPR_ROW, a.col);
+  }
+  return gridToArt(grid);
+});
+
+export const WALK_PAIR_FRONT_FRAMES: string[][] = Array.from({ length: WALK_PAIR_FRAMES_COUNT }, (_, t) => {
+  const grid = blank(C_ROWS, C_COLS);
+  const tn = makeWalkPairFrame(t, 'tender');
+  placeBlock(grid, tn.pose, FIGURE_ROW, tn.col);
+  return gridToArt(grid);
+});
+
+// === Dance frames ==========================================================
+// In `named`, tier 1 + tier 2 + Tender all cycle dance poses; tier 3 is
+// rendered too but with identical danceA/danceB poses (held still). The
+// Apprentice (own layer) stays still through the whole dance.
+
+const DANCING_FIGURES: FigurePosition[] = [
+  ...FRONT_TRIBE,
+  ...BACK_TRIBE,
+  ...FAR_TRIBE,
+  TENDER_DANCING
+];
+
+// Half-period swap: each figure spends ~7 ticks in danceA, ~8 in danceB
+// across the 15-frame cycle. With unique phaseOffsets in [0, 14), every
+// figure transitions at a different tick — the dance never marches in
+// lockstep.
+const DANCE_HALF = Math.floor(FRAMES / 2);
+
+export const DANCING_TRIBE_FRAMES: string[][] = Array.from({ length: FRAMES }, (_, t) => {
+  const grid = blank(C_ROWS, C_COLS);
+  for (const fp of DANCING_FIGURES) {
+    const phase = (t + fp.phaseOffset) % FRAMES;
+    const pose = phase < DANCE_HALF ? fp.sprite.danceA : fp.sprite.danceB;
+    placeBlock(grid, pose, fp.row, fp.col);
+  }
+  return gridToArt(grid);
+});
+
+// ---------------------------------------------------------------------------
+// HEARTH — the tribe's central never-extinguished fire, sitting in a stone
+// pit at camp (mirrors the camp-map scene). 23 rows tall × 29 cols wide;
+// the pit ring frames the fire base with one stone-col of border on each
+// side. The Tender, Apprentice, and arriving/dancing tribe all stand on
+// the same row level as the pit's base.
+// ---------------------------------------------------------------------------
+
+const HEARTH_PIT_ART = [
+  ' .oOoOoOoOoOoOoOoOoOoOoOoOoOo. ',
+  '  `                         `  '
+];
+
+const HEARTH_PIT_COL = 10 + CAMP_OFFSET; // pit left edge → 31 cols, centered
+const HEARTH_PIT_ROW = 47;                // pit at rows 47-48 (above ground)
+
+export const HEARTH_PIT: string[] = (() => {
+  const grid = blank(C_ROWS, C_COLS);
+  placeBlock(grid, HEARTH_PIT_ART, HEARTH_PIT_ROW, HEARTH_PIT_COL);
+  return gridToArt(grid);
+})();
+
+// Hearth fire — the Elder Fire is supposed to dominate the camp scene the
+// way it dominates the top-view map. 23 rows tall × 29 cols wide; sits one
+// row above the stone pit, with one stone-col of pit border on each side.
+const HEARTH_FIRE_ROWS = 23;
+const HEARTH_FIRE_COLS = 29;
+const HEARTH_FIRE_BOTTOM = HEARTH_PIT_ROW - 1;
+const HEARTH_FIRE_TOP    = HEARTH_FIRE_BOTTOM - HEARTH_FIRE_ROWS + 1;
+const HEARTH_FIRE_COL    = HEARTH_PIT_COL + 1;           // 1-col pit border each side
 
 const HEAT_GLYPHS = " ..',**ooo@@";
 const MAX_HEAT = HEAT_GLYPHS.length - 1;
@@ -376,7 +828,7 @@ const CINDER_VESSEL_ART = [
 ];
 
 const CINDER_VESSEL_ROW = 49;
-const CINDER_VESSEL_COL = 38 + CAMP_OFFSET;
+const CINDER_VESSEL_COL = 44 + CAMP_OFFSET;  // canvas col 55, just right of Apprentice
 
 export const CINDER_VESSEL: string[] = (() => {
   const grid = blank(C_ROWS, C_COLS);
@@ -436,15 +888,19 @@ export const CINDER_KINDLE_FRAMES: string[][] = Array.from({ length: FRAMES }, (
 // ---------------------------------------------------------------------------
 
 const HEARTH_SMOKE_STREAMS = [
-  { col: 19 + CAMP_OFFSET, drift: -0.30, period: 22, chars: "'~ " },
-  { col: 21 + CAMP_OFFSET, drift: -0.15, period: 18, chars: "~. " },
-  { col: 23 + CAMP_OFFSET, drift:  0.15, period: 20, chars: "'~." },
-  { col: 24 + CAMP_OFFSET, drift:  0.05, period: 17, chars: "'." },
+  { col: 11 + CAMP_OFFSET, drift: -0.40, period: 24, chars: "'~ " },
+  { col: 14 + CAMP_OFFSET, drift: -0.30, period: 22, chars: "~. " },
+  { col: 17 + CAMP_OFFSET, drift: -0.15, period: 18, chars: "'~." },
+  { col: 19 + CAMP_OFFSET, drift:  0.10, period: 20, chars: "'." },
+  { col: 21 + CAMP_OFFSET, drift:  0.05, period: 17, chars: "~. " },
+  { col: 23 + CAMP_OFFSET, drift: -0.10, period: 19, chars: "'~." },
   { col: 25 + CAMP_OFFSET, drift:  0.30, period: 23, chars: "~'.~" },
-  { col: 26 + CAMP_OFFSET, drift:  0.00, period: 16, chars: "'~" },
-  { col: 27 + CAMP_OFFSET, drift:  0.40, period: 19, chars: "'~." },
-  { col: 29 + CAMP_OFFSET, drift: -0.10, period: 21, chars: "'~. " },
-  { col: 31 + CAMP_OFFSET, drift: -0.25, period: 22, chars: "~." }
+  { col: 27 + CAMP_OFFSET, drift:  0.10, period: 17, chars: "'." },
+  { col: 29 + CAMP_OFFSET, drift:  0.00, period: 16, chars: "'~" },
+  { col: 31 + CAMP_OFFSET, drift:  0.40, period: 19, chars: "'~." },
+  { col: 33 + CAMP_OFFSET, drift: -0.10, period: 21, chars: "'~. " },
+  { col: 36 + CAMP_OFFSET, drift: -0.25, period: 22, chars: "~." },
+  { col: 39 + CAMP_OFFSET, drift:  0.30, period: 24, chars: "'~ " }
 ];
 
 const HEARTH_SMOKE_BASE_ROW = HEARTH_FIRE_TOP - 1; // just above fire
@@ -471,14 +927,19 @@ export const HEARTH_SMOKE_FRAMES: string[][] = Array.from({ length: FRAMES }, (_
 // ---------------------------------------------------------------------------
 
 const HEARTH_EMBER_SPARKS = [
-  { col: 22 + CAMP_OFFSET, drift:  0.25, period: 13, chars: "*'." },
-  { col: 23 + CAMP_OFFSET, drift: -0.15, period: 15, chars: "*'." },
-  { col: 24 + CAMP_OFFSET, drift: -0.05, period: 16, chars: "*'." },
-  { col: 25 + CAMP_OFFSET, drift:  0.30, period: 12, chars: "*'." },
-  { col: 26 + CAMP_OFFSET, drift:  0.15, period: 14, chars: "*'." },
-  { col: 27 + CAMP_OFFSET, drift: -0.20, period: 17, chars: "*'." },
+  { col: 14 + CAMP_OFFSET, drift: -0.30, period: 13, chars: "*'." },
+  { col: 16 + CAMP_OFFSET, drift:  0.30, period: 13, chars: "*'." },
+  { col: 18 + CAMP_OFFSET, drift:  0.25, period: 13, chars: "*'." },
+  { col: 20 + CAMP_OFFSET, drift: -0.15, period: 15, chars: "*'." },
+  { col: 22 + CAMP_OFFSET, drift: -0.05, period: 16, chars: "*'." },
+  { col: 24 + CAMP_OFFSET, drift:  0.30, period: 12, chars: "*'." },
+  { col: 25 + CAMP_OFFSET, drift:  0.15, period: 14, chars: "*'." },
+  { col: 26 + CAMP_OFFSET, drift: -0.20, period: 17, chars: "*'." },
   { col: 28 + CAMP_OFFSET, drift: -0.05, period: 11, chars: "*'." },
-  { col: 29 + CAMP_OFFSET, drift:  0.35, period: 18, chars: "*'." }
+  { col: 30 + CAMP_OFFSET, drift:  0.35, period: 18, chars: "*'." },
+  { col: 32 + CAMP_OFFSET, drift: -0.10, period: 14, chars: "*'." },
+  { col: 34 + CAMP_OFFSET, drift: -0.30, period: 13, chars: "*'." },
+  { col: 36 + CAMP_OFFSET, drift:  0.20, period: 12, chars: "*'." }
 ];
 
 const HEARTH_EMBER_BASE_ROW = HEARTH_FIRE_TOP;

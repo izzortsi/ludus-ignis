@@ -14,7 +14,7 @@ import { CinderDialog } from './CinderDialog';
 
 const STEP_MS = 140;
 const FIRE_TICK_MS = 120;
-const SPRITE_FRAMES = ['ô', 'Ô']; // alternating walk-cycle glyph
+const SPRITE_FRAMES = ['𜰄', '𜰄']; // single glyph; CSS flips it upside-down via .map-apprentice
 
 function sign(n: number): number {
   return n > 0 ? 1 : n < 0 ? -1 : 0;
@@ -80,21 +80,16 @@ export function CampMap() {
     onCleanup(() => clearInterval(id));
   });
 
-  // Sprite layer — single char at the Apprentice's current position.
-  const sprite = createMemo(() => {
-    const glyph = SPRITE_FRAMES[walkTick() % SPRITE_FRAMES.length];
-    const lines: string[] = [];
-    for (let r = 0; r < MAP_DIMS.rows; r++) {
-      if (r === apprentice.row) {
-        const before = ' '.repeat(apprentice.col);
-        const after  = ' '.repeat(MAP_DIMS.cols - apprentice.col - 1);
-        lines.push(before + glyph + after);
-      } else {
-        lines.push(' '.repeat(MAP_DIMS.cols));
-      }
-    }
-    return lines.join('\n');
-  });
+  // Apprentice glyph — rendered as a single absolutely-positioned span
+  // at (row * 1lh, col * 1ch). Rendering as a span (not a full-grid pre)
+  // means the .map-apprentice CSS can apply transform: rotate(180deg) to
+  // flip just the glyph upside-down without mirroring the whole layer's
+  // coordinate system.
+  const glyph = createMemo(() => SPRITE_FRAMES[walkTick() % SPRITE_FRAMES.length]);
+  const glyphStyle = createMemo(() => ({
+    top:  `calc(${apprentice.row} * 1lh)`,
+    left: `calc(${apprentice.col} * 1ch)`
+  }));
 
   // Tap-and-hold movement. Pointer down → set target; while held → target
   // follows the pointer; on release → stop unless heading to an
@@ -171,7 +166,7 @@ export function CampMap() {
         <pre class="map-layer map-terrain">{TERRAIN.join('\n')}</pre>
         <pre class="map-layer map-hearth-fire">{HEARTH_FIRE_FRAMES[fireTick()]}</pre>
         <pre class="map-layer map-cinder-fire">{CINDER_FIRE_FRAMES[fireTick()]}</pre>
-        <pre class="map-layer map-apprentice">{sprite()}</pre>
+        <span class="map-apprentice" style={glyphStyle()}>{glyph()}</span>
       </div>
 
       <Show when={dialog() === 'hearth'}>

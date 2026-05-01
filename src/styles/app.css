@@ -122,10 +122,23 @@ html, body {
 }
 
 .map-apprentice {
+  position: absolute;
+  font-family: inherit;
+  font-size: inherit;
+  line-height: inherit;
+  pointer-events: none;
+  user-select: none;
+  white-space: pre;
   color: rgba(255, 230, 180, 1);
   text-shadow:
     0 0 4px rgba(255, 220, 150, 0.7),
     0 0 10px rgba(255, 180, 80, 0.4);
+  /* Flip the 𜰄 glyph upside-down so it reads as a person — applied to
+     the single-glyph span only, so the apprentice's actual coordinates
+     (top/left) aren't mirrored. */
+  display: inline-block;
+  transform: rotate(180deg);
+  transform-origin: center;
 }
 
 /* === map dialogs === */
@@ -944,22 +957,102 @@ html, body {
   animation: intro-sky-breath 9s ease-in-out infinite;
   animation-delay: -3s;
 }
-.intro-sky-bow {
-  color: rgba(255, 225, 170, 1);
+.intro-aurora {
+  color: rgba(150, 245, 185, 0.95);
   text-shadow:
-    0 0 4px rgba(255, 225, 170, 0.9),
-    0 0 12px rgba(255, 195, 130, 0.55),
-    0 0 24px rgba(255, 195, 130, 0.25);
+    0 0 4px rgba(150, 245, 185, 0.85),
+    0 0 12px rgba(90, 220, 145, 0.5),
+    0 0 24px rgba(70, 200, 130, 0.25);
   z-index: 10;
+  animation: intro-aurora-pulse 8s ease-in-out infinite;
+}
+@keyframes intro-aurora-pulse {
+  0%, 100% { opacity: 0.85; }
+  50%      { opacity: 1.0; }
 }
 .intro-mountains-far  { color: rgba(60, 70, 90, 0.85); }
 .intro-mountains-near { color: rgba(90, 80, 60, 0.95); }
 .intro-ground         { color: rgba(80, 70, 55, 0.85); }
 
-.intro-tribe       { color: rgba(170, 150, 120, 0.85); }
-.intro-tender      { color: rgba(212, 184, 150, 0.95); }
-.intro-apprentice  { color: rgba(255, 220, 170, 1); }
-.intro-cart        { color: rgba(140, 100, 60, 0.9); }
+.intro-tender         { color: rgba(212, 184, 150, 0.95); }
+.intro-apprentice     { color: rgba(255, 220, 170, 1); }
+.intro-tribe          { color: rgba(190, 165, 130, 0.85); }
+.intro-tribe-dancing  { color: rgba(220, 190, 150, 0.95); }
+.intro-hearth-pit     { color: rgba(120, 110, 100, 0.9); }
+
+/* === wake_dream (bed scene) === */
+.intro-root.is-bed,
+.intro-stage.is-bed { background: rgba(8, 6, 10, 1); }
+.intro-hut          { color: rgba(110, 90, 70, 0.7); }
+.intro-bed-figure {
+  color: rgba(230, 200, 160, 0.95);
+  text-shadow: 0 0 6px rgba(230, 200, 160, 0.35);
+}
+
+/* === black_wake (cut to black) === */
+.intro-root.is-black,
+.intro-stage.is-black { background: #000; }
+.intro-wake-text {
+  position: fixed;
+  top: 50%; left: 50%;
+  transform: translate(-50%, -50%);
+  font-family: 'Menlo', 'Consolas', 'Courier New', monospace;
+  font-size: 1.2rem;
+  letter-spacing: 0.4em;
+  color: rgba(230, 220, 200, 0.85);
+  margin: 0;
+  text-shadow: 0 0 8px rgba(230, 220, 200, 0.3);
+}
+
+/* === morning variants (daylight desaturated tones) === */
+.intro-mountains-far.is-morning  { color: rgba(110, 120, 130, 0.7); }
+.intro-mountains-near.is-morning { color: rgba(140, 130, 110, 0.85); }
+.intro-hearth-fire.is-morning    { opacity: 0.85; }
+
+/* === test_morning sandbox (full-bright daylight pass) === */
+.intro-root.is-test-morning,
+.intro-stage.is-test-morning {
+  background: linear-gradient(180deg,
+    #b8d4ec 0%,
+    #d8d4cc 55%,
+    #e8c89c 78%,
+    #c89c70 100%);
+}
+
+/* Sun: white-hot core, strong amber halo bleeding into the warm sky.
+   The bright core punches against the pale gradient; the halo blends. */
+.intro-sun {
+  color: rgba(255, 252, 240, 1);
+  text-shadow:
+    0 0 6px  rgba(255, 220, 100, 1),
+    0 0 18px rgba(255, 170,  60, 0.85),
+    0 0 38px rgba(255, 130,  40, 0.55);
+}
+
+.intro-mountains-far.is-test-morning  { color: rgba(70, 80, 100, 0.9); }
+.intro-mountains-near.is-test-morning { color: rgba(75, 60, 45, 0.98); }
+.intro-ground.is-test-morning         { color: rgba(95, 75, 50, 0.95); }
+
+/* Fire: deep orange-red against the pale background (the default amber
+   washes out at noon). Full opacity now — colour carries the contrast. */
+.intro-hearth-fire.is-test-morning {
+  color: rgba(190, 60, 25, 1);
+  text-shadow:
+    0 0 6px  rgba(230, 110, 40, 0.85),
+    0 0 14px rgba(200,  70, 25, 0.5);
+  opacity: 1;
+}
+
+/* Smoke: darker grey, near-opaque. The doubled layer (different frame
+   offset, see IntroScene.tsx) adds density on top of this. */
+.intro-hearth-smoke.is-test-morning {
+  color: rgba(55, 50, 48, 0.85);
+}
+.intro-hearth-smoke.is-test-morning.is-extra {
+  color: rgba(70, 65, 60, 0.7);
+}
+
+.intro-apprentice.is-test-morning     { color: rgba(60, 40, 25, 1); }
 
 .intro-hearth-fire {
   color: var(--flame-orange);
@@ -1093,6 +1186,10 @@ html, body {
   justify-content: center;
   pointer-events: none;
   padding: 2rem;
+}
+.intro-typewriter.is-bottom {
+  align-items: flex-end;
+  padding-bottom: 4rem;
 }
 
 .intro-typewriter-text {
