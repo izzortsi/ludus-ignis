@@ -1,6 +1,6 @@
 # Ludus Ignis — World Bible
 
-Status: working draft, iteration 3.
+Status: working draft, iteration 4.
 Genre: hard-SF post-collapse with an unreliable narrator (the child protagonist) and a reliable one (the world's environmental record).
 
 Markers used below:
@@ -31,6 +31,8 @@ Probability is, in this world, **five things at once**:
 - and (meta) the epistemological tool the player uses to retrodict the cataclysm.
 
 Alpha-version goal: keep the Cinder alive, perform reliable Readings, and reach the equator. Difficulty scales with latitude.
+
+Game opens with the **Initiation Ritual** (§9): the Apprentice wakes from a dream, is led to the Hearth, witnesses the tribe's gathering and dance, hears the Elder Fire speak the lore of the cataclysm, receives their first Cinder, names it, and wakes the next morning alone with their new companion. From there, the campaign of tending and migrating south begins.
 
 DECIDED: localization Portuguese-first; English deferred. The fire speaks Portuguese natively.
 
@@ -133,6 +135,10 @@ Visibly reddened by atmospheric dust and post-collapse soot. The protagonist has
 ### Aurora
 Equatorial aurora visible during solar weather. The bonfire becomes more articulate at the same time. The two phenomena are connected; nobody alive knows how. Aurora become more common as the tribe moves south.
 
+DECIDED: the protagonist's culture calls the aurora **a serpente verde** ("the green serpent"). Surfaced in the Elder Fire's lore monologue (*"O Sol soltou a serpente verde — e ela ainda gira lá em cima"*). Visually rendered as a slow two-arm spiral with a brightness wave traveling outward along the arms.
+
+PROVISIONAL: in current rendering the aurora is the dominant overhead sky feature in both intro and camp scenes; the Earth Ring (above) is described as always visible but is **not currently rendered** — replaced by the spiral aurora during early iteration. Re-add as a separate visible phenomenon post-alpha so both can coexist.
+
 ### Things missing
 - Satellites (all decayed)
 - Stars in the directions where pre-collapse light pollution survived as reflected dust glow over former megacities — "starless regions" the protagonist treats as normal
@@ -199,6 +205,17 @@ PROVISIONAL: ~150-300 people. Several lineages within the tribe; some friction. 
 - Mirror-tide watch cycles.
 - Story nights at the Hearth (lore drops here).
 
+### The camp on the tableland (chapada)
+DECIDED: settled camps are built on top of high tablelands — flat-topped buttes / mesas (Portuguese: *chapada*) that rise above the surrounding terrain. The choice is layered:
+- **Defensive** — the cliff face deters approach.
+- **Thermal** — elevated air is drier and cooler than the lowlands.
+- **Instrumental** — open sky overhead means clearer Cinder Readings (polarimetric SNR is best with no canopy).
+- **Symbolic** — the Hearth on the height is visible to scouts from a long way out.
+
+The Hearth sits at the upper end of the plateau, on its stone pit. Cinder vessels are set out wherever apprentices choose to tend them. Cliff edges are non-walkable; falling off is the kind of ordinary danger nobody has to talk about. Beyond the cliff, in the player's view, lies open sky — the green spiral aurora overhead, stars in the band above the horizon, scree at the cliff foot trailing into void below.
+
+PROVISIONAL: implementation renders one canonical camp tableland in the camp-map view; later stages of the migration may use different geographies (river bend, cave mouth, ridge spine) which are not yet specified.
+
 ---
 
 ## 7. The Migration South
@@ -258,6 +275,12 @@ The tribe's central, never-extinguished bonfire. Houses the eldest fire-pattern 
 
 The Hearth has cultural near-personhood. It has been with the tribe for generations.
 
+DECIDED: the Hearth has two physical configurations, switched by ceremony:
+- **Stone pit** — when the tribe is settled (winter camp, ritual gathering). A ring of stones the bonfire rests in, with the Hearth-Tender keeping vigil. This is the form rendered in the camp-map view.
+- **Bronze cart** — when the tribe is travelling. A wheeled vessel that keeps the embers contained against weather and motion. The tribe's "literal eyes" ride at the front of the column. This is the form rendered in the intro scenes that show the Apprentice's recollection of arriving with the tribe.
+
+The transition between configurations is itself a brief rite: ember-transfer from cart to pit on arrival, pit to cart on departure. Hearth-Bearers carry the cart; the Hearth-Tender lights and tends both forms.
+
 ### The Cinder
 Each apprentice's personal small fire, started from an ember of the Hearth at the beginning of apprenticeship. The Cinder is the apprentice's lifelong companion, conscience, tutor, and personal polarimeter. It is the tamagotchi.
 
@@ -293,7 +316,7 @@ DECIDED: the player should grow fond of their Cinder. Cinder death is non-fatal 
 
 ### Bonding design
 Each Cinder is generated with:
-- **A name**, revealed across the first weeks of apprenticeship. (The Cinder names itself when it's ready. PROVISIONAL: short evocative names from a small generated pool — *Kel*, *Ash*, *Mira*, *Theo*, *Wren*…)
+- **A name**, given by the apprentice when the Cinder first lights at the end of the Initiation Ritual (DECIDED — the player types the name directly via the morning naming overlay; a small fallback pool — *Kel*, *Ash*, *Mira*, *Theo*, *Wren*, *Suri*, *Tova* — provides a default that the player can overwrite). The name is permanent for the Cinder's lifetime and persists across sessions.
 - **A personality**, drawn from a small palette of base traits (warm, laconic, playful, severe) plus minor variations (curious, gentle, wry, formal).
 - **A flicker pattern**, a unique ASCII-rendered visual signature.
 - **A voice**, a consistent verbal style: word choices, sentence rhythms, characteristic phrases.
@@ -319,6 +342,23 @@ A Cinder can die from doused fire, prolonged neglect, or accident. When it dies:
 - Specific lore the dead Cinder personally revealed is lost (the new one will reveal its own)
 
 PROVISIONAL: monument-mechanic — the player can bury an extinguished Cinder's vessel at a chosen spot; the spot is remembered and revisitable in journals.
+
+### The Initiation Ritual (game opening)
+DECIDED: the game opens with the Apprentice receiving their first Cinder. The ritual is the bootloader for the campaign — every later beat of tending, Reading, and migration depends on it having happened. Implementation stages it as a 13-phase opening sequence; the underlying narrative beats are:
+
+1. **Prelude** — three black-screen monologues from a long-ago Hearth-Tender ("escutem, o fogo está bom esta noite"), framed around two flashbacks: a Miyake-class CME spiral over a pre-collapse city (PROVISIONAL: identified as Rio de Janeiro, rendered as a dense static density-mapped reproduction), and a "mirror leak" still — the moment containment failed.
+2. **Wake from dream** — the Apprentice wakes in a hut, says aloud *"Tive o sonho mais estranho... e hoje, hoje é o Dia do Ritual."* The dream's contents are not specified — the player will infer over time that the Apprentice has been receiving fragmentary visions of the cataclysm.
+3. **Walking to the fire** — the Hearth-Tender leads the Apprentice into the camp from off-canvas, both passing the Hearth (the Apprentice walks behind the bonfire, momentarily eclipsed by it).
+4. **Arriving** — the tribe gathers around the Hearth. The Drummer and four front-row dancers walk in from the canvas edges; back-row figures pop in over time as if filling out from the surrounding camp.
+5. **Dancing** — the gathered tribe cycles ritual dance poses (arms raised / arms outstretched), each figure with its own phase offset so the dance is never in lockstep. The Apprentice stands still, witnessing.
+6. **Lore speech** — the Elder Fire, through the Hearth, speaks the lore of the Age of Men, the Sun's turning, the green serpent, the silenced cities. (PROVISIONAL: six-part placeholder monologue in alpha; user iterating.)
+7. **Receiving the Cinder** — the Hearth-Tender draws an ember from the Hearth, lowers it into the Apprentice's bronze vessel; the cinder kindles.
+8. **Cut to black** — single-word centred text: *"Acorda."*
+9. **Morning** — the Apprentice wakes alone beside the Hearth (now in its stone pit on the tableland) with their new Cinder; **names it**; the campaign begins.
+
+The ritual is staged once per save and not repeated. Subsequent Cinders (after the first dies) are received in a smaller, less ceremonial ember-transfer at the Hearth (see *Cinder death* above) — without dancing, without the full lore monologue, without the dream-wake framing.
+
+PROVISIONAL: a sandbox **test_morning** phase exists after the morning beat for iterating on daylight rendering (clearer sky, sun glyph, deeper-coloured fire). Not part of the canonical ritual; will be removed or merged into morning once the daylight palette settles.
 
 ### Misreading consequences
 DECIDED: real, but suffered by NPCs the protagonist cares about — never lethal to the protagonist directly. A wrongly-cleared grain makes a child sick for a week. A wrongly-condemned harvest causes a hungry winter and a tense ceremony in which the Mestra da Leitura quietly assesses the apprentice. The fire's reliability becomes a felt, costly thing — and the apprentice learns by measurable suffering of others that yesterday's neglected exercises become tomorrow's misRead.
@@ -562,6 +602,15 @@ When a new PDF arrives, diff against existing family list; propose additions bef
 
 The fire teaches in roughly the course's natural order (1→17, with 18 woven in), but advanced families can unlock earlier through burn-bright streaks. Concept names are revealed within immersion; formal names appear occasionally as "the older word."
 
+### The parable corpus
+DECIDED: the canonical voice of the Elder Fire teaching the 18 families is documented in `lore/contos_do_fogo_anciao.md` — *Os Contos do Fogo Ancião*, eighteen parables, one per family, each presenting the family's central intuition through a single lived scene (a path of footprints, a jar of chips, a worn rope, rain on a roof, two scouts returning at different speeds…). Each parable follows the same beat structure: scene → core intuition → bolded principle → counter-warning.
+
+The parables are the source material for two downstream uses:
+- *cinder-voice* lines (in-camp teaching, the fire speaking to the Apprentice between exercises),
+- *exercise-intro* prose (problem framings in the curriculum pipeline; wrap intensities B and C draw their worldframes directly from the parable's scene).
+
+PROVISIONAL: alpha corpus is a working draft; per-family iteration ongoing. Several parables flagged for tightening: Family 7 needs a concrete numerical contrast (mean ≠ majority-winner), Family 10 needs the additivity claim qualified to specific distributional families, Family 16 needs to distinguish mean from median wait, Family 9 needs explicit framing as decision-theoretic rather than purely probabilistic.
+
 ---
 
 ## 15. A note on extraction infrastructure
@@ -574,7 +623,7 @@ Future PDFs from Prof. Giulio (or others) follow the same path. If the user ever
 
 ## 16. Open Design Questions
 
-**Resolved this iteration:** Provadora rename → Mestra da Leitura. Numerics → dual-mode (study/field). Misreading consequences → real, NPC-borne, never lethal to the protagonist. Localization → Portuguese-first. Default wrap intensity → B. Proofs in alpha → verbatim. Parameterization → yes. Concept names revealed within immersion → yes.
+**Resolved across iterations 3–4:** Provadora rename → Mestra da Leitura. Numerics → dual-mode (study/field). Misreading consequences → real, NPC-borne, never lethal to the protagonist. Localization → Portuguese-first. Default wrap intensity → B. Proofs in alpha → verbatim. Parameterization → yes. Concept names revealed within immersion → yes. **Cinder name → player-given via morning naming overlay; small pool serves as fallback default.** **Initiation Ritual structure → 13-phase opening (§9).** **Camp geography → tableland / chapada with cliff edges, scree base, sky-with-aurora-and-stars overhead (§6).** **Aurora diegetic name → "a serpente verde".** **Hearth physical configurations → stone pit (settled) and bronze cart (travelling), with ember-transfer rite between them.** **18-parable corpus drafted at `lore/contos_do_fogo_anciao.md` (§14); per-family iteration ongoing.**
 
 **Still open:**
 
@@ -587,11 +636,14 @@ Future PDFs from Prof. Giulio (or others) follow the same path. If the user ever
 7. **UI / rendering**: pure ASCII vs ASCII + light Unicode + sparing color. PROVISIONAL: ASCII + light Unicode + sparing color.
 8. **Mobile delivery**: PWA so the Cinder's daily-care nature works as a phone notification target. PROVISIONAL: PWA.
 9. **Felt-distribution vocabulary calibration**: are seven bands the right number? Six bands for A Leitura (with *sem mão*) — should the felt-distribution vocabulary also have a "no signal" band for completeness?
-10. **Cinder name pool**: small fixed pool (recognizable names recur) vs large pool (each Cinder feels unique).
-11. **Mentor-NPC content**: how rich? One sentence per camp, or a parallel storyline?
-12. **Reading sample-prep depth**: should sample-prep be a sub-mechanic (the player actively prepares samples, with quality affecting the Reading), or backgrounded (the prep happens, the Reading is what the player does)?
-13. **Joint Readings at the Hearth**: when multiple Cinders Read together, is it a separate subgame (combine multiple noisy estimators) or just a more-confident verdict?
+10. **Mentor-NPC content**: how rich? One sentence per camp, or a parallel storyline?
+11. **Reading sample-prep depth**: should sample-prep be a sub-mechanic (the player actively prepares samples, with quality affecting the Reading), or backgrounded (the prep happens, the Reading is what the player does)?
+12. **Joint Readings at the Hearth**: when multiple Cinders Read together, is it a separate subgame (combine multiple noisy estimators) or just a more-confident verdict?
+13. **Earth Ring re-add**: the Ring is canonically always-visible (§4) but currently not rendered. When and how to re-introduce it without diluting the aurora's visual primacy.
+14. **Lore monologue text** (§9 Initiation Ritual, beat 6): placeholder draft committed; needs a pass once the cataclysm voice is settled. Should it reference the Apprentice's dream from beat 2 explicitly, or stay general?
+15. **Apprentice's recurring dream**: the wake-from-dream beat opens a thread that the bible doesn't yet specify. What is the Apprentice dreaming of? PROVISIONAL: fragmentary visions from the cataclysm, surfacing through the bonfire substrate (the fires' inheritance leaks into apprentices' sleep). Needs a decision before the dream content is shown explicitly.
+16. **Ritual second-pass**: the Initiation Ritual currently runs once per save. Optionality to re-watch (memorial mode? museum mode?) is open.
 
 ---
 
-End of working draft, iteration 3. Iteration 4 once you've reacted, especially on §16.
+End of working draft, iteration 4. Iteration 5 once you've reacted, especially on §16.
