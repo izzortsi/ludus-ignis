@@ -18,9 +18,13 @@ const M_ROWS = MAP_DIMS.rows;
 // of sine waves keyed off the polar angle. The waves give the boundary
 // natural-looking bulges and inlets without hand-drawing a silhouette;
 // changing the phase offsets reshuffles the irregularities.
-const PLATEAU_CENTER_ROW = Math.floor(M_ROWS / 2);  // 27
+// Centre pulled below the canvas mid-line so the upper sky band gets
+// noticeably more breathing room than the void below the plateau —
+// reads as "looking out across a high tableland with the night sky
+// stretched overhead".
+const PLATEAU_CENTER_ROW = 33;
 const PLATEAU_CENTER_COL = Math.floor(M_COLS / 2);  // 30
-const PLATEAU_SEMI_V     = 19;                       // vertical half-axis
+const PLATEAU_SEMI_V     = 17;                       // vertical half-axis
 const PLATEAU_SEMI_H     = 25;                       // horizontal half-axis
 
 function plateauRadiusFactor(angle: number): number {
@@ -73,9 +77,9 @@ function isAboveHorizon(r: number, _c: number): boolean {
 
 const HEARTH_FIRE_ROWS = 8;
 const HEARTH_FIRE_COLS = 13;
-const HEARTH_FIRE_TOP  = 8;                                 // top row of flames
+const HEARTH_FIRE_TOP  = 14;                                // top row of flames
 const HEARTH_FIRE_LEFT = 24;                                // left col of flames
-const HEARTH_PIT_ROW   = HEARTH_FIRE_TOP + HEARTH_FIRE_ROWS; // row 16
+const HEARTH_PIT_ROW   = HEARTH_FIRE_TOP + HEARTH_FIRE_ROWS; // row 22
 
 const HEARTH_PIT_ART = [
   ' .ooOoOoOoOo. ',
@@ -87,9 +91,9 @@ const HEARTH_PIT_LEFT = HEARTH_FIRE_LEFT - 1; // pit slightly wider than fire
 
 const CINDER_FIRE_ROWS = 3;
 const CINDER_FIRE_COLS = 5;
-const CINDER_FIRE_TOP  = 28;
+const CINDER_FIRE_TOP  = 34;
 const CINDER_FIRE_LEFT = 28;
-const CINDER_VESSEL_ROW = CINDER_FIRE_TOP + CINDER_FIRE_ROWS; // row 31
+const CINDER_VESSEL_ROW = CINDER_FIRE_TOP + CINDER_FIRE_ROWS; // row 37
 
 const CINDER_VESSEL_ART = [
   '[___]',
@@ -256,10 +260,12 @@ export const STARS_FIELD: string = (() => {
 // with a brightness wave that travels outward along the arms over the
 // 60-frame cycle. Same algorithm as the intro aurora but masked so
 // glyphs only land in sky cells (never on the plateau).
-const AURORA_CENTER_ROW = 3;
+// Aurora spiral centred in the upper third of the sky band. With horizon
+// now at ~row 16 there's enough room for the full intro-aurora geometry.
+const AURORA_CENTER_ROW = 7;
 const AURORA_CENTER_COL = Math.floor(M_COLS / 2);
 const AURORA_Y_SCALE    = 0.5;
-const AURORA_MAX_THETA  = 3.5 * Math.PI;   // tighter than the intro aurora — fits in the small above-horizon band
+const AURORA_MAX_THETA  = 4.5 * Math.PI;
 const AURORA_A          = 0.8;
 const AURORA_B          = 0.95;
 const AURORA_ARMS       = 2;
