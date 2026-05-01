@@ -18,7 +18,7 @@ import {
   CINDER_SMOKE_FRAMES, EMBER_FALL_FRAMES,
   RIO_MIYAKE, MIRROR_LEAK
 } from './scene-art';
-import { cinder } from '../../core/cinder/cinder-store';
+import { cinder, setCinder } from '../../core/cinder/cinder-store';
 
 const TICK_MS = 140;
 const TYPE_MS = 32;
@@ -118,6 +118,17 @@ function IntroTypewriter(props: { text: string; position?: 'center' | 'bottom' }
 export function IntroScene(props: Props) {
   const [tick, setTick] = createSignal(0);
   const [phase, setPhase] = createSignal<Phase>('text1');
+  const [nameInput, setNameInput] = createSignal('');
+  const [nameChosen, setNameChosen] = createSignal(false);
+
+  function submitName(e: SubmitEvent) {
+    e.preventDefault();
+    e.stopPropagation();
+    const name = nameInput().trim();
+    if (!name) return;
+    setCinder('name', name);
+    setNameChosen(true);
+  }
 
   onMount(() => {
     const id = window.setInterval(() => setTick((t) => t + 1), TICK_MS);
@@ -245,16 +256,16 @@ export function IntroScene(props: Props) {
             <Layer art={WALK_PAIR_FRONT_FRAMES[walkPairIdx()]} className="intro-tender" />
           </Show>
 
-          {/* arriving — outer 4 walk in, back/far tiers pop in over time. */}
+          {/* arriving — outer 4 walk in (front-row baked frames), back row
+              pops in over time, Tender + Apprentice always-there. */}
           <Show when={phase() === 'arriving'}>
             <Layer art={WALKING_FRAMES[walkIdx()]} className="intro-tribe" />
             <Layer art={TENDER} className="intro-tender" />
             <Layer art={APPRENTICE} className="intro-apprentice" />
           </Show>
 
-          {/* dancing + lore_speech — same composition: tribe dancing, no
-              cinder yet. Tender position is INSIDE DANCING_TRIBE_FRAMES so
-              we don't render the standalone TENDER layer here. */}
+          {/* dancing + lore_speech — same composition: front-row tribe +
+              back row + Tender dancing, no cinder yet. */}
           <Show when={phase() === 'dancing' || phase() === 'lore_speech'}>
             <Layer art={DANCING_TRIBE_FRAMES[f()]} className="intro-tribe-dancing" />
             <Layer art={APPRENTICE} className="intro-apprentice" />
@@ -310,9 +321,9 @@ export function IntroScene(props: Props) {
           <Layer art={HEARTH_SMOKE_FRAMES[(f() + 10) % FRAMES]} className="intro-hearth-smoke is-test-morning is-extra" />
           <Layer art={BREEZE_FRAMES[f()]} className="intro-breeze" />
           <Layer art={APPRENTICE} className="intro-apprentice is-test-morning" />
-          <Layer art={CINDER_VESSEL} className="intro-cinder-vessel" />
-          <Layer art={CINDER_FIRE_FRAMES[f()]} className="intro-cinder-fire" />
-          <Layer art={CINDER_SMOKE_FRAMES[f()]} className="intro-cinder-smoke" />
+          <Layer art={CINDER_VESSEL} className="intro-cinder-vessel is-test-morning" />
+          <Layer art={CINDER_FIRE_FRAMES[f()]} className="intro-cinder-fire is-test-morning" />
+          <Layer art={CINDER_SMOKE_FRAMES[f()]} className="intro-cinder-smoke is-test-morning" />
         </Show>
       </div>
 
@@ -346,13 +357,35 @@ export function IntroScene(props: Props) {
       </Show>
 
       <Show when={phase() === 'morning' || phase() === 'test_morning'}>
-        <div class="intro-naming">
-          <p class="intro-cinder-says">
-            <em>"eu sou {cinder.name}."</em>
-          </p>
-          <button class="intro-begin" onClick={(e) => { e.stopPropagation(); onBegin(); }}>
-            começar
-          </button>
+        <div class="intro-naming" onClick={(e) => e.stopPropagation()}>
+          <Show
+            when={nameChosen()}
+            fallback={
+              <form class="intro-name-form" onSubmit={submitName}>
+                <p class="intro-name-prompt">dá um nome à tua brasa.</p>
+                <input
+                  class="intro-name-input"
+                  type="text"
+                  value={nameInput()}
+                  onInput={(e) => setNameInput(e.currentTarget.value)}
+                  maxlength="20"
+                  autocomplete="off"
+                  spellcheck={false}
+                  autofocus
+                />
+                <button type="submit" class="intro-begin" disabled={nameInput().trim().length === 0}>
+                  nomear →
+                </button>
+              </form>
+            }
+          >
+            <p class="intro-cinder-says">
+              <em>"eu sou {cinder.name}."</em>
+            </p>
+            <button class="intro-begin" onClick={onBegin}>
+              começar
+            </button>
+          </Show>
         </div>
       </Show>
 

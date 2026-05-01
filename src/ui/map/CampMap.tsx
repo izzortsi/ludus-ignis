@@ -2,6 +2,7 @@ import { createSignal, onMount, onCleanup, createEffect, createMemo, Show } from
 import {
   TERRAIN, MAP_DIMS, FRAMES,
   HEARTH_FIRE_FRAMES, CINDER_FIRE_FRAMES,
+  STARS_FIELD, AURORA_FRAMES, AURORA_FRAMES_COUNT, CLIFF_SCREE,
   isWalkable, interactableAt, approachFor,
   type InteractableId
 } from './map-art';
@@ -14,15 +15,18 @@ import { CinderDialog } from './CinderDialog';
 
 const STEP_MS = 140;
 const FIRE_TICK_MS = 120;
-const SPRITE_FRAMES = ['𜰄', '𜰄']; // single glyph; CSS flips it upside-down via .map-apprentice
+const SPRITE_FRAMES = ['ô', 'Ô']; // alternating walk-cycle glyph
 
 function sign(n: number): number {
   return n > 0 ? 1 : n < 0 ? -1 : 0;
 }
 
+const AURORA_TICK_MS = 140;
+
 export function CampMap() {
   const [walkTick, setWalkTick] = createSignal(0);
   const [fireTick, setFireTick] = createSignal(0);
+  const [auroraTick, setAuroraTick] = createSignal(0);
   const [dialog, setDialog] = createSignal<InteractableId | null>(null);
 
   // Persist position whenever it changes (cheap; 1-2 writes per second
@@ -35,6 +39,16 @@ export function CampMap() {
   // when standing still.
   onMount(() => {
     const id = window.setInterval(() => setFireTick((t) => (t + 1) % FRAMES), FIRE_TICK_MS);
+    onCleanup(() => clearInterval(id));
+  });
+
+  // Aurora animation tick — slower than fire (the aurora cycle is 60
+  // frames vs the fire's 15), runs on its own interval.
+  onMount(() => {
+    const id = window.setInterval(
+      () => setAuroraTick((t) => (t + 1) % AURORA_FRAMES_COUNT),
+      AURORA_TICK_MS
+    );
     onCleanup(() => clearInterval(id));
   });
 
@@ -80,16 +94,21 @@ export function CampMap() {
     onCleanup(() => clearInterval(id));
   });
 
-  // Apprentice glyph — rendered as a single absolutely-positioned span
-  // at (row * 1lh, col * 1ch). Rendering as a span (not a full-grid pre)
-  // means the .map-apprentice CSS can apply transform: rotate(180deg) to
-  // flip just the glyph upside-down without mirroring the whole layer's
-  // coordinate system.
-  const glyph = createMemo(() => SPRITE_FRAMES[walkTick() % SPRITE_FRAMES.length]);
-  const glyphStyle = createMemo(() => ({
-    top:  `calc(${apprentice.row} * 1lh)`,
-    left: `calc(${apprentice.col} * 1ch)`
-  }));
+  // Sprite layer — single char at the Apprentice's current position.
+  const sprite = createMemo(() => {
+    const glyph = SPRITE_FRAMES[walkTick() % SPRITE_FRAMES.length];
+    const lines: string[] = [];
+    for (let r = 0; r < MAP_DIMS.rows; r++) {
+      if (r === apprentice.row) {
+        const before = ' '.repeat(apprentice.col);
+        const after  = ' '.repeat(MAP_DIMS.cols - apprentice.col - 1);
+        lines.push(before + glyph + after);
+      } else {
+        lines.push(' '.repeat(MAP_DIMS.cols));
+      }
+    }
+    return lines.join('\n');
+  });
 
   // Tap-and-hold movement. Pointer down → set target; while held → target
   // follows the pointer; on release → stop unless heading to an
@@ -163,10 +182,13 @@ export function CampMap() {
         onPointerCancel={endHold}
       >
         <pre class="map-filler">{Array(MAP_DIMS.rows).fill(' '.repeat(MAP_DIMS.cols)).join('\n')}</pre>
+        <pre class="map-layer map-stars">{STARS_FIELD}</pre>
+        <pre class="map-layer map-aurora">{AURORA_FRAMES[auroraTick()]}</pre>
+        <pre class="map-layer map-scree">{CLIFF_SCREE}</pre>
         <pre class="map-layer map-terrain">{TERRAIN.join('\n')}</pre>
         <pre class="map-layer map-hearth-fire">{HEARTH_FIRE_FRAMES[fireTick()]}</pre>
         <pre class="map-layer map-cinder-fire">{CINDER_FIRE_FRAMES[fireTick()]}</pre>
-        <span class="map-apprentice" style={glyphStyle()}>{glyph()}</span>
+        <pre class="map-layer map-apprentice">{sprite()}</pre>
       </div>
 
       <Show when={dialog() === 'hearth'}>

@@ -391,22 +391,6 @@ const BACK_HEAD_DOT  = backRowSprite(',o,');
 const BACK_HEAD_FACE = backRowSprite('(o)');
 const BACK_HEAD_TUFT = backRowSprite('.o.');
 
-// Far-back 2-row sprites: 1-col silhouette of head + body. Too distant to
-// dance — they hold their pose. Variety in head/body chars suggests many
-// individuals rather than copies.
-function farSprite(head: string, body: string): FigureSprite {
-  const still = [head, body];
-  return { still, danceA: still, danceB: still };
-}
-
-const FAR_OT = farSprite('o', 'T');
-const FAR_DT = farSprite('.', 'T');
-const FAR_OY = farSprite('o', 'Y');
-const FAR_OI = farSprite('o', '|');
-const FAR_BT = farSprite('O', 'T');
-const FAR_DY = farSprite('.', 'Y');
-const FAR_BI = farSprite('O', '|');
-
 // Standalone exports for layers rendered separately.
 export const TENDER: string[] = (() => {
   const grid = blank(C_ROWS, C_COLS);
@@ -487,17 +471,14 @@ export const SUN: string[] = (() => {
 })();
 
 // === Tribe layout ==========================================================
-// Three depth tiers, totaling 19 figures + Apprentice + Tender (rendered
-// separately) = 21 people gathered around the Hearth.
+// Two depth tiers around the Hearth (the third / far-distant tier was
+// removed — it cluttered the composition without adding much):
 //   * Tier 1 (FRONT_TRIBE)   — rows 45-48, 4-row sprites, 4 dancers + Drummer
 //   * Tier 2 (BACK_TRIBE)    — rows 42-44, 3-row sprites, 6 figures
-//   * Tier 3 (FAR_TRIBE)     — rows 39-40, 2-row 1-col silhouettes, 8 figures
 //
-// PhaseOffsets for animated figures (tiers 1+2 + Tender) are unique values
-// spread across [0, 14], so each transitions at a different tick within the
-// 15-frame cycle. Tier 3 figures don't dance — they hold a still pose.
-
-const FAR_ROW = 39;  // tier 3 top row (2 rows tall, occupies rows 39-40)
+// PhaseOffsets for animated figures are unique values spread across
+// [0, 14], so each transitions at a different tick within the 15-frame
+// dance cycle.
 
 const FRONT_TRIBE: FigurePosition[] = [
   { col:  4, row: FIGURE_ROW, sprite: TRIBE_HEAD_FLAT, phaseOffset:  0 },
@@ -515,21 +496,6 @@ const BACK_TRIBE: FigurePosition[] = [
   { col: 69, row: BACK_ROW, sprite: BACK_HEAD_FACE, phaseOffset: 13 }
 ];
 
-// Tier 3 — far-back 2-row 1-col silhouettes. Distributed across the cols
-// outside the fire region (fire spans canvas cols 22-50). Each is a single
-// `head/body` glyph pair. PhaseOffset is unused (no dance) but kept on the
-// type for uniformity.
-const FAR_TRIBE: FigurePosition[] = [
-  { col:  3, row: FAR_ROW, sprite: FAR_OT, phaseOffset: 0 },
-  { col:  7, row: FAR_ROW, sprite: FAR_DY, phaseOffset: 0 },
-  { col: 14, row: FAR_ROW, sprite: FAR_OI, phaseOffset: 0 },
-  { col: 20, row: FAR_ROW, sprite: FAR_BT, phaseOffset: 0 },
-  { col: 53, row: FAR_ROW, sprite: FAR_OY, phaseOffset: 0 },
-  { col: 58, row: FAR_ROW, sprite: FAR_DT, phaseOffset: 0 },
-  { col: 65, row: FAR_ROW, sprite: FAR_OI, phaseOffset: 0 },
-  { col: 70, row: FAR_ROW, sprite: FAR_BI, phaseOffset: 0 }
-];
-
 // Tender as a dancing figure (used in named only; in earlier phases the
 // standalone TENDER layer is rendered instead).
 const TENDER_DANCING: FigurePosition = {
@@ -537,11 +503,11 @@ const TENDER_DANCING: FigurePosition = {
 };
 
 // === Arriving (still composition for kindle) ===============================
-// All three tiers rendered in their resting `still` pose. Tender is its own
+// Front + back tiers in their resting `still` pose. Tender is its own
 // layer; Apprentice + vessel join in the kindle phase.
 export const ARRIVING_TRIBE: string[] = (() => {
   const grid = blank(C_ROWS, C_COLS);
-  for (const fp of [...FRONT_TRIBE, ...BACK_TRIBE, ...FAR_TRIBE]) {
+  for (const fp of [...FRONT_TRIBE, ...BACK_TRIBE]) {
     placeBlock(grid, fp.sprite.still, fp.row, fp.col);
   }
   return gridToArt(grid);
@@ -570,28 +536,9 @@ const ARRIVING_WALKERS: Walker[] = [
 
 export const WALKING_FRAMES_COUNT = 30;
 
-// Far-row pop schedule: figures appear one at a time (alternating left-
-// right) at FAR_POP_INTERVAL tick intervals, instead of all at once. Order
-// is by position-index pair (0 then last, 1 then 2nd-last, etc) so the
-// crowd fills in symmetrically.
-const FAR_POP_INTERVAL = 3;
-const FAR_POP_TICKS: number[] = (() => {
-  const ticks = new Array(FAR_TRIBE.length).fill(0);
-  // Pair indices outward-in: [0, last, 1, last-1, 2, last-2, ...]
-  const order: number[] = [];
-  for (let i = 0; i < Math.ceil(FAR_TRIBE.length / 2); i++) {
-    order.push(i);
-    if (FAR_TRIBE.length - 1 - i !== i) order.push(FAR_TRIBE.length - 1 - i);
-  }
-  for (let k = 0; k < order.length; k++) {
-    ticks[order[k]] = k * FAR_POP_INTERVAL;
-  }
-  return ticks;
-})();
-
-// Back-row pop schedule: a couple appear instantly at t=0 (the closest to
-// the apprentice's view), the rest pop in shortly after — gives the
-// arriving phase a sense of the back tier filling out alongside the front.
+// Back-row pop schedule: figures appear one at a time (in declared order)
+// as the front row walks in, so the crowd fills out gradually rather than
+// snapping in.
 const BACK_POP_INTERVAL = 4;
 const BACK_POP_TICKS: number[] = BACK_TRIBE.map((_, i) => i * BACK_POP_INTERVAL);
 
@@ -602,13 +549,6 @@ export const WALKING_FRAMES: string[][] = Array.from({ length: WALKING_FRAMES_CO
   for (let i = 0; i < BACK_TRIBE.length; i++) {
     if (t >= BACK_POP_TICKS[i]) {
       placeBlock(grid, BACK_TRIBE[i].sprite.still, BACK_TRIBE[i].row, BACK_TRIBE[i].col);
-    }
-  }
-
-  // Far-row figures pop in one at a time (alternating left-right).
-  for (let i = 0; i < FAR_TRIBE.length; i++) {
-    if (t >= FAR_POP_TICKS[i]) {
-      placeBlock(grid, FAR_TRIBE[i].sprite.still, FAR_TRIBE[i].row, FAR_TRIBE[i].col);
     }
   }
 
@@ -707,14 +647,12 @@ export const WALK_PAIR_FRONT_FRAMES: string[][] = Array.from({ length: WALK_PAIR
 });
 
 // === Dance frames ==========================================================
-// In `named`, tier 1 + tier 2 + Tender all cycle dance poses; tier 3 is
-// rendered too but with identical danceA/danceB poses (held still). The
-// Apprentice (own layer) stays still through the whole dance.
-
+// In `named`, the front row + back row + Tender all cycle dance poses,
+// each with a distinct phaseOffset so the tribe never moves in lockstep.
+// The Apprentice (own layer) stays still through the whole dance.
 const DANCING_FIGURES: FigurePosition[] = [
   ...FRONT_TRIBE,
   ...BACK_TRIBE,
-  ...FAR_TRIBE,
   TENDER_DANCING
 ];
 

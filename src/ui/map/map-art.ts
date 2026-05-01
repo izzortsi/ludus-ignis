@@ -1,14 +1,70 @@
-// Top-view camp map. The Apprentice walks freely on this grid; the Hearth
-// (Elder Fire, big animated bonfire on a stone pit) and Cinder vessel (small
-// animated flame in a bronze cup) are the two interactables for Phase 1.
+// Top-down camp map — the Elder Fire sits on top of a tableland (chapada),
+// an oval plateau in the middle of the canvas. Beyond the cliff edges is
+// open sky, with the green spiral aurora swirling overhead and stars
+// scattered through the rest of the sky. The Apprentice walks only on the
+// plateau interior; the cliff edges are non-walkable (would fall off).
 
 import { mulberry32 } from '../ascii/prng';
 import type { SceneDims } from '../intro/scene-art';
 
 export const MAP_DIMS: SceneDims = { cols: 60, rows: 54, rowPx: 14 };
 export const FRAMES = 15;
+export const AURORA_FRAMES_COUNT = 60;
 const M_COLS = MAP_DIMS.cols;
 const M_ROWS = MAP_DIMS.rows;
+
+// === PLATEAU SHAPE ===
+// Tableland centred in the canvas, base ellipse radii perturbed by a sum
+// of sine waves keyed off the polar angle. The waves give the boundary
+// natural-looking bulges and inlets without hand-drawing a silhouette;
+// changing the phase offsets reshuffles the irregularities.
+const PLATEAU_CENTER_ROW = Math.floor(M_ROWS / 2);  // 27
+const PLATEAU_CENTER_COL = Math.floor(M_COLS / 2);  // 30
+const PLATEAU_SEMI_V     = 19;                       // vertical half-axis
+const PLATEAU_SEMI_H     = 25;                       // horizontal half-axis
+
+function plateauRadiusFactor(angle: number): number {
+  // Multiplicative noise: 1.0 = no change, <1 = inlet, >1 = bulge.
+  // Three octaves at decreasing amplitude give large bulges + small wobble.
+  return 1.0
+    + 0.10 * Math.sin(angle * 2.0 + 0.4)
+    + 0.06 * Math.sin(angle * 5.0 + 1.7)
+    + 0.04 * Math.sin(angle * 11.0 + 0.9);
+}
+
+function isOnPlateau(r: number, c: number): boolean {
+  const dy = r - PLATEAU_CENTER_ROW;
+  const dx = c - PLATEAU_CENTER_COL;
+  if (dy === 0 && dx === 0) return true;
+  const angle = Math.atan2(dy, dx);
+  const k = plateauRadiusFactor(angle);
+  const dr = dy / (PLATEAU_SEMI_V * k);
+  const dc = dx / (PLATEAU_SEMI_H * k);
+  return dr * dr + dc * dc < 1.0;
+}
+
+function isPlateauEdge(r: number, c: number): boolean {
+  if (!isOnPlateau(r, c)) return false;
+  return !isOnPlateau(r - 1, c) || !isOnPlateau(r + 1, c)
+      || !isOnPlateau(r, c - 1) || !isOnPlateau(r, c + 1);
+}
+
+// Horizon: a single global row = the plateau's topmost row anywhere.
+// Stars and aurora only render at sky cells STRICTLY above this row,
+// so the side strips and the bottom of the canvas stay empty (no stars
+// below the horizon line).
+const HORIZON_ROW: number = (() => {
+  for (let r = 0; r < M_ROWS; r++) {
+    for (let c = 0; c < M_COLS; c++) {
+      if (isOnPlateau(r, c)) return r;
+    }
+  }
+  return M_ROWS;
+})();
+
+function isAboveHorizon(r: number, _c: number): boolean {
+  return r < HORIZON_ROW;
+}
 
 // === HEARTH (Elder Fire) ===
 // Side-on visual on top-down map (a common convention — top-down "real"
@@ -98,43 +154,161 @@ function buildTerrain(): string[] {
   const grid = blank(M_ROWS, M_COLS);
   const rng = mulberry32(101);
 
-  // Top tree band — two staggered rows of `T` chars
-  for (let c = 0; c < M_COLS; c += 4) grid[0][c] = 'T';
-  for (let c = 2; c < M_COLS; c += 4) grid[1][c] = 'T';
-
-  // Bottom tree band
-  for (let c = 0; c < M_COLS; c += 4) grid[M_ROWS - 1][c] = 'T';
-  for (let c = 2; c < M_COLS; c += 4) grid[M_ROWS - 2][c] = 'T';
-
-  // Left/right edges always have a tree; sparse `t` one cell inward.
-  for (let r = 2; r < M_ROWS - 2; r++) {
-    grid[r][0] = 'T';
-    grid[r][M_COLS - 1] = 'T';
-    if (r % 5 === 0 && r > 2) {
-      grid[r][1] = 't';
-      grid[r][M_COLS - 2] = 't';
+  for (let r = 0; r < M_ROWS; r++) {
+    for (let c = 0; c < M_COLS; c++) {
+      if (!isOnPlateau(r, c)) continue;  // sky cell — leave blank for aurora layer
+      if (isPlateauEdge(r, c)) {
+        grid[r][c] = '^';                // cliff edge (non-walkable rock face)
+      } else {
+        // Plateau interior: sparse grass texture
+        const x = rng();
+        if (x < 0.04) grid[r][c] = ',';
+        else if (x < 0.07) grid[r][c] = '\'';
+        // else leave blank (still part of the plateau, just empty grass)
+      }
     }
   }
 
-  // Sparse grass texture in the open interior
-  for (let row = 2; row < M_ROWS - 2; row++) {
-    for (let col = 2; col < M_COLS - 2; col++) {
-      if (grid[row][col] !== ' ') continue;
-      const x = rng();
-      if (x < 0.025) grid[row][col] = ',';
-      else if (x < 0.045) grid[row][col] = '\'';
-    }
-  }
-
-  // Hearth stone pit (visible ring of stones the bonfire sits in)
+  // Hearth stone pit + Cinder bronze vessel sit on the plateau interior
   placeBlock(grid, HEARTH_PIT_ART, HEARTH_PIT_ROW, HEARTH_PIT_LEFT);
-  // Cinder bronze vessel
   placeBlock(grid, CINDER_VESSEL_ART, CINDER_VESSEL_ROW, CINDER_VESSEL_LEFT);
 
   return grid.map((row) => row.join(''));
 }
 
 export const TERRAIN: string[] = buildTerrain();
+
+// === SCREE (cliff-face / rock-debris border, below horizon) ===
+// In the sky region BELOW the horizon, dust the cells near the plateau
+// with rocky texture that thins out with distance — reads as the cliff
+// face crumbling into scree at the base of the tableland. Cells far
+// from the plateau stay blank (deep void). Cells above horizon are
+// reserved for stars/aurora, so this layer skips them.
+
+function distanceToPlateau(r: number, c: number, maxR: number): number {
+  let best = maxR + 1;
+  for (let dr = -maxR; dr <= maxR; dr++) {
+    const r2 = r + dr;
+    if (r2 < 0 || r2 >= M_ROWS) continue;
+    for (let dc = -maxR; dc <= maxR; dc++) {
+      const c2 = c + dc;
+      if (c2 < 0 || c2 >= M_COLS) continue;
+      if (!isOnPlateau(r2, c2)) continue;
+      const d = Math.max(Math.abs(dr), Math.abs(dc));
+      if (d < best) best = d;
+    }
+  }
+  return best;
+}
+
+export const CLIFF_SCREE: string = (() => {
+  const grid = blank(M_ROWS, M_COLS);
+  const rng = mulberry32(73);
+  const SCREE_REACH = 6;
+  for (let r = 0; r < M_ROWS; r++) {
+    for (let c = 0; c < M_COLS; c++) {
+      if (isOnPlateau(r, c)) continue;
+      if (isAboveHorizon(r, c)) continue;
+      const d = distanceToPlateau(r, c, SCREE_REACH);
+      if (d > SCREE_REACH) continue;
+      const x = rng();
+      if (d === 1) {
+        // Right at the cliff foot — densest rocky band.
+        if      (x < 0.45) grid[r][c] = ':';
+        else if (x < 0.70) grid[r][c] = "'";
+        else if (x < 0.85) grid[r][c] = ',';
+      } else if (d === 2) {
+        if      (x < 0.30) grid[r][c] = "'";
+        else if (x < 0.50) grid[r][c] = ',';
+        else if (x < 0.60) grid[r][c] = '.';
+      } else if (d <= 4) {
+        if      (x < 0.18) grid[r][c] = ',';
+        else if (x < 0.30) grid[r][c] = '.';
+      } else {
+        if (x < 0.08) grid[r][c] = '.';
+      }
+    }
+  }
+  return grid.map((row) => row.join('')).join('\n');
+})();
+
+// === STARS (sky background, above horizon only) ===
+// Sparse stars scattered only through sky cells ABOVE the plateau's top
+// edge in each column — nothing below the horizon (the foreground would
+// be lower terrain at night, no visible sky there).
+export const STARS_FIELD: string = (() => {
+  const grid = blank(M_ROWS, M_COLS);
+  const rng = mulberry32(42);
+  for (let r = 0; r < M_ROWS; r++) {
+    for (let c = 0; c < M_COLS; c++) {
+      if (isOnPlateau(r, c)) continue;
+      if (!isAboveHorizon(r, c)) continue;
+      const x = rng();
+      if (x < 0.040) grid[r][c] = '.';
+      else if (x < 0.055) grid[r][c] = '*';
+    }
+  }
+  return grid.map((row) => row.join('')).join('\n');
+})();
+
+// === AURORA (animated, sky-only) ===
+// Two-arm Archimedean spiral centred above the plateau (upper sky band),
+// with a brightness wave that travels outward along the arms over the
+// 60-frame cycle. Same algorithm as the intro aurora but masked so
+// glyphs only land in sky cells (never on the plateau).
+const AURORA_CENTER_ROW = 3;
+const AURORA_CENTER_COL = Math.floor(M_COLS / 2);
+const AURORA_Y_SCALE    = 0.5;
+const AURORA_MAX_THETA  = 3.5 * Math.PI;   // tighter than the intro aurora — fits in the small above-horizon band
+const AURORA_A          = 0.8;
+const AURORA_B          = 0.95;
+const AURORA_ARMS       = 2;
+
+function auroraGlyph(intensity: number): string | null {
+  if (intensity >= 0.70) return '*';
+  if (intensity >= 0.50) return ':';
+  if (intensity >= 0.30) return '\'';
+  if (intensity >= 0.10) return '.';
+  return null;
+}
+
+function makeAuroraFrame(t: number): string {
+  const grid = blank(M_ROWS, M_COLS);
+  const wavePhase = 2 * Math.PI * (t / AURORA_FRAMES_COUNT);
+  const cells = new Map<string, number>();
+  for (let arm = 0; arm < AURORA_ARMS; arm++) {
+    const armPhase = (arm * 2 * Math.PI) / AURORA_ARMS;
+    for (let theta = 0; theta <= AURORA_MAX_THETA; theta += 0.025) {
+      const r = AURORA_A + AURORA_B * theta;
+      const x = r * Math.cos(theta + armPhase);
+      const y = r * Math.sin(theta + armPhase) * AURORA_Y_SCALE;
+      const col = Math.round(AURORA_CENTER_COL + x);
+      const row = Math.round(AURORA_CENTER_ROW + y);
+      if (col < 0 || col >= M_COLS) continue;
+      if (row < 0 || row >= M_ROWS) continue;
+      if (isOnPlateau(row, col)) continue;
+      if (!isAboveHorizon(row, col)) continue;
+      const baseIntensity = 1 - 0.80 * (theta / AURORA_MAX_THETA);
+      const wave = 0.5 + 0.5 * Math.sin(theta - wavePhase);
+      const intensity = baseIntensity * (0.05 + 0.95 * wave);
+      const key = `${row},${col}`;
+      const prev = cells.get(key) ?? 0;
+      if (intensity > prev) cells.set(key, intensity);
+    }
+  }
+  for (const [key, intensity] of cells) {
+    const g = auroraGlyph(intensity);
+    if (!g) continue;
+    const [r, c] = key.split(',').map(Number);
+    grid[r][c] = g;
+  }
+  return grid.map((row) => row.join('')).join('\n');
+}
+
+export const AURORA_FRAMES: string[] = Array.from(
+  { length: AURORA_FRAMES_COUNT },
+  (_, t) => makeAuroraFrame(t)
+);
 
 // === DOOM-FIRE ALGORITHM ===
 // Same heat-propagation algorithm as the intro hearth: seed bottom row with
@@ -209,10 +383,10 @@ export const CINDER_FIRE_FRAMES: string[] = Array.from({ length: FRAMES }, (_, t
 });
 
 // === WALKABILITY ===
-// Walkable: empty grass cells. Trees, the Hearth pit/box, the Cinder
-// vessel/box, and the Hearth/Cinder fire regions are all blocked.
-
-const WALKABLE = new Set([' ', ',', '\'']);
+// Walkable: plateau interior cells (anything inside the ellipse that
+// isn't the cliff-edge ring or one of the interactable footprints).
+// Sky (off-plateau) and cliff edges are non-walkable — apprentice
+// would walk off the tableland.
 
 function inBox(r: number, c: number, b: typeof HEARTH_BOX): boolean {
   return r >= b.rowMin && r <= b.rowMax && c >= b.colMin && c <= b.colMax;
@@ -221,9 +395,11 @@ function inBox(r: number, c: number, b: typeof HEARTH_BOX): boolean {
 export function isWalkable(row: number, col: number): boolean {
   if (row < 0 || row >= M_ROWS) return false;
   if (col < 0 || col >= M_COLS) return false;
+  if (!isOnPlateau(row, col)) return false;
+  if (isPlateauEdge(row, col)) return false;
   if (inBox(row, col, HEARTH_BOX)) return false;
   if (inBox(row, col, CINDER_BOX)) return false;
-  return WALKABLE.has(TERRAIN[row][col]);
+  return true;
 }
 
 // === INTERACTABLE DETECTION ===

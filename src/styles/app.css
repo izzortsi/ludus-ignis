@@ -75,6 +75,11 @@ html, body {
   flex-shrink: 0;
   cursor: pointer;
   user-select: none;
+  /* Near-black night with a faint warm tint — visible through every
+     blank cell in the layers above. The previous deep navy read as
+     "blue background", which was wrong: high up on the tableland at
+     night with no scattered light, the void should read as black. */
+  background: #050304;
   /* Prevent the browser from interpreting touch drag as a page scroll;
      the map handles its own pointer events for hold-to-walk. */
   touch-action: none;
@@ -102,8 +107,32 @@ html, body {
   line-height: inherit;
 }
 
+.map-stars {
+  color: rgba(245, 240, 200, 0.7);
+  text-shadow: 0 0 3px rgba(245, 240, 200, 0.45);
+}
+
+.map-aurora {
+  color: rgba(150, 245, 185, 0.95);
+  text-shadow:
+    0 0 4px rgba(150, 245, 185, 0.85),
+    0 0 12px rgba(90, 220, 145, 0.5),
+    0 0 24px rgba(70, 200, 130, 0.25);
+  animation: map-aurora-pulse 8s ease-in-out infinite;
+}
+@keyframes map-aurora-pulse {
+  0%, 100% { opacity: 0.85; }
+  50%      { opacity: 1.0; }
+}
+
+.map-scree {
+  /* Cliff-foot rocky border — dimmer + cooler than the plateau terrain
+     so it reads as "ground falling away" rather than more plateau. */
+  color: rgba(95, 85, 75, 0.75);
+}
+
 .map-terrain {
-  color: rgba(180, 170, 145, 0.9);
+  color: rgba(170, 160, 130, 0.9);
 }
 
 .map-hearth-fire {
@@ -122,23 +151,10 @@ html, body {
 }
 
 .map-apprentice {
-  position: absolute;
-  font-family: inherit;
-  font-size: inherit;
-  line-height: inherit;
-  pointer-events: none;
-  user-select: none;
-  white-space: pre;
   color: rgba(255, 230, 180, 1);
   text-shadow:
     0 0 4px rgba(255, 220, 150, 0.7),
     0 0 10px rgba(255, 180, 80, 0.4);
-  /* Flip the 𜰄 glyph upside-down so it reads as a person — applied to
-     the single-glyph span only, so the apprentice's actual coordinates
-     (top/left) aren't mirrored. */
-  display: inline-block;
-  transform: rotate(180deg);
-  transform-origin: center;
 }
 
 /* === map dialogs === */
@@ -1054,6 +1070,26 @@ html, body {
 
 .intro-apprentice.is-test-morning     { color: rgba(60, 40, 25, 1); }
 
+/* Cinder against bright sky: vessel near-black silhouette, flame in
+   white-hot core with strong amber halo (mirrors the sun treatment so
+   the apprentice's small fire reads as kin to the bigger one), smoke
+   dark and visible above the pale horizon. */
+.intro-cinder-vessel.is-test-morning {
+  color: rgba(35, 22, 12, 1);
+}
+.intro-cinder-fire.is-test-morning {
+  /* Glowing-coal red with a warm halo — saturated enough to punch
+     through the cream sky, bright enough to read as live flame. */
+  color: rgba(215, 55, 30, 1);
+  text-shadow:
+    0 0 4px  rgba(245,  90, 35, 1),
+    0 0 10px rgba(220,  60, 25, 0.75),
+    0 0 20px rgba(180,  35, 15, 0.45);
+}
+.intro-cinder-smoke.is-test-morning {
+  color: rgba(60, 55, 50, 0.85);
+}
+
 .intro-hearth-fire {
   color: var(--flame-orange);
   text-shadow:
@@ -1120,6 +1156,48 @@ html, body {
   color: var(--flame-sparks);
   text-shadow: 0 0 6px rgba(255, 245, 184, 0.5);
   letter-spacing: 0.05em;
+}
+
+.intro-name-form {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.9rem;
+  margin: 0;
+}
+.intro-name-prompt {
+  margin: 0;
+  font-family: 'Menlo', 'Consolas', 'Courier New', monospace;
+  font-size: 0.95rem;
+  color: var(--fg-dim);
+  font-style: italic;
+  letter-spacing: 0.05em;
+}
+.intro-name-input {
+  background: transparent;
+  border: none;
+  border-bottom: 1px solid var(--flame-amber);
+  color: var(--flame-amber);
+  font-family: 'Menlo', 'Consolas', 'Courier New', monospace;
+  font-size: 1.05rem;
+  text-align: center;
+  padding: 0.35rem 0.5rem;
+  width: 12rem;
+  letter-spacing: 0.15em;
+  outline: none;
+  caret-color: var(--flame-amber);
+}
+.intro-name-input:focus {
+  border-bottom-color: var(--flame-sparks);
+  text-shadow: 0 0 5px rgba(255, 245, 184, 0.4);
+}
+.intro-begin:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+.intro-begin:disabled:hover {
+  background: transparent;
+  color: var(--flame-amber);
 }
 
 .intro-begin {
