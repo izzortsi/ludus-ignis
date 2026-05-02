@@ -57,5 +57,5 @@ export const asJurasDaChama: Lesson = {
       text: 'A armadilha do caçador foi exatamente esta: ele aplicou a terceira jura sem checar se os eventos eram disjuntos. Quando A e B podem ocorrer juntos, a soma simples mente — sempre por excesso. Antes de somar, pergunta sempre: estes eventos podem se tocar?'
     }
   ],
-  practiceTarget: 3
+  practiceTarget: 5
 };

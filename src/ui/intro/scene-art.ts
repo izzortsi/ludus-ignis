@@ -766,7 +766,12 @@ const CINDER_VESSEL_ART = [
 ];
 
 const CINDER_VESSEL_ROW = 49;
-const CINDER_VESSEL_COL = 44 + CAMP_OFFSET;  // canvas col 55, just right of Apprentice
+// The apprentice hieroglyph at col 56 renders at 5em font-size, which spans
+// roughly cols 52-60 visually (square hieroglyph em-box, ~8 ch wide). Place
+// the vessel at col 62 so its 5-col footprint (62-66) clears the glyph's
+// right edge with a 1-col padding. This also clears the Cinder fire (which
+// sits in the vessel's columns) out of the apprentice's body.
+const CINDER_VESSEL_COL = 51 + CAMP_OFFSET;  // canvas col 62, right of apprentice glyph
 
 export const CINDER_VESSEL: string[] = (() => {
   const grid = blank(C_ROWS, C_COLS);
@@ -1198,7 +1203,8 @@ export const EMBER_FALL_FRAMES: string[][] = Array.from({ length: FRAMES }, (_, 
   const grid = blank(C_ROWS, C_COLS);
   const u = t / (FRAMES - 1);
   const startRow = HEARTH_FIRE_TOP + 1, startCol = 30 + CAMP_OFFSET;
-  const endRow = CINDER_VESSEL_ROW,     endCol = 40 + CAMP_OFFSET;
+  // Land at the vessel's centre column so the ember visibly arcs into it.
+  const endRow = CINDER_VESSEL_ROW,     endCol = CINDER_VESSEL_COL + 2;
   // Slight upward arc mid-flight (the spark leaps before falling).
   const row = Math.round(startRow + (endRow - startRow) * u + Math.sin(u * Math.PI) * -3);
   const col = Math.round(startCol + (endCol - startCol) * u);

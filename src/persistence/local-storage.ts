@@ -81,6 +81,8 @@ export interface PersistedLesson {
   stage: LessonStage;
   practiceCorrect: number;
   theoryIntroduced: boolean;
+  /** Optional in legacy saves; backfilled by lesson-store when missing. */
+  presentedLessonIds?: string[];
 }
 
 export function persistLesson(state: PersistedLesson): void {

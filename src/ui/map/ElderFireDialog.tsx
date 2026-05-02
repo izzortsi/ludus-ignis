@@ -1,12 +1,12 @@
 import { createMemo, Show, For, onMount } from 'solid-js';
-import { SpeechPresentation, type SpeechPart } from './SpeechPresentation';
+import { SpeechPresentation, type SpeechPart, renderInlineMarkup } from './SpeechPresentation';
 import { MapDialog } from './MapDialog';
 import {
   currentLesson, lessonState, markParableHeard,
   markTested, advanceToNextLesson, hasNextLesson
 } from '../../core/lessons/lesson-store';
 import {
-  exerciseState, loadNextExercise, selectAnswer, clearExercise
+  exerciseState, loadNextExercise, selectAnswer, revealAnswer, clearExercise
 } from '../../core/exercises/exercise-store';
 import { vitalityGainOnCorrect, VITALITY_PENALTY_ON_WRONG } from '../../core/exercises/exercise-model';
 import { feedCinder } from '../../core/cinder/cinder-model';
@@ -123,6 +123,16 @@ function ElderTest(props: Props) {
     }
   }
 
+  function onReveal() {
+    const ex = exerciseState.current;
+    if (!ex || exerciseState.result !== null) return;
+    revealAnswer();
+    // Reveal in the test breaks the streak — the answer was shown, not
+    // earned. No vitality penalty (no wrong pick), but the lesson stage
+    // does not advance to 'tested'.
+    recordWrong(ex.family);
+  }
+
   function close() {
     clearExercise();
     props.onClose();
@@ -159,7 +169,7 @@ function ElderTest(props: Props) {
                   return (
                     <button
                       class={classes()}
-                      disabled={exerciseState.selectedIndex !== null}
+                      disabled={exerciseState.result !== null}
                       onClick={() => onSelect(i())}
                     >
                       {opt}
@@ -168,6 +178,12 @@ function ElderTest(props: Props) {
                 }}
               </For>
             </div>
+
+            <Show when={exerciseState.result === null}>
+              <button class="cinder-reveal-link" onClick={onReveal}>
+                ver resposta
+              </button>
+            </Show>
 
             <Show when={exerciseState.result === 'correct'}>
               <p class="study-feedback is-correct">
@@ -189,6 +205,27 @@ function ElderTest(props: Props) {
                 <button class="cinder-back-link" onClick={close}>
                   voltar ao Cinder
                 </button>
+              </div>
+            </Show>
+
+            <Show when={exerciseState.result === 'revealed'}>
+              <p class="study-feedback is-revealed">
+                <em>A resposta certa está marcada. A prova não passa assim — tenta outra.</em>
+              </p>
+              <div class="elder-test-retry">
+                <button class="cinder-cta" onClick={nextQuestion}>
+                  outra pergunta →
+                </button>
+                <button class="cinder-back-link" onClick={close}>
+                  voltar ao Cinder
+                </button>
+              </div>
+            </Show>
+
+            <Show when={(exerciseState.result === 'wrong' || exerciseState.result === 'revealed') && ex().solution}>
+              <div class="study-solution">
+                <div class="study-solution-label">caminho da resposta</div>
+                <p class="study-solution-text" innerHTML={renderInlineMarkup(ex().solution!)} />
               </div>
             </Show>
           </div>

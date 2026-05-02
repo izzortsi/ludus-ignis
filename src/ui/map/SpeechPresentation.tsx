@@ -35,7 +35,17 @@ export function SpeechPresentation(props: Props) {
   const [partDone, setPartDone] = createSignal(false);
   const [instant, setInstant] = createSignal(false);
 
-  const currentPart = createMemo(() => props.parts[partIdx()]);
+  // Clamp partIdx to the valid range — props.parts can shrink mid-flight if
+  // the parent's memo recomputes (e.g., the Elder's parts switch from a
+  // multi-paragraph parable to a one-line "studying" remark when stage
+  // transitions during the same close gesture). Without the clamp,
+  // currentPart() returns undefined and downstream `.math` access throws.
+  const currentPart = createMemo(() => {
+    const parts = props.parts;
+    if (parts.length === 0) return null;
+    const idx = Math.min(partIdx(), parts.length - 1);
+    return parts[idx];
+  });
   const isLastPart = createMemo(() => partIdx() >= props.parts.length - 1);
   const canGoBack = createMemo(() => partIdx() > 0);
 
@@ -75,57 +85,61 @@ export function SpeechPresentation(props: Props) {
   }
 
   return (
-    <div
-      class="speech-panel"
-      onClick={onTap}
-      onPointerDown={(e) => e.stopPropagation()}
-    >
-      <div class="speech-header">
-        <span class="speech-speaker">{props.speaker}</span>
-        <Show when={props.title}>
-          <span class="speech-title">— {props.title}</span>
-        </Show>
-        <span class="speech-progress">
-          {partIdx() + 1}/{props.parts.length}
-        </span>
-        <Show when={props.skipLabel}>
-          <button class="speech-skip" onClick={onSkipClick}>{props.skipLabel}</button>
-        </Show>
-      </div>
-      <p class={`speech-text ${currentPart().variant === 'directive' ? 'is-directive' : ''}`}>
-        <Show
-          when={instant() || partDone()}
-          fallback={
-            <Typewriter
-              text={currentPart().text}
-              speedMs={28}
-              skip={skip()}
-              onDone={() => setPartDone(true)}
-            />
-          }
+    <Show when={currentPart()}>
+      {(part) => (
+        <div
+          class="speech-panel"
+          onClick={onTap}
+          onPointerDown={(e) => e.stopPropagation()}
         >
-          {/* Once the text is fully revealed (or we're in instant/back mode),
-              swap to the markup-rendered version so inline italics and inline
-              math (`$\mid$`, etc.) actually render. */}
-          <span innerHTML={renderInlineMarkup(currentPart().text)} />
-        </Show>
-      </p>
-      {/* Display equation: only show once the text is fully revealed so the
-          eye lands on the prose first, the equation second. */}
-      <Show when={currentPart().math && partDone()}>
-        <MathRender tex={currentPart().math!} />
-      </Show>
-      <div class="speech-nav">
-        <span class="speech-nav-back">
-          <Show when={canGoBack()}>← voltar</Show>
-        </span>
-        <span class="speech-nav-forward">
-          <Show when={partDone()}>
-            {isLastPart() ? (props.finalHint ?? 'fechar →') : 'avançar →'}
+          <div class="speech-header">
+            <span class="speech-speaker">{props.speaker}</span>
+            <Show when={props.title}>
+              <span class="speech-title">— {props.title}</span>
+            </Show>
+            <span class="speech-progress">
+              {partIdx() + 1}/{props.parts.length}
+            </span>
+            <Show when={props.skipLabel}>
+              <button class="speech-skip" onClick={onSkipClick}>{props.skipLabel}</button>
+            </Show>
+          </div>
+          <p class={`speech-text ${part().variant === 'directive' ? 'is-directive' : ''}`}>
+            <Show
+              when={instant() || partDone()}
+              fallback={
+                <Typewriter
+                  text={part().text}
+                  speedMs={28}
+                  skip={skip()}
+                  onDone={() => setPartDone(true)}
+                />
+              }
+            >
+              {/* Once the text is fully revealed (or we're in instant/back mode),
+                  swap to the markup-rendered version so inline italics and inline
+                  math (`$\mid$`, etc.) actually render. */}
+              <span innerHTML={renderInlineMarkup(part().text)} />
+            </Show>
+          </p>
+          {/* Display equation: only show once the text is fully revealed so the
+              eye lands on the prose first, the equation second. */}
+          <Show when={part().math && partDone()}>
+            <MathRender tex={part().math!} />
           </Show>
-        </span>
-      </div>
-    </div>
+          <div class="speech-nav">
+            <span class="speech-nav-back">
+              <Show when={canGoBack()}>← voltar</Show>
+            </span>
+            <span class="speech-nav-forward">
+              <Show when={partDone()}>
+                {isLastPart() ? (props.finalHint ?? 'fechar →') : 'avançar →'}
+              </Show>
+            </span>
+          </div>
+        </div>
+      )}
+    </Show>
   );
 }
 

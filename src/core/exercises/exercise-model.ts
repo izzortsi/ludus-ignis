@@ -17,6 +17,10 @@ export interface Exercise {
   statement: string;         // Portuguese; fire-voice transposition of the source
   options: string[];         // rendered as buttons
   correctIndex: number;      // index into options
+  /** Worked-out solution shown when the player reveals the answer or picks
+   *  wrong. Portuguese; inline LaTeX via $...$ supported (rendered by the
+   *  same renderInlineMarkup pipeline as theory pages). */
+  solution?: string;
   source?: ExerciseSource;   // present for curriculum-extracted problems
 }
 

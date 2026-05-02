@@ -52,5 +52,5 @@ export const aRodaDasInclusoes: Lesson = {
       text: 'Esta é a lição que sequências curtas escondem. Eventos que parecem persistir podem, no limite, desaparecer; eventos que parecem efêmeros podem, no limite, capturar tudo. A roda continua girando — mas com cuidado.'
     }
   ],
-  practiceTarget: 3
+  practiceTarget: 5
 };

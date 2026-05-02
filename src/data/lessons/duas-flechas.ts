@@ -43,5 +43,5 @@ export const duasFlechas: Lesson = {
       text: 'O teste, então, antes de multiplicar: existe algo que toca os dois? Se existe, a multiplicação simples mente.'
     }
   ],
-  practiceTarget: 3
+  practiceTarget: 5
 };

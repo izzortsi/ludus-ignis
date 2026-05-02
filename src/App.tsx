@@ -72,7 +72,8 @@ export function App() {
       currentLessonId: lessonState.currentLessonId,
       stage: lessonState.stage,
       practiceCorrect: lessonState.practiceCorrect,
-      theoryIntroduced: lessonState.theoryIntroduced
+      theoryIntroduced: lessonState.theoryIntroduced,
+      presentedLessonIds: [...lessonState.presentedLessonIds]
     });
   });
 

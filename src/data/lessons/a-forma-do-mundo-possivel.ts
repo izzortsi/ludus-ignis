@@ -55,5 +55,5 @@ export const aFormaDoMundoPossivel: Lesson = {
       text: 'O *cesto certo* depende da pergunta. Se queres apenas o veredicto da Cinder, três mundos bastam (tocada, limpa, ambígua). Se queres distinguir o riacho de origem, o cesto cresce (três riachos × três veredictos = nove mundos). Cesto pequeno demais perde a pergunta; cesto grande demais cansa o aprendiz e turva a conta.'
     }
   ],
-  practiceTarget: 3
+  practiceTarget: 5
 };

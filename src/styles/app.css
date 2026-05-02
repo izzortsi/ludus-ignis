@@ -247,7 +247,9 @@ html, body {
   border-radius: 5px;
   padding: 0.7rem 0.9rem 0.8rem;
   cursor: pointer;
-  z-index: 50;
+  /* Above the map dialog backdrop (100) so the Cinder's typewriter intro
+     can play as an overlay on top of the modal hub when both are open. */
+  z-index: 200;
   box-shadow: 0 0 28px rgba(255, 150, 60, 0.22);
   font-family: 'Menlo', 'Consolas', 'Courier New', monospace;
   user-select: none;
@@ -342,6 +344,12 @@ html, body {
   cursor: pointer;
 }
 .cinder-hub-option:hover { background: rgba(255, 200, 100, 0.18); }
+
+.cinder-hub-option:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+.cinder-hub-option:disabled:hover { background: rgba(255, 200, 100, 0.08); }
 
 .cinder-hub-option-label {
   font-size: 0.95rem;
@@ -700,8 +708,62 @@ html, body {
   text-align: center;
 }
 
-.study-feedback.is-correct { color: var(--bright); }
-.study-feedback.is-wrong   { color: var(--low);    }
+.study-feedback.is-correct  { color: var(--bright); }
+.study-feedback.is-wrong    { color: var(--low);    }
+.study-feedback.is-revealed { color: var(--fg-dim); font-style: italic; }
+
+/* Worked-out solution shown after a wrong answer or an explicit reveal.
+   Distinct from the option buttons so it reads as commentary; tinted with
+   a subtle bright accent so it draws the eye without screaming. */
+.study-solution {
+  margin: 0.25rem 0;
+  padding: 0.7rem 0.9rem;
+  border: 1px solid rgba(220, 200, 160, 0.25);
+  border-left: 3px solid rgba(255, 200, 120, 0.6);
+  background: rgba(255, 200, 100, 0.04);
+  border-radius: 3px;
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+.study-solution-label {
+  font-size: 0.72rem;
+  letter-spacing: 0.12em;
+  text-transform: lowercase;
+  color: rgba(255, 200, 120, 0.75);
+}
+
+.study-solution-text {
+  margin: 0;
+  color: rgba(235, 220, 180, 0.95);
+  font-size: 0.9rem;
+  line-height: 1.55;
+}
+
+.study-solution-text .katex { font-size: 0.95em; }
+
+/* Subtle, low-stakes "give me the answer" link. Less visually weighty than
+   the option buttons, but findable. Aligned center between options and
+   feedback. */
+.cinder-reveal-link {
+  align-self: center;
+  background: none;
+  border: none;
+  color: var(--fg-dim);
+  font-family: inherit;
+  font-size: 0.85rem;
+  font-style: italic;
+  letter-spacing: 0.05em;
+  cursor: pointer;
+  padding: 0.25rem 0.5rem;
+  text-decoration: underline;
+  text-decoration-color: rgba(110, 88, 64, 0.4);
+}
+
+.cinder-reveal-link:hover {
+  color: rgba(255, 220, 160, 0.85);
+}
 
 .study-intro {
   margin: 0;
