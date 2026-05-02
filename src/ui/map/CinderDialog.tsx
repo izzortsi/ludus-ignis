@@ -3,6 +3,7 @@ import { MapDialog } from './MapDialog';
 import { CinderView } from '../components/CinderView';
 import { Math as MathRender } from '../components/Math';
 import { SpeechPresentation, type SpeechPart, renderInlineMarkup } from './SpeechPresentation';
+import { GALLERY, type GalleryCard } from './gallery-cards';
 import {
   currentLesson, lessonState,
   recordPracticeCorrect, markTheoryIntroduced,
@@ -27,31 +28,36 @@ const REVEAL_VITALITY_BONUS = 10;
 
 // Hub navigation state. The review tree (rever-list → rever-family) lets the
 // apprentice replay any presented lesson's parable or theory; pratica is the
-// current lesson's family practice.
+// current lesson's family practice; galeria-list shows collectible-card
+// dense-ASCII scenes from the intro.
 type HubView =
   | 'hub'
   | 'pratica'
   | 'rever-list'
   | 'rever-family'
   | 'rever-parable'
-  | 'rever-theory';
+  | 'rever-theory'
+  | 'galeria-list';
 
 // The Cinder dialog renders the modal hub *always* (so the apprentice can
 // review prior lessons even before talking to the Elder about a new one) and,
 // on top of it, the spontaneous theory walk-through speech panel when the
 // current lesson's parable has been heard but the theory hasn't yet been
-// taught. The walk-through panel sits at higher z-index than the modal so the
-// typewriter intro keeps its cinematic moment; closing/skipping it marks the
-// theory as introduced and the modal is right there underneath.
+// taught. The gallery card viewer is also a fullscreen overlay (above the
+// modal) that opens when a card is tapped — clicking dismisses it.
 export function CinderDialog(props: Props) {
   const offerSpontaneous = createMemo(
     () => lessonState.stage !== 'parable' && !lessonState.theoryIntroduced
   );
+  const [openCard, setOpenCard] = createSignal<GalleryCard | null>(null);
   return (
     <>
-      <CinderHub {...props} />
+      <CinderHub {...props} onOpenCard={setOpenCard} />
       <Show when={offerSpontaneous()}>
         <CinderSpontaneous />
+      </Show>
+      <Show when={openCard()}>
+        <GalleryCardViewer card={openCard()!} onClose={() => setOpenCard(null)} />
       </Show>
     </>
   );
@@ -80,7 +86,11 @@ function CinderSpontaneous() {
 
 // === Hub modal (always opens; sub-views handle each path) ===================
 
-function CinderHub(props: Props) {
+interface HubProps extends Props {
+  onOpenCard: (card: GalleryCard) => void;
+}
+
+function CinderHub(props: HubProps) {
   const lesson = createMemo(() => currentLesson());
   const [view, setView] = createSignal<HubView>('hub');
   const [reviewLessonId, setReviewLessonId] = createSignal<string | null>(null);
@@ -170,6 +180,10 @@ function CinderHub(props: Props) {
                 </Show>
               </span>
             </button>
+            <button class="cinder-hub-option" onClick={() => setView('galeria-list')}>
+              <span class="cinder-hub-option-label">Galeria</span>
+              <span class="cinder-hub-option-desc">cenas guardadas pela brasa</span>
+            </button>
           </div>
           <Show when={lessonState.stage === 'practiced'}>
             <p class="cinder-practiced-hint">
@@ -201,6 +215,9 @@ function CinderHub(props: Props) {
       </Show>
       <Show when={view() === 'pratica'}>
         <PracticeView lesson={lesson()} onBack={backToHub} />
+      </Show>
+      <Show when={view() === 'galeria-list'}>
+        <GalleryListView onPick={props.onOpenCard} onBack={backToHub} />
       </Show>
     </MapDialog>
   );
@@ -242,6 +259,61 @@ function ReviewListView(props: { onPick: (id: string) => void; onBack: () => voi
           </For>
         </div>
       </Show>
+    </div>
+  );
+}
+
+// Gallery list — shows the dense-ASCII collectible cards drawn from the
+// intro's flashbacks. Clicking a card opens its full-size view as a
+// fullscreen overlay (handled at the CinderDialog level).
+function GalleryListView(props: { onPick: (card: GalleryCard) => void; onBack: () => void }) {
+  return (
+    <div class="cinder-section">
+      <BackLink onBack={props.onBack} />
+      <div class="cinder-section-header">
+        <span class="cinder-section-label">galeria</span>
+        <span class="cinder-section-meta">cenas guardadas pela brasa</span>
+      </div>
+      <div class="cinder-hub-options">
+        <For each={GALLERY}>
+          {(card) => (
+            <button class="cinder-hub-option" onClick={() => props.onPick(card)}>
+              <span class="cinder-hub-option-label">{card.title}</span>
+              <span
+                class="cinder-hub-option-desc"
+                innerHTML={renderInlineMarkup(card.caption)}
+              />
+            </button>
+          )}
+        </For>
+      </div>
+    </div>
+  );
+}
+
+// Fullscreen card viewer — renders the dense-ASCII at the same scale the
+// intro stage uses, so the art reads at full fidelity. Click anywhere to
+// dismiss (matches the "collectible card flipped over" gesture).
+function GalleryCardViewer(props: { card: GalleryCard; onClose: () => void }) {
+  return (
+    <div class="cinder-gallery-overlay" onClick={props.onClose}>
+      <pre
+        class="cinder-gallery-card"
+        style={{
+          '--cols': props.card.cols,
+          '--rows': props.card.rows
+        }}
+      >
+        {props.card.art.join('\n')}
+      </pre>
+      <div class="cinder-gallery-card-caption">
+        <span class="cinder-gallery-card-title">{props.card.title}</span>
+        <span
+          class="cinder-gallery-card-text"
+          innerHTML={renderInlineMarkup(props.card.caption)}
+        />
+        <span class="cinder-gallery-card-hint">toque para fechar</span>
+      </div>
     </div>
   );
 }

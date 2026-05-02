@@ -743,6 +743,73 @@ html, body {
 
 .study-solution-text .katex { font-size: 0.95em; }
 
+/* === Cinder modal — Galeria card viewer ============================
+   Fullscreen overlay that renders a dense-ASCII flashback at the same
+   scale the intro stage uses, so the art keeps its proper density.
+   Click anywhere on the overlay (or the art) to flip the card back. */
+
+.cinder-gallery-overlay {
+  position: fixed;
+  inset: 0;
+  /* Above the modal backdrop (100) and the speech-panel overlay (200). */
+  z-index: 250;
+  background: rgba(0, 0, 0, 0.94);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.6rem;
+  padding: 0.5rem;
+  cursor: pointer;
+  user-select: none;
+}
+
+.cinder-gallery-card {
+  margin: 0;
+  padding: 0;
+  font-family: 'Menlo', 'Consolas', 'Courier New', monospace;
+  /* Same fit-to-viewport formula as the intro stage. */
+  font-size: min(
+    0.85rem,
+    calc(98vw / var(--cols) / 0.6),
+    calc(82vh / var(--rows) / 1.05)
+  );
+  line-height: 1.05em;
+  color: rgba(220, 200, 160, 0.92);
+  white-space: pre;
+  letter-spacing: 0;
+}
+
+.cinder-gallery-card-caption {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.25rem;
+  max-width: 36rem;
+  text-align: center;
+  font-family: 'Menlo', 'Consolas', 'Courier New', monospace;
+}
+
+.cinder-gallery-card-title {
+  font-size: 1rem;
+  letter-spacing: 0.06em;
+  color: rgba(255, 220, 160, 0.95);
+}
+
+.cinder-gallery-card-text {
+  font-size: 0.85rem;
+  font-style: italic;
+  color: rgba(220, 200, 160, 0.82);
+  line-height: 1.5;
+}
+
+.cinder-gallery-card-hint {
+  margin-top: 0.4rem;
+  font-size: 0.72rem;
+  letter-spacing: 0.12em;
+  color: rgba(220, 200, 160, 0.5);
+}
+
 /* Subtle, low-stakes "give me the answer" link. Less visually weighty than
    the option buttons, but findable. Aligned center between options and
    feedback. */
