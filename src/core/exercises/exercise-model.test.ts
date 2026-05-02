@@ -4,7 +4,7 @@ import { Exercise, Difficulty, vitalityGainOnCorrect, randomExercise } from './e
 function mk(id: string, difficulty: Difficulty = 1): Exercise {
   return {
     id,
-    family: 6,
+    family: 9,
     conceptName: 'O Caminho de Volta',
     difficulty,
     statement: '',

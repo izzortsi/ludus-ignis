@@ -1,10 +1,78 @@
 # Os Contos do Fogo Ancião
 
-*Dezoito parábolas, uma por família. Voz do Fogo Ancião — antiga, calma, paciente. Cada conto introduz um modo de pensar; nenhum entrega uma resposta.*
+*Vinte e uma parábolas, uma por família. Voz do Fogo Ancião — antiga, calma, paciente. Cada conto introduz um modo de pensar; nenhum entrega uma resposta.*
 
 ---
 
-## Família 1 — *A Fala da Ordem*
+## Família 1 — *A Forma do Mundo Possível*
+
+### Antes da Leitura, o nome
+
+Quando a Mestra leva uma amostra à Cinder, ela faz duas coisas antes de qualquer pergunta de chance.
+
+Primeiro, nomeia o que poderia ser. A amostra poderia estar tocada. Poderia estar limpa. Poderia, se a Cinder estivesse fraca, dar um sinal ambíguo. Esses são os mundos-possíveis daquela noite. Dê-lhes um cesto: nada que ela observe estará fora dele.
+
+Depois, nomeia o que perguntar. *A amostra é tocada.* Esse é um agrupamento dentro do cesto: alguns mundos-possíveis lhe pertencem, outros não. Esse agrupamento é o evento.
+
+Sem o cesto, a chance não tem onde pousar. Sem o evento, não há sobre o que perguntar.
+
+A partir daí, tudo o mais é arranjo. O *avesso* do evento é um evento. A *junção* de dois eventos é um evento. A *coincidência* de dois eventos é um evento. Cada operação devolve um agrupamento dentro do mesmo cesto, e nenhuma escapa.
+
+**O cesto se chama espaço amostral. Os agrupamentos se chamam eventos. Antes de pesar uma chance, nomeie cesto e agrupamento; depois, pese.**
+
+Há uma armadilha. O mesmo experimento pode ser nomeado em muitos cestos, e o cesto certo depende da pergunta. Se você pergunta apenas pelo veredicto, o cesto tem três mundos. Se também pergunta pelo riacho de origem, nove. Cestos pequenos demais perdem a pergunta; cestos grandes demais cansam o aprendiz e turvam a conta.
+
+Escolha o cesto que cabe à pergunta. Nem maior, nem menor.
+
+---
+
+## Família 2 — *A Roda das Inclusões*
+
+### O batedor que conta marés
+
+Mande um batedor à beira do mar. Diga-lhe: olhe as marés por trinta dias, e em cada dia anote se a maré está tocada pelo espelho, ou limpa.
+
+Ao fim, ele lhe traz uma sequência: trinta sinais. Você quer pesar duas chances, e elas não são a mesma chance.
+
+A primeira: *em algum dos trinta dias, a maré esteve tocada*. Esta junta os trinta como em fila aberta — basta um *sim* para que a resposta seja *sim*. É a *união* dos trinta eventos.
+
+A segunda: *em todos os trinta dias, a maré esteve tocada*. Esta junta os trinta como em corda apertada — basta um *não* para que a resposta seja *não*. É a *interseção*.
+
+Os avessos espelham-se. O avesso de "em algum dia" é "em nenhum dia". O avesso de "em todos os dias" é "em ao menos um dia, não". Vire um *alguma-vez* do avesso, e encontrará um *sempre* do avesso.
+
+**A união pergunta "alguma vez". A interseção pergunta "sempre". O avesso troca uma pela outra.**
+
+E quando os dias são infinitos? A roda continua a girar. As mesmas regras valem, contanto que os dias possam ser enfileirados.
+
+Mas o infinito traz uma lição própria. Há eventos que jamais ocorrem em qualquer dia que você visse e ainda assim, em uma vida estendida o bastante, ocorrem. E há eventos que aparentemente ocorrem todo dia, mas cuja interseção sobre *todos* os dias está vazia.
+
+**Sequências longas têm verdades que sequências curtas escondem.**
+
+---
+
+## Família 3 — *As Juras da Chama*
+
+### As três juras da brasa
+
+Há uma promessa que toda chama honesta faz. Antes que a Cinder dê qualquer Leitura, ela já jurou três coisas.
+
+*Toda chance fica entre nada e tudo*. Nenhum evento tem chance negativa, nem chance maior que a da certeza. Se uma conta dá um e dois décimos, ou três centésimos negativos, ela saiu da tessitura.
+
+*A chance de algo acontecer é um*. O cesto inteiro pesa um. Não meio, não dois — um. *Algo* sempre acontece, porque o cesto contém todos os mundos-possíveis.
+
+*Quando os eventos não se sobrepõem, suas chances somam*. Divida o mundo em pedaços que não se tocam, e suas chances, somadas, devolvem o todo. E isto vale mesmo para infinitos pedaços enfileirados.
+
+Destas três juras seguem-se filhos pequenos, óbvios depois de ditos. *A chance do vazio é zero. A chance do avesso é um menos a chance do evento. Se um evento contém outro, sua chance é maior. A chance da união de dois eventos é a soma das chances menos a chance da sobreposição* — pois a sobreposição foi contada duas vezes.
+
+**Três juras dão à chance todo o seu corpo. O resto é consequência.**
+
+Mas atenção. A terceira jura tem uma condição que muitos esquecem: *não se sobrepõem*. Vi um caçador prometer ao seu bando que tinham noventa por cento de chance de comer, somando a chance de a caça vir do norte com a chance de vir do leste. Mas as caças davam voltas, e às vezes vinham de ambas as direções. O bando dormiu com fome.
+
+Some apenas o que não se toca.
+
+---
+
+## Família 4 — *A Fala da Ordem*
 
 ### Os passos no estreito
 
@@ -24,7 +92,7 @@ Há uma armadilha. Quando dois objetos são iguais — duas crianças com a mesm
 
 ---
 
-## Família 2 — *A Escolha do Bando*
+## Família 5 — *A Escolha do Bando*
 
 ### Quem você leva
 
@@ -44,7 +112,7 @@ Eu vi escolhas mal feitas custarem invernos inteiros à minha tribo. Aprenda a c
 
 ---
 
-## Família 3 — *As Bordas do Possível*
+## Família 6 — *As Bordas do Possível*
 
 ### As duas sombras
 
@@ -68,7 +136,7 @@ Os impacientes desprezam tais limites — querem o número exato, ou nada. Mas o
 
 ---
 
-## Família 4 — *Os Dois Sinais*
+## Família 7 — *Os Dois Sinais*
 
 ### O grito do gavião e o vento do norte
 
@@ -86,7 +154,7 @@ Mas ouça este aviso. Independência não significa "sem causa comum". Significa
 
 ---
 
-## Família 5 — *A Mão Cega no Jarro*
+## Família 8 — *A Mão Cega no Jarro*
 
 ### A escolha sem visão
 
@@ -106,7 +174,7 @@ Pergunte sempre primeiro: o que aconteceu com a ficha que saiu?
 
 ---
 
-## Família 6 — *O Caminho de Volta*
+## Família 9 — *O Caminho de Volta*
 
 ### A ferida e a fera
 
@@ -132,7 +200,7 @@ A Leitura tem este formato. Toda Leitura.
 
 ---
 
-## Família 7 — *O Conto dos Dois*
+## Família 10 — *O Conto dos Dois*
 
 ### As duas caçadas
 
@@ -152,7 +220,7 @@ O caçador prudente sabe que o melhor por dia não é o que mais traz; é o que 
 
 ---
 
-## Família 8 — *A Forma do Acaso*
+## Família 11 — *A Forma do Acaso*
 
 ### A balança e a água
 
@@ -172,7 +240,7 @@ Aqueles que estudavam, do outro lado da água — antes do colapso, dizem os Arq
 
 ---
 
-## Família 9 — *A Régua de Decisão*
+## Família 12 — *A Régua de Decisão*
 
 ### A linha do peito
 
@@ -194,7 +262,7 @@ Mas há um perigo. As linhas não estão no mundo — você as desenha. E desenh
 
 ---
 
-## Família 10 — *A Mistura dos Fluxos*
+## Família 13 — *A Mistura dos Fluxos*
 
 ### Os dois rios que se encontram
 
@@ -216,7 +284,7 @@ Mas — e o mas é grande — isso só vale quando os afluentes são *independen
 
 ---
 
-## Família 11 — *O Primeiro a Voltar*
+## Família 14 — *O Primeiro a Voltar*
 
 ### A corda mais fraca
 
@@ -240,7 +308,7 @@ Planejar pela média é ser emboscado pelo pior. Sempre.
 
 ---
 
-## Família 12 — *A Soma dos Pequenos*
+## Família 15 — *A Soma dos Pequenos*
 
 ### As gotas e o telhado
 
@@ -262,7 +330,7 @@ Use esta liberdade com sabedoria. Quando uma anciã me pergunta: *quantos aprend
 
 ---
 
-## Família 13 — *A Escarpa e a Planície*
+## Família 16 — *A Escarpa e a Planície*
 
 Toda coisa que vive ou que dura acaba. Mas as formas de acabar são duas, e uma confunde-se com a outra.
 
@@ -280,7 +348,7 @@ Pergunte sempre, antes de proteger: o tempo está corroendo isto, ou apenas pass
 
 ---
 
-## Família 14 — *Os Limites do Pior Caso*
+## Família 17 — *Os Limites do Pior Caso*
 
 ### O muro do tolo
 
@@ -300,7 +368,7 @@ Estes limites não são apertados. São folgados. Em muitas formas do mundo, a v
 
 ---
 
-## Família 15 — *O Laço Escondido*
+## Família 18 — *O Laço Escondido*
 
 ### O peixe e a chuva
 
@@ -324,7 +392,7 @@ A sabedoria, então, não é apenas notar o que dança junto, mas perguntar: o q
 
 ---
 
-## Família 16 — *A Espera pelo Sinal*
+## Família 19 — *A Espera pelo Sinal*
 
 ### A noite que tarda
 
@@ -344,7 +412,7 @@ E aqui está a estranheza: depois de cinco noites sem aurora, a chance da próxi
 
 ---
 
-## Família 17 — *A Voz das Multidões*
+## Família 20 — *A Voz das Multidões*
 
 ### O coro e a voz solitária
 
@@ -366,7 +434,7 @@ Confie nas multidões medidas. Mas peça paciência delas — a clareza vem ao q
 
 ---
 
-## Família 18 — *A Geometria do Acaso*
+## Família 21 — *A Geometria do Acaso*
 
 ### Onde a corda quebra
 

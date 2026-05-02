@@ -1,6 +1,6 @@
 # Ludus Ignis — World Bible
 
-Status: working draft, iteration 4.
+Status: working draft, iteration 6.
 Genre: hard-SF post-collapse with an unreliable narrator (the child protagonist) and a reliable one (the world's environmental record).
 
 Markers used below:
@@ -543,9 +543,9 @@ Curriculum is delivered as PDFs (multiple, ongoing). Pipeline stages:
    - sub-items (each with point value, answer type, accepted forms)
    - concept tags
    - difficulty (point value as proxy; explicit tier overlay)
-   - family assignment (one of 18, see below)
+   - family assignment (one of 21, see below)
    - parameter specification (what varies across instances)
-3. **Family parameterization** (DECIDED). Recurring problem types lifted into ~18 templates with parameters; new instances generated on demand.
+3. **Family parameterization** (DECIDED). Recurring problem types lifted into ~21 templates with parameters; new instances generated on demand.
 4. **In-world wrapper** (DECIDED default = B; A and C also produced). Three intensities:
    - **A (verbatim, fire-voice transposed)**: minimal reframing; the fire poses pure math.
    - **B (light frame)**: vocabulary swapped to in-world objects (jars, scouts, terraces); math intact.
@@ -558,58 +558,108 @@ Curriculum is delivered as PDFs (multiple, ongoing). Pipeline stages:
 ### Multi-PDF intake (DECIDED)
 The pipeline accepts multiple PDFs. New PDFs add either:
 - More instances of existing families (expands parameter library)
-- New families (extends taxonomy from 18)
+- New families (extends taxonomy from 21)
 
 When a new PDF arrives, diff against existing family list; propose additions before merging. Family taxonomy is versioned.
 
 ### Proofs (DECIDED)
 "Mostre que…" / "Enuncie…" problems are presented verbatim with binary self-check in alpha. Real symbolic verification post-alpha.
 
-### Family taxonomy (18 families, locked for current corpus)
+### Family taxonomy
 
-**P1 (foundations)**
+DECIDED: **alpha covers Phase 1 only** — the P0 (foundations) tier and the post-foundations P1 tier, families 1–10. Phase 2 families (11–20) and the cross-cutting family (21) are deferred to post-alpha when source material exists for them.
 
-| # | Diegetic name | Mathematical concept | Canonical worldframe |
-|---|---|---|---|
-| 1 | **A Fala da Ordem** | Counting arrangements under order/adjacency constraints | Counting glyph sequences on pre-collapse artifacts; valid marching-order arrangements |
-| 2 | **A Escolha do Bando** | Team selection with overlap/exclusion rules | Choosing scout teams with skill constraints |
-| 3 | **As Bordas do Possível** | Bounds on intersection probability | Estimating joint-event risk from marginal observations |
-| 4 | **Os Dois Sinais** | Independence of joint events | Testing whether two omens are linked or coincidental |
-| 5 | **A Mão Cega no Jarro** | Urn draws with/without replacement | Blind draws from grain bins; bone-token divination |
-| 6 | **O Caminho de Volta** | Bayesian inversion (observation → source); diagnostic Bayes (sub-pattern) | A Leitura (canonical); foraging source inference; sickness diagnosis |
-| 7 | **O Conto dos Dois** | Comparison of two binomials (P(X<Y), P(X=Y)) | Comparing two scout teams' or two foraging parties' yields |
+DECIDED (iteration 6, supersedes iteration 5): the **foundations layer** is promoted from "prerequisite, no family number" to a **P0 tier of three numbered families**. Aula 1 establishes this content explicitly across seven pages and L1 drills it in problems 1–5; the alpha curriculum needs slots for it. The σ-algebra material that Aula 1 gestures at without formalizing is *not* given a family of its own — it stays a forward-compatible enrichment that may surface post-alpha if future PDFs warrant it.
 
-**P2 (random variables and inequalities)**
+**P0 (foundations) — alpha tier 1, families 1–3**
 
 | # | Diegetic name | Mathematical concept | Canonical worldframe |
 |---|---|---|---|
-| 8 | **A Forma do Acaso** | Continuous density: normalize, CDF, region prob, transformation | Weather distributions; mirror-tide intensity profiles |
-| 9 | **A Régua de Decisão** | Discrete RV from continuous via threshold function | When does continuous wind become "a storm"? |
-| 10 | **A Mistura dos Fluxos** | Sum of independent RVs (Poisson, Geom); convolution | Mirror-tide arrivals from multiple directions combined |
-| 11 | **O Primeiro a Voltar** | Order statistics: min/max | First scout to return from multiple paths; first canteen to leak |
-| 12 | **A Soma dos Pequenos** | Linearity of E/Var over indicator sums | Counting expected insomniac tribe members tonight |
-| 13 | **A Meia-Vida das Coisas** | Survival, hazard, memorylessness, exponential | Bronze vessel lifetimes; rope wear |
-| 14 | **Os Limites do Pior Caso** | Markov, Chebyshev; concentration | Bounding worst-case spore load given mean and variance |
-| 15 | **O Laço Escondido** | Covariance, indicator-covariance, dependence | Detecting whether sickness and bad weather are linked |
-| 16 | **A Espera pelo Sinal** | Waiting times, runs | Days until next aurora; turns until pattern |
-| 17 | **A Voz das Multidões** | Sample mean: LLN, CLT, sample-size inequalities | Archivists' multi-year almanacs; inferring "is this year normal" |
+| 1 | **A Forma do Mundo Possível** | Sample space construction; events as subsets; $\cup, \cap, {}^c, \setminus$ on events; verbal-to-set translation; cardinality of event spaces | Naming $\Omega$ before A Leitura; defining the event whose chance is to be weighed |
+| 2 | **A Roda das Inclusões** | Finite and countable $\bigcup, \bigcap$; De Morgan; monotone limits; the "alguma vez" / "sempre" duality | Long observation logs of marés-espelho; events expressed across many days |
+| 3 | **As Juras da Chama** | Kolmogorov axioms A1–A3 and derived properties: $P(\emptyset)=0$, finite additivity, complement, monotonicity, $P(A\cup B) = P(A) + P(B) - P(A\cap B)$ | The Cinder's covenant — three rules every honest reckoning must obey |
 
-**Cross-cutting**
+Per-family parameter dimensions (drive the wrapping pipeline §14 step 4):
+
+- **Family 1**: `experiment_type` ∈ {`two_dice`, `coin_sequence`, `urn_draw`, `roll_until_stop`, `system_state`}; `events_to_describe` (3–5 named events); `operations` ⊆ {∩, ∪, ᶜ, \, multi-fold}; `present_as` ∈ {`enumerate_elements`, `set_builder_only`, `cardinality_only`}; `infinite_omega` (covers the roll-until-stop and infinite-coin-sequence cases).
+- **Family 2**: `sequence_type` ∈ {`nested_increasing`, `nested_decreasing`, `disjoint`, `interval_real_line`, `abstract_indexed`}; `task` ∈ {`compute_union_intersection`, `expression_in_indexed_events`, `de_morgan_dual`}; `index_set` ∈ {`finite_n`, `countable_infinite`}; `with_concrete_intervals` (toggles the Aula 1 page-6 family $\{[0,1/n], (0,1/n), [n,n+1], (0,n)\}$).
+- **Family 3**: `mode` ∈ {`disjoint_marginals`, `general_two_event`, `multi_event_inclusion_exclusion`, `axiom_consistency_check`}; `n_events` (2–4); `given` ⊆ {marginals, pairwise intersections, union, complement}; `targets` ⊆ {$P(A\cup B), P(A\cap B), P(A^c\cap B), P(A\setminus B), P((A\cup B)^c), \ldots$}.
+
+**P1 (combinatorics & elementary probability) — alpha tier 2, families 4–10**
 
 | # | Diegetic name | Mathematical concept | Canonical worldframe |
 |---|---|---|---|
-| 18 | **A Geometria do Acaso** | Geometric probability (point in region, broken-stick) | A worn rope breaks at random — can the pieces still tripod the Cinder vessel-stand? |
+| 4 | **A Fala da Ordem** | Counting arrangements under order/adjacency constraints | Counting glyph sequences on pre-collapse artifacts; valid marching-order arrangements |
+| 5 | **A Escolha do Bando** | Team selection with overlap/exclusion rules | Choosing scout teams with skill constraints |
+| 6 | **As Bordas do Possível** | Fréchet-style intersection / union bounds; what *must* and *can* happen given marginals | Bounding co-occurrence of two omens given each one's frequency in the Arquivistas' almanac |
+| 7 | **Os Dois Sinais** | Independence of joint events | Testing whether two omens are linked or coincidental |
+| 8 | **A Mão Cega no Jarro** | Urn draws with/without replacement | Blind draws from grain bins; bone-token divination |
+| 9 | **O Caminho de Volta** | Bayesian inversion (observation → source); diagnostic Bayes (sub-pattern) | A Leitura (canonical); foraging source inference; sickness diagnosis |
+| 10 | **O Conto dos Dois** | Comparison of two binomials (P(X<Y), P(X=Y)) | Comparing two scout teams' or two foraging parties' yields |
 
-The fire teaches in roughly the course's natural order (1→17, with 18 woven in), but advanced families can unlock earlier through burn-bright streaks. Concept names are revealed within immersion; formal names appear occasionally as "the older word."
+Family 6 (As Bordas do Possível) is **reinstated** in iteration 6: it was demoted in iteration 5 for lack of source material, but the iteration 6 permissive criterion (numbered families may exist without dedicated source problems if the concept is canonical and the parable is written) reinstates it. The parable in `lore/contos_do_fogo_anciao.md` is now load-bearing rather than decorative.
+
+Family numbering is contiguous after the iteration 6 reorganization (no gaps). Cross-references in the parable corpus are updated by the +3 shift.
+
+**P2 (random variables & inequalities) — post-alpha, families 11–20**
+
+| # | Diegetic name | Mathematical concept | Canonical worldframe |
+|---|---|---|---|
+| 11 | **A Forma do Acaso** | Continuous density: normalize, CDF, region prob, transformation | Weather distributions; mirror-tide intensity profiles |
+| 12 | **A Régua de Decisão** | Discrete RV from continuous via threshold function | When does continuous wind become "a storm"? |
+| 13 | **A Mistura dos Fluxos** | Sum of independent RVs (Poisson, Geom); convolution | Mirror-tide arrivals from multiple directions combined |
+| 14 | **O Primeiro a Voltar** | Order statistics: min/max | First scout to return from multiple paths; first canteen to leak |
+| 15 | **A Soma dos Pequenos** | Linearity of E/Var over indicator sums | Counting expected insomniac tribe members tonight |
+| 16 | **A Meia-Vida das Coisas** | Survival, hazard, memorylessness, exponential | Bronze vessel lifetimes; rope wear |
+| 17 | **Os Limites do Pior Caso** | Markov, Chebyshev; concentration | Bounding worst-case spore load given mean and variance |
+| 18 | **O Laço Escondido** | Covariance, indicator-covariance, dependence | Detecting whether sickness and bad weather are linked |
+| 19 | **A Espera pelo Sinal** | Waiting times, runs | Days until next aurora; turns until pattern |
+| 20 | **A Voz das Multidões** | Sample mean: LLN, CLT, sample-size inequalities | Archivists' multi-year almanacs; inferring "is this year normal" |
+
+**Cross-cutting — family 21**
+
+| # | Diegetic name | Mathematical concept | Canonical worldframe |
+|---|---|---|---|
+| 21 | **A Geometria do Acaso** | Geometric probability (point in region, broken-stick) | A worn rope breaks at random — can the pieces still tripod the Cinder vessel-stand? |
+
+The fire teaches in roughly the course's natural order (P0 → P1 → P2, with 21 woven in), but advanced families can unlock earlier through burn-bright streaks. Concept names are revealed within immersion; formal names appear occasionally as "the older word."
+
+**Journey-stage placement (P0)**: all three P0 families unlock in stage 1 (Cascade Foothills), the tutorial. Suggested in-tribe unlock order, which differs from numerical order by design:
+
+1. **Family 1 first** — most concrete: name $\Omega$, name the event.
+2. **Family 3 next** — the three rules of honest reckoning. Pairs naturally with 1.
+3. **Family 2 last (of P0)** — sequences and their limits, once finite reasoning is solid; bridges into the P1 combinatorial tier via the "alguma vez / sempre" intuition.
+
+PROVISIONAL: per-family parable iteration ongoing. Tightening targets (renumbered for iteration 6): **Family 10** needs a concrete numerical contrast (mean ≠ majority-winner); **Family 13** needs the additivity claim qualified to specific distributional families; **Family 19** needs to distinguish mean from median wait; **Family 12** needs explicit framing as decision-theoretic rather than purely probabilistic.
+
+### L1 / lista2 are reference material, not in-game content
+
+DECIDED: the source-PDF problems (L1's 29 problems, lista2's 34 problems, the worked solutions) are **reference material for authoring**, not the problems the player will see in-game. Every in-game problem is authored fresh, wrapped in tribal-life worldframes, with parameters varied per instance. The source corpus serves three purposes:
+
+1. **Coverage map** — which families have source problems, how rich the coverage is, where gaps lie.
+2. **Pattern library** — each source problem is an instance of a structural pattern; new in-game problems instantiate the same pattern with new parameters and worldframes.
+3. **Verification ground truth** — the worked answers in lista1 Soluções let the schema record final answers per problem, which the curriculum pipeline can use to validate that re-parameterized in-game variants produce the right shape of answer.
+
+Schema and populated entries live at `curriculum/` (see §14a below).
+
+### §14a Curriculum scaffolding
+
+DECIDED: structured artifacts under `curriculum/`:
+- `curriculum/README.md` — purpose, scope, how the directory is used
+- `curriculum/exercise-schema.md` — JSON schema spec for problem entries
+- `curriculum/problems.json` — populated entries, source-by-source
+- `curriculum/families.md` — per-family pattern library + source-problem index
+
+These are reference artifacts; runtime ships the in-game problem bank (authored separately, parameterized).
 
 ### The parable corpus
-DECIDED: the canonical voice of the Elder Fire teaching the 18 families is documented in `lore/contos_do_fogo_anciao.md` — *Os Contos do Fogo Ancião*, eighteen parables, one per family, each presenting the family's central intuition through a single lived scene (a path of footprints, a jar of chips, a worn rope, rain on a roof, two scouts returning at different speeds…). Each parable follows the same beat structure: scene → core intuition → bolded principle → counter-warning.
+DECIDED: the canonical voice of the Elder Fire teaching the families is documented in `lore/contos_do_fogo_anciao.md` — *Os Contos do Fogo Ancião*, twenty-one parables (iteration 6: 18 originals + 3 P0 additions), one per family, each presenting the family's central intuition through a single lived scene (a tecelã's loom, a batedor counting marés, a path of footprints, a jar of chips, a worn rope, rain on a roof, two scouts returning at different speeds…). Each parable follows the same beat structure: scene → core intuition → bolded principle → counter-warning.
 
 The parables are the source material for two downstream uses:
 - *cinder-voice* lines (in-camp teaching, the fire speaking to the Apprentice between exercises),
 - *exercise-intro* prose (problem framings in the curriculum pipeline; wrap intensities B and C draw their worldframes directly from the parable's scene).
 
-PROVISIONAL: alpha corpus is a working draft; per-family iteration ongoing. Several parables flagged for tightening: Family 7 needs a concrete numerical contrast (mean ≠ majority-winner), Family 10 needs the additivity claim qualified to specific distributional families, Family 16 needs to distinguish mean from median wait, Family 9 needs explicit framing as decision-theoretic rather than purely probabilistic.
+The 21 family headers in the corpus follow the iteration 6 numbering (P0 1–3 prepended; old 1–18 shifted by +3). Family 6 (As Bordas do Possível) is canonical now that the family is reinstated; the Phase 2 parables (families 11–21) ship as lore and become teaching templates when their families activate post-alpha.
 
 ---
 
@@ -624,6 +674,10 @@ Future PDFs from Prof. Giulio (or others) follow the same path. If the user ever
 ## 16. Open Design Questions
 
 **Resolved across iterations 3–4:** Provadora rename → Mestra da Leitura. Numerics → dual-mode (study/field). Misreading consequences → real, NPC-borne, never lethal to the protagonist. Localization → Portuguese-first. Default wrap intensity → B. Proofs in alpha → verbatim. Parameterization → yes. Concept names revealed within immersion → yes. **Cinder name → player-given via morning naming overlay; small pool serves as fallback default.** **Initiation Ritual structure → 13-phase opening (§9).** **Camp geography → tableland / chapada with cliff edges, scree base, sky-with-aurora-and-stars overhead (§6).** **Aurora diegetic name → "a serpente verde".** **Hearth physical configurations → stone pit (settled) and bronze cart (travelling), with ember-transfer rite between them.** **18-parable corpus drafted at `lore/contos_do_fogo_anciao.md` (§14); per-family iteration ongoing.**
+
+**Resolved iteration 5 (curriculum scope):** **Alpha curriculum scope → Phase 1 only (families 1, 2, 4, 5, 6, 7).** **Family 3 (As Bordas do Possível) → demoted from locked taxonomy to candidate; no source material in current corpus.** **Aula 1 foundations material (sample space, axioms, set operations, basic properties) → treated as prerequisite, not as a family.** **L1 / lista2 problems → reference material for authoring; in-game problems are authored fresh per the wrapping pipeline.** **Curriculum scaffolding → `curriculum/` directory with schema, problems.json, families.md, README (§14a).**
+
+**Resolved iteration 6 (P0 promotion):** **Aula 1 foundations material → promoted from "prerequisite, no family" to a P0 tier of three numbered families: 1 *A Forma do Mundo Possível* (sample space + events), 2 *A Roda das Inclusões* (sequences + De Morgan), 3 *As Juras da Chama* (Kolmogorov axioms + derived properties).** **Existing families 1–18 shifted by +3 to make room.** **Family 6 *As Bordas do Possível* → reinstated under permissive criterion (canonical concept + written parable; source material may follow).** **σ-algebra material → not given a numbered family; remains forward-compatible enrichment (no source material formalizes it).** **Tier nomenclature → P0 (foundations) / P1 (combinatorics & elementary probability) / P2 (random variables & inequalities) / cross-cutting.** **Alpha now covers families 1–10 (P0 + P1).** **Foundations exercises → `curriculum/exercises/foundations.md` (six exercises, two per P0 family).**
 
 **Still open:**
 
@@ -646,4 +700,4 @@ Future PDFs from Prof. Giulio (or others) follow the same path. If the user ever
 
 ---
 
-End of working draft, iteration 4. Iteration 5 once you've reacted, especially on §16.
+End of working draft, iteration 6. Iteration 7 once you've reacted, especially on §16.

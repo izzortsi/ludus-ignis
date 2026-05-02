@@ -1,4 +1,4 @@
-// Family 5 — A Mão Cega no Jarro — urn draws / classical sampling.
+// Family 8 — A Mão Cega no Jarro — urn draws / classical sampling.
 // Alpha-zero hand-authored set; A-style; Brazilian Portuguese.
 
 import { Exercise } from '../../core/exercises/exercise-model';
@@ -6,7 +6,7 @@ import { Exercise } from '../../core/exercises/exercise-model';
 export const aMaoCegaNoJarro: Exercise[] = [
   {
     id: 'amcj-1',
-    family: 5,
+    family: 8,
     conceptName: 'A Mão Cega no Jarro',
     difficulty: 1,
     statement:
@@ -16,7 +16,7 @@ export const aMaoCegaNoJarro: Exercise[] = [
   },
   {
     id: 'amcj-2',
-    family: 5,
+    family: 8,
     conceptName: 'A Mão Cega no Jarro',
     difficulty: 2,
     statement:
@@ -26,7 +26,7 @@ export const aMaoCegaNoJarro: Exercise[] = [
   },
   {
     id: 'amcj-3',
-    family: 5,
+    family: 8,
     conceptName: 'A Mão Cega no Jarro',
     difficulty: 2,
     statement:
@@ -36,7 +36,7 @@ export const aMaoCegaNoJarro: Exercise[] = [
   },
   {
     id: 'amcj-4',
-    family: 5,
+    family: 8,
     conceptName: 'A Mão Cega no Jarro',
     difficulty: 3,
     statement:
@@ -46,7 +46,7 @@ export const aMaoCegaNoJarro: Exercise[] = [
   },
   {
     id: 'amcj-5',
-    family: 5,
+    family: 8,
     conceptName: 'A Mão Cega no Jarro',
     difficulty: 3,
     statement:

@@ -1,4 +1,4 @@
-// Family 6 — O Caminho de Volta — extracted from Prof. Giulio's
+// Family 9 — O Caminho de Volta — extracted from Prof. Giulio's
 // "Lista de Exercícios 2 — Probabilidade Condicional - Fórmula de Bayes".
 //
 // All problems verified against the source PDF and the answer worked through
@@ -10,7 +10,7 @@ import { Exercise } from '../../core/exercises/exercise-model';
 export const oCaminhoDeVoltaLista2: Exercise[] = [
   {
     id: 'ocdv-l2-1',
-    family: 6,
+    family: 9,
     conceptName: 'O Caminho de Volta',
     difficulty: 2,
     statement:
@@ -21,7 +21,7 @@ export const oCaminhoDeVoltaLista2: Exercise[] = [
   },
   {
     id: 'ocdv-l2-2',
-    family: 6,
+    family: 9,
     conceptName: 'O Caminho de Volta',
     difficulty: 5,
     statement:
@@ -32,7 +32,7 @@ export const oCaminhoDeVoltaLista2: Exercise[] = [
   },
   {
     id: 'ocdv-l2-3',
-    family: 6,
+    family: 9,
     conceptName: 'O Caminho de Volta',
     difficulty: 3,
     statement:
@@ -43,7 +43,7 @@ export const oCaminhoDeVoltaLista2: Exercise[] = [
   },
   {
     id: 'ocdv-l2-4',
-    family: 6,
+    family: 9,
     conceptName: 'O Caminho de Volta',
     difficulty: 1,
     statement:

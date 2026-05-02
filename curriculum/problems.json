@@ -1,0 +1,736 @@
+{
+  "version": "0.1",
+  "_notes": [
+    "Schema: see exercise-schema.md.",
+    "Source problems are reference material; in-game problems will be authored fresh.",
+    "Difficulty 'advanced' is set when (**) appears in lista1 Soluções. Only L1.21 is visually confirmed; other L1 entries default to 'standard' pending full pass-through (see TODO at end).",
+    "lista2 has no published solutions in this corpus — answers null."
+  ],
+  "source_corpus": [
+    { "id": "L1",     "file": "course_material/L1.pdf",                     "kind": "exercise_list", "topic": "axiomas / probabilidade básica" },
+    { "id": "L1.sol", "file": "course_material/lista1 Soluções.pdf",         "kind": "solutions",     "for": "L1" },
+    { "id": "lista2", "file": "course_material/lista2.pdf",                  "kind": "exercise_list", "topic": "probabilidade condicional / Bayes" },
+    { "id": "Aula1",  "file": "course_material/Aula 1 -.pdf",               "kind": "lecture",       "topic": "foundations" },
+    { "id": "Aula2",  "file": "course_material/Aula 2.pdf",                 "kind": "lecture",       "topic": "classical examples" },
+    { "id": "Aula3",  "file": "course_material/Aula 3.-.pdf",               "kind": "lecture",       "topic": "conditional probability + Bayes" },
+    { "id": "Aula4",  "file": "course_material/Aula 4..pdf",                "kind": "lecture",       "topic": "independence" }
+  ],
+  "problems": [
+
+    {
+      "id": "L1.1", "source": "L1", "page": 1, "number": 1, "subitems": null,
+      "statement": "Em um experimento, um dado é rolado continuamente até que um 6 apareça, momento em que o experimento é interrompido. Qual é o espaço amostral do experimento? Chame de E_n o evento em que o dado é rolado n vezes para que o experimento seja finalizado. Que pontos do espaço amostral estão contidos em E_n? O que é (∪_{n=1}^∞ E_n)^c?",
+      "family": 1, "foundations": true, "pattern": "sample-space-infinite", "difficulty": "standard",
+      "concept_tags": ["sample-space", "infinite-sequences", "complement", "event-sequences", "cross-pattern-family-2"],
+      "parameters": [
+        { "name": "die_faces", "kind": "count", "source_value": 6 },
+        { "name": "stop_face", "kind": "count", "source_value": 6 }
+      ],
+      "answer": {
+        "kind": "narrative",
+        "value": {
+          "Omega": "{(6), (x_1,6), (x_1,x_2,6), ...} with x_i ∈ {1,2,3,4,5}",
+          "E_n": "{(x_1,...,x_{n-1},6) : x_i ∈ {1,2,3,4,5}}",
+          "complement_of_union": "{(x_1,x_2,...) : x_i ∈ {1,2,3,4,5} ∀i} — sequences where the 6 never appears"
+        },
+        "source": "L1.sol p.1"
+      },
+      "wrapping_notes": "Bone-token tossing until a particular sun-mark appears; describe the sample space."
+    },
+    {
+      "id": "L1.2", "source": "L1", "page": 1, "number": 2, "subitems": null,
+      "statement": "Dois dados são lançados. Seja E o evento em que a soma dos dados é ímpar, F o evento em que o número 1 sai em pelo menos um dos dados, e G o evento em que a soma dos dados é igual a 5. Descreva os eventos E∩F, E∪F, F∩G, E∩F^c e E∩F∩G.",
+      "family": 1, "foundations": true, "pattern": "set-algebra-on-events", "difficulty": "standard",
+      "concept_tags": ["set-operations", "event-enumeration"],
+      "parameters": [{ "name": "die_count", "kind": "count", "source_value": 2 }],
+      "answer": null,
+      "wrapping_notes": "Two-bone divination; describe overlaps and complements of three named omens."
+    },
+    {
+      "id": "L1.3", "source": "L1", "page": 1, "number": 3, "subitems": ["a", "b"],
+      "statement": "A, B e C se alternam jogando uma moeda. O primeiro a tirar cara vence. O espaço amostral deste experimento pode ser definido como S = {1, 01, 001, 0001, ..., 0000...}.",
+      "subitem_statements": {
+        "a": "Interprete o espaço amostral.",
+        "b": "Defina os eventos a seguir em termos de S: (i) A vence; (ii) B vence; (iii) (A ∪ B)^c. Suponha que A jogue a moeda primeiro, então B, então C, então A, e assim por diante."
+      },
+      "family": 1, "foundations": true, "pattern": "sample-space-infinite", "difficulty": "standard",
+      "concept_tags": ["sample-space", "infinite-sequences", "rotation", "complement"],
+      "parameters": [{ "name": "n_players", "kind": "count", "source_value": 3 }],
+      "answer": null,
+      "wrapping_notes": "Three apprentices alternating Cinder-tasks until one succeeds; describe whose turn it is in each outcome."
+    },
+    {
+      "id": "L1.4", "source": "L1", "page": 1, "number": 4, "subitems": ["a", "b", "c", "d"],
+      "statement": "Um sistema é formado por 5 componentes; cada um deles ou está funcionando ou está estragado. Considere um experimento que consiste em observar a condição de cada componente e represente o resultado do experimento como o vetor (x_1, x_2, x_3, x_4, x_5), onde x_i é igual a 1 se o componente i estiver funcionando e igual a 0 se o componente i estiver estragado.",
+      "subitem_statements": {
+        "a": "Existem quantos resultados no espaço amostral deste experimento?",
+        "b": "Suponha que o sistema irá funcionar se os componentes 1 e 2 estiverem funcionando, ou se os componentes 3 e 4 estiverem funcionando, ou se os componentes 1, 3 e 5 estiverem funcionando. Seja W o evento em que o sistema irá funcionar. Especifique todos os resultados em W.",
+        "c": "Seja A o evento em que os componentes 4 e 5 estão estragados. Quantos resultados estão contidos no evento A?",
+        "d": "Escreva todos os resultados no evento A ∩ W."
+      },
+      "family": 1, "foundations": true, "pattern": "sample-space-product", "difficulty": "standard",
+      "concept_tags": ["sample-space", "binary-vectors", "system-reliability", "set-enumeration"],
+      "parameters": [{ "name": "n_components", "kind": "count", "source_value": 5 }],
+      "answer": {
+        "kind": "exact",
+        "value": { "a": 32, "b": "enumerate vectors satisfying (x1=1∧x2=1)∨(x3=1∧x4=1)∨(x1=1∧x3=1∧x5=1)", "c": 8, "d": "enumerate intersection" },
+        "source": "L1.sol"
+      },
+      "wrapping_notes": "Five Cinders in a tribal cluster; system 'works' if quorum patterns of healthy Cinders are met."
+    },
+    {
+      "id": "L1.5", "source": "L1", "page": 2, "number": 5, "subitems": ["a", "b", "c"],
+      "statement": "Suponha que A e B sejam eventos disjuntos para os quais P(A) = 0,3 e P(B) = 0,5. Qual é a probabilidade de que: (a) A ∪ B ocorra? (b) A ocorra mas B não ocorra? (c) A e B ocorram?",
+      "family": 3, "foundations": true, "pattern": "disjoint-additivity", "difficulty": "standard",
+      "concept_tags": ["disjoint-events", "additivity", "complement"],
+      "parameters": [
+        { "name": "P_A", "kind": "probability", "source_value": 0.3 },
+        { "name": "P_B", "kind": "probability", "source_value": 0.5 },
+        { "name": "disjoint", "kind": "label", "source_value": true }
+      ],
+      "answer": { "kind": "exact", "value": { "a": 0.8, "b": 0.3, "c": 0 }, "source": "L1.sol", "notes": "Disjoint ⇒ P(A∪B)=P(A)+P(B); P(A∩B)=0; P(A\\B)=P(A)." },
+      "wrapping_notes": "Two omens that cannot both happen on the same morning; compute P(at least one), P(only one), P(both)."
+    },
+    {
+      "id": "L1.6", "source": "L1", "page": 2, "number": 6, "subitems": ["a", "b", "c"],
+      "statement": "Uma escola fundamental oferece três cursos de línguas: um de espanhol, um de francês e outro de alemão. As classes estão abertas para todos os 100 estudantes da escola. Há 28 estudantes na classe de espanhol, 26 na classe de francês e 16 na classe de alemão. Há 12 estudantes que fazem aulas de espanhol e francês, 4 que fazem aulas de espanhol e alemão, 6 que fazem aulas de francês e alemão. Além disso, há 2 estudantes fazendo os três cursos.",
+      "subitem_statements": {
+        "a": "Se um estudante é escolhido aleatoriamente, qual é a probabilidade de ele ou ela não esteja matriculado(a) em nenhum dos cursos?",
+        "b": "Se um estudante é escolhido aleatoriamente, qual é a probabilidade de que ele ou ela esteja fazendo exatamente um curso de línguas?",
+        "c": "Se dois estudantes são escolhidos aleatoriamente, qual é a probabilidade de que pelo menos um deles esteja fazendo um curso de línguas?"
+      },
+      "family": 5, "foundations": false, "pattern": "combinations-basic", "difficulty": "standard",
+      "concept_tags": ["inclusion-exclusion", "complement", "without-replacement"],
+      "parameters": [
+        { "name": "total_students", "kind": "count", "source_value": 100 },
+        { "name": "n_only_groups", "kind": "count", "source_value": 3 }
+      ],
+      "answer": null,
+      "wrapping_notes": "Three lineages within the tribe with overlapping skill-trainings; count who has none, exactly one, etc."
+    },
+    {
+      "id": "L1.7", "source": "L1", "page": 2, "number": 7, "subitems": ["a", "b", "c", "d", "e"],
+      "statement": "Certa cidade com uma população de 100.000 habitantes possui 3 jornais: I, II e III. As proporções de moradores que leem esses jornais são as seguintes: I: 10%, II: 8%, III: 4%, I e II: 6%, I e III: 3%, II e III: 2%, I, II e III: 1%.",
+      "subitem_statements": {
+        "a": "Determine o número de pessoas que leem apenas um jornal.",
+        "b": "Quantas pessoas leem pelo menos dois jornais?",
+        "c": "Se I e II são jornais matutinos e III é um jornal vespertino, quantas pessoas leem pelo menos um jornal matutino mais um jornal vespertino?",
+        "d": "Quantas pessoas não leem nenhum jornal?",
+        "e": "Quantas pessoas leem apenas um jornal matutino e um jornal vespertino?"
+      },
+      "family": 3, "foundations": true, "pattern": "multi-event-inclusion-exclusion", "difficulty": "standard",
+      "concept_tags": ["inclusion-exclusion", "venn-three-sets"],
+      "parameters": [{ "name": "population", "kind": "count", "source_value": 100000 }],
+      "answer": null,
+      "wrapping_notes": "Three orally-transmitted news-cycles in the tribe; count overlap of who hears which."
+    },
+    {
+      "id": "L1.8", "source": "L1", "page": 2, "number": 8, "subitems": ["a", "b", "c", "d", "e"],
+      "statement": "Se é assumido que todas as C(52,5) mãos de pôquer são igualmente prováveis, qual é a probabilidade de alguém sair com (a) um flush (todas 5 cartas mesmo naipe)? (b) um par (a,a,b,c,d)? (c) dois pares (a,a,b,b,c)? (d) trinca (a,a,a,b,c)? (e) quadra (a,a,a,a,b)?",
+      "family": 4, "foundations": false, "pattern": "permutations-with-repetition", "difficulty": "standard",
+      "concept_tags": ["combinatorics", "card-hands"],
+      "parameters": [
+        { "name": "deck_size", "kind": "count", "source_value": 52 },
+        { "name": "hand_size", "kind": "count", "source_value": 5 },
+        { "name": "n_ranks", "kind": "count", "source_value": 13 },
+        { "name": "n_suits", "kind": "count", "source_value": 4 }
+      ],
+      "answer": null,
+      "wrapping_notes": "Pre-collapse playing cards rediscovered; counting recurrence-pattern hands."
+    },
+    {
+      "id": "L1.9", "source": "L1", "page": 3, "number": 9, "subitems": ["a", "b", "c", "d", "e", "f", "g"],
+      "statement": "Pôquer com dados é jogado com o lançamento simultâneo de 5 dados. Mostre que: (a) P(nenhum dado de mesmo valor) = 0,0926. (b) P(um par) = 0,4630. (c) P(dois pares) = 0,2315. (d) P(trinca) = 0,1543. (e) P(uma trinca e um par) = 0,0386. (f) P(quadra) = 0,0193. (g) P(cinco dados iguais) = 0,0008.",
+      "family": 4, "foundations": false, "pattern": "permutations-with-repetition", "difficulty": "standard",
+      "concept_tags": ["combinatorics", "dice-poker", "multiset-counting"],
+      "parameters": [
+        { "name": "n_dice", "kind": "count", "source_value": 5 },
+        { "name": "die_faces", "kind": "count", "source_value": 6 }
+      ],
+      "answer": {
+        "kind": "decimal",
+        "value": { "a": 0.0926, "b": 0.4630, "c": 0.2315, "d": 0.1543, "e": 0.0386, "f": 0.0193, "g": 0.0008 },
+        "source": "L1.sol p.10",
+        "notes": "Total = 6^5 = 7776. Each pattern counted: choose values × distribute positions / 6^5."
+      },
+      "wrapping_notes": "Bone-token shake game with 5 tokens; identical pattern counting under tribal frame."
+    },
+    {
+      "id": "L1.10", "source": "L1", "page": 3, "number": 10, "subitems": null,
+      "statement": "Se 8 torres são colocadas aleatoriamente em um tabuleiro de xadrez, calcule a probabilidade de que nenhuma das torres possa capturar qualquer uma das demais. Isto é, compute a probabilidade de que nenhuma linha contenha mais que uma torre.",
+      "family": 4, "foundations": false, "pattern": "permutations-distinct", "difficulty": "standard",
+      "concept_tags": ["combinatorics", "n-rooks", "permutation-correspondence"],
+      "parameters": [
+        { "name": "board_size", "kind": "count", "source_value": 8 },
+        { "name": "n_rooks", "kind": "count", "source_value": 8 }
+      ],
+      "answer": null,
+      "wrapping_notes": "Placing tribal markers on a recovered ancient game board; non-attacking configurations."
+    },
+    {
+      "id": "L1.11", "source": "L1", "page": 3, "number": 11, "subitems": ["a", "b"],
+      "statement": "Uma pequena organização comunitária é formada por 20 famílias, das quais 4 têm uma criança, 8 têm duas crianças, 5 têm três crianças, 2 têm quatro crianças e 1 tem 5 crianças.",
+      "subitem_statements": {
+        "a": "Se uma dessas famílias é escolhida aleatoriamente, qual é a probabilidade de que ela tenha i crianças, i = 1, 2, 3, 4, 5?",
+        "b": "Se duas das crianças são escolhidas aleatoriamente, qual é a probabilidade de que a criança venha de uma família com i crianças, i = 1, 2, 3, 4, 5?"
+      },
+      "family": 8, "foundations": false, "pattern": "urn-weighted", "difficulty": "standard",
+      "concept_tags": ["size-biased-sampling", "discrete-distribution"],
+      "parameters": [
+        { "name": "n_families", "kind": "count", "source_value": 20 },
+        { "name": "family_counts_by_size", "kind": "label", "source_value": { "1": 4, "2": 8, "3": 5, "4": 2, "5": 1 } }
+      ],
+      "answer": null,
+      "wrapping_notes": "Tribal lineages with different numbers of apprentices; size-biased lineage selection vs uniform lineage selection."
+    },
+    {
+      "id": "L1.12", "source": "L1", "page": 3, "number": 12, "subitems": null,
+      "statement": "Rola-se um par de dados honestos. Qual é a probabilidade de o segundo dado sair com um valor maior do que o primeiro?",
+      "family": 10, "foundations": false, "pattern": "compare-two-dice", "difficulty": "standard",
+      "concept_tags": ["compare-iid", "symmetry", "tie"],
+      "parameters": [{ "name": "die_faces", "kind": "count", "source_value": 6 }],
+      "answer": { "kind": "exact", "value": "5/12", "source": "L1.sol", "notes": "P(X<Y) = (1 − P(X=Y))/2 = (1 − 1/6)/2 = 5/12." },
+      "wrapping_notes": "Two independent identical bone-shakes; chance the second outscores the first."
+    },
+    {
+      "id": "L1.13", "source": "L1", "page": 3, "number": 13, "subitems": null,
+      "statement": "Se dois dados são rolados, qual é a probabilidade de que a soma das faces para cima seja igual a i? Determine essa probabilidade para i = 2, 3, ..., 11, 12.",
+      "family": 1, "foundations": true, "pattern": "sample-space-finite", "difficulty": "standard",
+      "concept_tags": ["dice-sum-distribution"],
+      "parameters": [
+        { "name": "n_dice", "kind": "count", "source_value": 2 },
+        { "name": "die_faces", "kind": "count", "source_value": 6 }
+      ],
+      "answer": { "kind": "exact", "value": { "2": "1/36", "3": "2/36", "4": "3/36", "5": "4/36", "6": "5/36", "7": "6/36", "8": "5/36", "9": "4/36", "10": "3/36", "11": "2/36", "12": "1/36" }, "source": "L1.sol" },
+      "wrapping_notes": "Two-bone shake; tabulate probability of each possible sum (canonical introduction to discrete distributions)."
+    },
+    {
+      "id": "L1.14", "source": "L1", "page": 3, "number": 14, "subitems": null,
+      "statement": "Uma urna contém 3 bolas vermelhas e 7 bolas pretas. Os jogadores A e B retiram bolas da urna alternadamente até que uma bola vermelha seja selecionada. Determine a probabilidade de A selecionar uma bola vermelha. (A tira a primeira bola, depois B, e assim por diante. Não há devolução das bolas retiradas.)",
+      "family": 8, "foundations": false, "pattern": "urn-without-replacement", "difficulty": "standard",
+      "concept_tags": ["alternating-draws", "first-success"],
+      "parameters": [
+        { "name": "n_red", "kind": "count", "source_value": 3 },
+        { "name": "n_black", "kind": "count", "source_value": 7 }
+      ],
+      "answer": null,
+      "wrapping_notes": "Two scouts alternating through a token-pouch until a sun-mark; chance the first scout pulls it."
+    },
+    {
+      "id": "L1.15", "source": "L1", "page": 3, "number": 15, "subitems": ["a", "b"],
+      "statement": "Uma urna contém 5 bolas vermelhas, 6 bolas azuis e 8 bolas verdes. Se um conjunto de 3 bolas é selecionado aleatoriamente, qual é a probabilidade de que cada uma das bolas seja (a) da mesma cor? (b) de cores diferentes?",
+      "family": 8, "foundations": false, "pattern": "urn-multinomial-batch", "difficulty": "standard",
+      "concept_tags": ["hypergeometric", "color-classes"],
+      "parameters": [
+        { "name": "n_red", "kind": "count", "source_value": 5 },
+        { "name": "n_blue", "kind": "count", "source_value": 6 },
+        { "name": "n_green", "kind": "count", "source_value": 8 },
+        { "name": "k_drawn", "kind": "count", "source_value": 3 }
+      ],
+      "answer": null,
+      "wrapping_notes": "Three-color token draw; same color (omen confluence) vs all different (mixed signs)."
+    },
+    {
+      "id": "L1.16", "source": "L1", "page": 3, "number": 16, "subitems": ["a", "b", "c"],
+      "statement": "Uma urna contém n bolas brancas e m bolas pretas, onde n e m são números positivos. (a) Se duas bolas são retiradas da urna aleatoriamente, qual é a probabilidade de que elas sejam da mesma cor? (b) Se uma bola é retirada da urna aleatoriamente e então recolocada antes que a segunda bola seja retirada, qual é a probabilidade de que as bolas saiam da mesma cor? (c) Mostre que a probabilidade calculada na letra (b) é sempre maior do que aquela calculada na letra (a).",
+      "family": 8, "foundations": false, "pattern": "urn-with-replacement", "difficulty": "standard",
+      "concept_tags": ["with-vs-without-replacement", "comparison-proof"],
+      "parameters": [
+        { "name": "n_white", "kind": "count", "source_value": "n" },
+        { "name": "n_black", "kind": "count", "source_value": "m" }
+      ],
+      "answer": null,
+      "wrapping_notes": "The classic 'jar that remembers vs jar that forgets' contrast (Family 5's parable); ask which gives higher P(same color)."
+    },
+    {
+      "id": "L1.17", "source": "L1", "page": 4, "number": 17, "subitems": null,
+      "statement": "Um grupo de indivíduos contendo m meninos e n garotas é alinhado de forma aleatória; isto é, supõe-se que cada uma das (m+n)! permutações seja igualmente provável. Qual é a probabilidade de que a pessoa na i-ésima posição, 1 ≤ i ≤ m+n, seja uma garota?",
+      "family": 4, "foundations": false, "pattern": "arrangements-with-position", "difficulty": "standard",
+      "concept_tags": ["permutation-symmetry", "marginal-position"],
+      "parameters": [
+        { "name": "m_boys", "kind": "count", "source_value": "m" },
+        { "name": "n_girls", "kind": "count", "source_value": "n" }
+      ],
+      "answer": { "kind": "expression", "value": "n / (m+n)", "source": "L1.sol", "notes": "By symmetry, every position is equally likely to hold any individual." },
+      "wrapping_notes": "Apprentices and tenders mixed in a procession; chance position i is an apprentice."
+    },
+    {
+      "id": "L1.18", "source": "L1", "page": 4, "number": 18, "subitems": ["a", "b"],
+      "statement": "Duas cartas são escolhidas aleatoriamente de um baralho de 52 cartas. Qual é a probabilidade de (a) ambas serem ases? (b) ambas terem o mesmo valor?",
+      "family": 5, "foundations": false, "pattern": "combinations-basic", "difficulty": "standard",
+      "concept_tags": ["card-pairs", "without-replacement"],
+      "parameters": [{ "name": "deck_size", "kind": "count", "source_value": 52 }, { "name": "n_drawn", "kind": "count", "source_value": 2 }],
+      "answer": null,
+      "wrapping_notes": "Two artifacts drawn from a recovered chest; pair likelihood."
+    },
+    {
+      "id": "L1.19", "source": "L1", "page": 4, "number": 19, "subitems": ["a", "b"],
+      "statement": "Um instrutor propõe para a classe um conjunto de 10 problemas com a informação de que o exame final será formado por uma seleção aleatória de 5 deles. Se um estudante tiver descoberto como resolver 7 dos problemas, qual é a probabilidade de ele ou ela venha a responder corretamente: (a) todos os 5 problemas? (b) pelo menos 4 dos problemas?",
+      "family": 5, "foundations": false, "pattern": "combinations-stratified", "difficulty": "standard",
+      "concept_tags": ["hypergeometric", "study-coverage"],
+      "parameters": [
+        { "name": "n_total", "kind": "count", "source_value": 10 },
+        { "name": "n_known", "kind": "count", "source_value": 7 },
+        { "name": "n_drawn", "kind": "count", "source_value": 5 }
+      ],
+      "answer": null,
+      "wrapping_notes": "An apprentice studies 7 of 10 known sample-prep rituals; the Mestra picks 5 to demonstrate."
+    },
+    {
+      "id": "L1.20", "source": "L1", "page": 4, "number": 20, "subitems": null,
+      "statement": "Existem n meias em uma gaveta, 3 das quais são vermelhas. Qual é o valor de n se a probabilidade de que duas meias vermelhas sejam retiradas aleatoriamente da gaveta é 1/12?",
+      "family": 8, "foundations": false, "pattern": "urn-multinomial-batch", "difficulty": "standard",
+      "concept_tags": ["solve-for-n", "hypergeometric"],
+      "parameters": [{ "name": "n_red", "kind": "count", "source_value": 3 }, { "name": "P_target", "kind": "probability", "source_value": "1/12" }],
+      "answer": { "kind": "exact", "value": 9, "source": "L1.sol p.20", "notes": "C(3,2)/C(n,2) = 1/12 ⇒ C(n,2) = 36 ⇒ n=9." },
+      "wrapping_notes": "Tokens of two kinds in a pouch; given the chance of two specific draws, infer total."
+    },
+    {
+      "id": "L1.21", "source": "L1", "page": 4, "number": 21, "subitems": null,
+      "statement": "Uma cidade contém 4 pessoas que consertam televisões. Se 4 aparelhos estiverem estragados, qual é a probabilidade de que exatamente 2 dos técnicos sejam chamados? Que suposições você está fazendo?",
+      "family": 5, "foundations": false, "pattern": "combinations-stratified", "difficulty": "advanced",
+      "concept_tags": ["surjection-counting", "complement"],
+      "parameters": [{ "name": "n_repairers", "kind": "count", "source_value": 4 }, { "name": "n_devices", "kind": "count", "source_value": 4 }],
+      "answer": { "kind": "exact", "value": "21/64", "source": "L1.sol p.20", "notes": "C(4,2) · (2^4 − 2) / 4^4 = 6·14/256 = 84/256 = 21/64." },
+      "wrapping_notes": "Four token-makers in the camp; 4 broken vessels; chance exactly 2 are summoned."
+    },
+    {
+      "id": "L1.22", "source": "L1", "page": 4, "number": 22, "subitems": null,
+      "statement": "Se um dado é rolado 4 vezes, qual é a probabilidade de que o 6 saia pelo menos uma vez?",
+      "family": 7, "foundations": false, "pattern": "bernoulli-trials", "difficulty": "standard",
+      "concept_tags": ["complement", "at-least-one"],
+      "parameters": [{ "name": "n_rolls", "kind": "count", "source_value": 4 }, { "name": "die_faces", "kind": "count", "source_value": 6 }],
+      "answer": { "kind": "exact", "value": "1 − (5/6)^4 ≈ 0.5177", "source": "L1.sol" },
+      "wrapping_notes": "Four bone-shakes in a row; chance the sun-mark appears at least once."
+    },
+    {
+      "id": "L1.23", "source": "L1", "page": 4, "number": 23, "subitems": null,
+      "statement": "Dois dados são jogados n vezes em sequência. Compute a probabilidade de que um duplo 6 apareça pelo menos uma vez. Quão grande precisa ser n para que essa probabilidade seja pelo menos igual a 1/2?",
+      "family": 7, "foundations": false, "pattern": "bernoulli-trials", "difficulty": "standard",
+      "concept_tags": ["complement", "solve-for-n"],
+      "parameters": [{ "name": "single_trial_p", "kind": "probability", "source_value": "1/36" }],
+      "answer": { "kind": "exact", "value": "n ≥ 25", "source": "L1.sol", "notes": "1 − (35/36)^n ≥ 1/2 ⇒ n ≥ ln(0.5)/ln(35/36) ≈ 24.6." },
+      "wrapping_notes": "Two-bone shakes repeated; smallest n for double-mark with ≥ 50% chance."
+    },
+    {
+      "id": "L1.24", "source": "L1", "page": 4, "number": 24, "subitems": ["a", "b", "c"],
+      "statement": "Cinco pessoas, designadas como A, B, C, D, E, são arranjadas em uma sequência linear. Supondo que cada uma das ordenações possíveis seja igualmente provável, qual é a probabilidade de que (a) exista exatamente uma pessoa entre A e B? (b) existam exatamente duas pessoas entre A e B? (c) existam três pessoas entre A e B?",
+      "family": 4, "foundations": false, "pattern": "arrangements-with-adjacency", "difficulty": "standard",
+      "concept_tags": ["gap-counting", "permutation-symmetry"],
+      "parameters": [{ "name": "n_people", "kind": "count", "source_value": 5 }],
+      "answer": null,
+      "wrapping_notes": "Five elders in procession; chance of exact gap-distance between two named ones."
+    },
+    {
+      "id": "L1.25", "source": "L1", "page": 4, "number": 25, "subitems": null,
+      "statement": "Quantas pessoas têm de estar em uma sala para que a probabilidade de que pelo menos duas delas celebrem aniversário no mesmo dia seja igual a 1/2? Suponha que todos os possíveis resultados mensais sejam igualmente prováveis.",
+      "family": 4, "foundations": false, "pattern": "permutations-distinct", "difficulty": "standard",
+      "concept_tags": ["birthday-problem", "complement"],
+      "parameters": [{ "name": "n_days", "kind": "count", "source_value": 365 }],
+      "answer": { "kind": "exact", "value": 23, "source": "L1.sol / Aula2 p.7", "notes": "Standard birthday problem: smallest n with 1 − ∏(365−i)/365 ≥ 1/2." },
+      "wrapping_notes": "Apprentice gathering: smallest tribe-meeting size with ≥50% chance of two same-day-born."
+    },
+    {
+      "id": "L1.26", "source": "L1", "page": 5, "number": 26, "subitems": null,
+      "statement": "Um grupo de 6 homens e 6 mulheres é dividido aleatoriamente em 2 grupos de 6 pessoas cada. Qual é a probabilidade de que ambos os grupos possuam o mesmo número de homens?",
+      "family": 5, "foundations": false, "pattern": "combinations-stratified", "difficulty": "standard",
+      "concept_tags": ["balanced-split", "hypergeometric"],
+      "parameters": [
+        { "name": "n_men", "kind": "count", "source_value": 6 },
+        { "name": "n_women", "kind": "count", "source_value": 6 },
+        { "name": "n_groups", "kind": "count", "source_value": 2 },
+        { "name": "group_size", "kind": "count", "source_value": 6 }
+      ],
+      "answer": null,
+      "wrapping_notes": "12 scouts split into two equal bands; chance both have equal lineage parity."
+    },
+    {
+      "id": "L1.27", "source": "L1", "page": 5, "number": 27, "subitems": null,
+      "statement": "Se quatro casais estão dispostos em linha, determine a probabilidade de que nenhum marido se sente ao lado de sua esposa.",
+      "family": 4, "foundations": false, "pattern": "arrangements-with-adjacency", "difficulty": "advanced",
+      "concept_tags": ["inclusion-exclusion", "derangement-style"],
+      "parameters": [{ "name": "n_couples", "kind": "count", "source_value": 4 }],
+      "answer": null,
+      "wrapping_notes": "Four bonded pairs of elders seated; no pair sits adjacent (inclusion-exclusion)."
+    },
+    {
+      "id": "L1.28", "source": "L1", "page": 5, "number": 28, "subitems": null,
+      "statement": "Suponha que 5 pessoas devam ser selecionadas aleatoriamente de um grupo de 20 indivíduos formados por 10 casais, e que queiramos determinar P(N), a probabilidade de que os 5 escolhidos não estejam relacionados (isto é, que nenhum par de pessoas selecionadas seja um casal). Determine P(N).",
+      "family": 4, "foundations": false, "pattern": "arrangements-with-adjacency", "difficulty": "advanced",
+      "concept_tags": ["pair-exclusion", "hypergeometric-style"],
+      "parameters": [{ "name": "n_couples", "kind": "count", "source_value": 10 }, { "name": "n_drawn", "kind": "count", "source_value": 5 }],
+      "answer": null,
+      "wrapping_notes": "Pick 5 from 10 lineage pairs; nobody picked is paired with another picked one."
+    },
+    {
+      "id": "L1.29", "source": "L1", "page": 5, "number": 29, "subitems": ["a", "b"],
+      "statement": "No jogo de bridge, o baralho de 52 cartas é inteiramente distribuído entre 4 jogadores. Qual é a probabilidade de (a) um dos jogadores receber todas as treze cartas do naipe de espadas? (b) cada jogador receber um ás?",
+      "family": 5, "foundations": false, "pattern": "urn-pile-distribution", "difficulty": "standard",
+      "concept_tags": ["multinomial", "bridge-deal"],
+      "parameters": [{ "name": "deck_size", "kind": "count", "source_value": 52 }, { "name": "n_players", "kind": "count", "source_value": 4 }],
+      "answer": { "kind": "expression", "value": { "a": "4 / C(52,13) ≈ 6.3e-12", "b": "4! · C(48,12) · C(36,12) · C(24,12) / [C(52,13) · C(39,13) · C(26,13)]" }, "source": "L1.sol p.27" },
+      "wrapping_notes": "Multinomial deal of 52 ritual tokens to 4 lineages; chance one lineage gets all of one suit, or all four get one ace."
+    },
+
+    {
+      "id": "lista2.1", "source": "lista2", "page": 1, "number": 1, "subitems": null,
+      "statement": "Qual é a probabilidade de que pelo menos um de um par de dados honestos caia no 6, dado que a soma dos dados seja i, i = 2, 3, ..., 12?",
+      "family": 9, "foundations": false, "pattern": "bayes-direct", "difficulty": "standard",
+      "concept_tags": ["conditioning-on-sum", "dice"],
+      "parameters": [{ "name": "die_count", "kind": "count", "source_value": 2 }],
+      "answer": null,
+      "wrapping_notes": "Given the apparent sum of two-bone-throw, posterior on whether one specific mark appeared."
+    },
+    {
+      "id": "lista2.2", "source": "lista2", "page": 1, "number": 2, "subitems": null,
+      "statement": "Uma urna contém 6 bolas brancas e 9 bolas pretas. Se 4 bolas devem ser selecionadas aleatoriamente sem devolução, qual é a probabilidade de que as 2 primeiras bolas selecionadas sejam brancas e as 2 últimas sejam pretas?",
+      "family": 8, "foundations": false, "pattern": "urn-without-replacement", "difficulty": "standard",
+      "concept_tags": ["sequential-draws", "ordered-pattern"],
+      "parameters": [{ "name": "n_white", "kind": "count", "source_value": 6 }, { "name": "n_black", "kind": "count", "source_value": 9 }],
+      "answer": null,
+      "wrapping_notes": "Token-pouch draws in a specific order; chance of WWBB pattern."
+    },
+    {
+      "id": "lista2.3", "source": "lista2", "page": 1, "number": 3, "subitems": null,
+      "statement": "Considere 3 urnas. A urna A contém 2 bolas brancas e 4 bolas vermelhas, a urna B contém 8 bolas brancas e 4 bolas vermelhas, e a urna C contém 1 bola branca e 4 bolas vermelhas. Se 1 bola é selecionada de cada urna, qual é a probabilidade de que a bola escolhida da urna A seja branca, dado que exatamente 2 bolas brancas tenham sido selecionadas?",
+      "family": 9, "foundations": false, "pattern": "bayes-partition", "difficulty": "standard",
+      "concept_tags": ["multi-urn", "posterior-given-marginal"],
+      "parameters": [{ "name": "n_urns", "kind": "count", "source_value": 3 }],
+      "answer": null,
+      "wrapping_notes": "Three Cinder Readings simultaneously across the camp; given exactly two indicate 'safe', what's the chance the Hearth's Reading was 'safe'?"
+    },
+    {
+      "id": "lista2.4", "source": "lista2", "page": 1, "number": 4, "subitems": null,
+      "statement": "Uma gravidez ectópica é duas vezes mais provável em mulheres fumantes do que em mulheres não fumantes. Se 32% das mulheres em idade reprodutiva são fumantes, que percentual das mulheres com gravidez ectópica são fumantes?",
+      "family": 9, "foundations": false, "pattern": "bayes-direct", "difficulty": "standard",
+      "concept_tags": ["medical-bayes", "relative-risk"],
+      "parameters": [
+        { "name": "P_smoker", "kind": "probability", "source_value": 0.32 },
+        { "name": "relative_risk", "kind": "ratio", "source_value": 2 }
+      ],
+      "answer": null,
+      "wrapping_notes": "A southern mirror-tide event is twice as likely in stagnant water as in flowing; given a tide event, posterior on water condition."
+    },
+    {
+      "id": "lista2.5", "source": "lista2", "page": 1, "number": 5, "subitems": null,
+      "statement": "Noventa e oito por cento de todos os bebês sobrevivem ao parto. Entretanto, 15% dos nascimentos envolvem cesarianas (C), e, quando uma cesariana é realizada, os bebês sobrevivem em 96% dos casos. Determine a probabilidade de que um bebê sobreviva dado que o nascimento não foi por cesariana.",
+      "family": 9, "foundations": false, "pattern": "bayes-partition", "difficulty": "standard",
+      "concept_tags": ["medical-bayes", "law-of-total-probability"],
+      "parameters": [
+        { "name": "P_survival", "kind": "probability", "source_value": 0.98 },
+        { "name": "P_C", "kind": "probability", "source_value": 0.15 },
+        { "name": "P_survival_given_C", "kind": "probability", "source_value": 0.96 }
+      ],
+      "answer": null,
+      "wrapping_notes": "Cinder kindling rate 98% overall; 15% kindlings use the slow ember rite (96% of those succeed). What's the success rate for the fast rite?"
+    },
+    {
+      "id": "lista2.6", "source": "lista2", "page": 1, "number": 6, "subitems": ["a", "b"],
+      "statement": "Em certa comunidade, 36% das famílias têm um cão e 22% das famílias que possuem um cão também possuem um gato. Além disso, 30% das famílias têm um gato. (a) Qual é a probabilidade de que uma família aleatoriamente selecionada tenha tanto um cão quanto um gato? (b) Qual é a probabilidade condicional de que uma família aleatoriamente selecionada tenha um cão, dado que ela tem um gato?",
+      "family": 9, "foundations": false, "pattern": "bayes-direct", "difficulty": "standard",
+      "concept_tags": ["conditional-probability", "joint-from-marginal-and-conditional"],
+      "parameters": [
+        { "name": "P_dog", "kind": "probability", "source_value": 0.36 },
+        { "name": "P_cat_given_dog", "kind": "probability", "source_value": 0.22 },
+        { "name": "P_cat", "kind": "probability", "source_value": 0.30 }
+      ],
+      "answer": null,
+      "wrapping_notes": "Tribe families with sleep-companion animals; joint and reverse-conditional."
+    },
+    {
+      "id": "lista2.7", "source": "lista2", "page": 1, "number": 7, "subitems": ["a", "b"],
+      "statement": "Um total de 48% das mulheres e 37% dos homens que fizeram um curso para parar de fumar permaneceu sem fumar por pelo menos um ano após o final do curso. Suponha que todos aqueles que permaneceram sem fumar participaram de uma festa de comemoração ao final do ano. Sabe-se que, entre os participantes do curso, 62% eram homens. (a) Qual é o percentual de mulheres entre os participantes da festa? (b) Que percentual da turma original participou da festa?",
+      "family": 9, "foundations": false, "pattern": "bayes-partition", "difficulty": "standard",
+      "concept_tags": ["weighted-mixture", "reverse-conditional"],
+      "parameters": [
+        { "name": "P_women_quit", "kind": "probability", "source_value": 0.48 },
+        { "name": "P_men_quit", "kind": "probability", "source_value": 0.37 },
+        { "name": "P_men_in_class", "kind": "probability", "source_value": 0.62 }
+      ],
+      "answer": null,
+      "wrapping_notes": "Two cohorts of apprentices with different success rates at a ritual; mixture posterior."
+    },
+    {
+      "id": "lista2.8", "source": "lista2", "page": 2, "number": 8, "subitems": ["a", "b"],
+      "statement": "Cinquenta e dois por cento dos estudantes de certa faculdade são mulheres. Cinco por cento dos estudantes da faculdade estão se formando em ciência da computação. Dois por cento dos estudantes são mulheres se formando em ciência da computação. Se um estudante é selecionado aleatoriamente, determine a probabilidade condicional de que um estudante (a) seja mulher dado que está se formando em ciência da computação; (b) esteja se formando em ciência da computação dado que ela é uma mulher.",
+      "family": 9, "foundations": false, "pattern": "bayes-direct", "difficulty": "standard",
+      "concept_tags": ["two-way-conditional"],
+      "parameters": [
+        { "name": "P_woman", "kind": "probability", "source_value": 0.52 },
+        { "name": "P_cs", "kind": "probability", "source_value": 0.05 },
+        { "name": "P_woman_and_cs", "kind": "probability", "source_value": 0.02 }
+      ],
+      "answer": null,
+      "wrapping_notes": "Tribe lineage by craft specialization; two-way conditional."
+    },
+    {
+      "id": "lista2.9", "source": "lista2", "page": 2, "number": 9, "subitems": ["a", "b", "c"],
+      "statement": "Um total de 500 casais que trabalham participaram de uma pesquisa sobre seus salários anuais, tendo-se como resultado a tabela: Esposa<25k & Marido<25k: 212, Esposa<25k & Marido>25k: 198, Esposa>25k & Marido<25k: 36, Esposa>25k & Marido>25k: 54. (a) probabilidade de o marido ganhar menos que R$25.000? (b) prob. condicional de a mulher ganhar mais que R$25.000 dado que o marido ganha mais? (c) prob. condicional de a mulher ganhar mais dado que o marido ganha menos?",
+      "family": 9, "foundations": false, "pattern": "bayes-direct", "difficulty": "standard",
+      "concept_tags": ["contingency-table", "marginal-and-conditional"],
+      "parameters": [{ "name": "n_couples", "kind": "count", "source_value": 500 }],
+      "answer": null,
+      "wrapping_notes": "Tribal lineage-pair survey: tabulated joint outcomes; compute marginal and conditional rates."
+    },
+    {
+      "id": "lista2.10", "source": "lista2", "page": 2, "number": 10, "subitems": ["a", "b"],
+      "statement": "Um dado vermelho, um azul e um amarelo (todos honestos) são rolados. Estamos interessados na probabilidade de que o número que sai no dado azul seja menor do que aquele que sai no dado amarelo, e que este seja menor do que o número que sai no dado vermelho. Isto é, com B, A, V representando, respectivamente, os resultados dos dados azul, amarelo e vermelho, queremos calcular P(B < A < V). (a) Qual é a probabilidade de que um mesmo número não saia em dois dados? (b) Dado que um mesmo número não saia em dois dados, qual é a probabilidade condicional de que B < A < V?",
+      "family": 10, "foundations": false, "pattern": "compare-two-dice", "difficulty": "standard",
+      "concept_tags": ["multi-dice-ordering", "conditioning-on-distinct"],
+      "parameters": [{ "name": "die_count", "kind": "count", "source_value": 3 }],
+      "answer": null,
+      "wrapping_notes": "Three colored bone-throws; chance of strict ordering, factored via 'all distinct'."
+    },
+    {
+      "id": "lista2.11", "source": "lista2", "page": 2, "number": 11, "subitems": ["a", "b"],
+      "statement": "A urna I contém 2 bolas brancas e 4 bolas vermelhas, enquanto a urna II contém 1 bola branca e 1 bola vermelha. Uma bola é retirada aleatoriamente da urna I e colocada na urna II, e então uma bola é retirada aleatoriamente da urna II. (a) Qual é a probabilidade de que a bola selecionada da urna II seja branca? (b) Qual é a probabilidade condicional de que a bola transferida seja branca dado que uma bola branca tenha sido selecionada da urna II?",
+      "family": 8, "foundations": false, "pattern": "urn-with-replacement", "difficulty": "standard",
+      "concept_tags": ["urn-transfer", "bayes-partition"],
+      "parameters": [],
+      "answer": null,
+      "wrapping_notes": "Token transferred between two pouches before final draw; backwards-infer the transfer."
+    },
+    {
+      "id": "lista2.12", "source": "lista2", "page": 2, "number": 12, "subitems": null,
+      "statement": "Suponha que 5% dos homens e 0,25% das mulheres sejam daltônicos. Uma pessoa daltônica é escolhida aleatoriamente. Qual é a probabilidade dessa pessoa ser um homem? Suponha que existam duas vezes mais homens do que mulheres na população.",
+      "family": 9, "foundations": false, "pattern": "bayes-direct", "difficulty": "standard",
+      "concept_tags": ["medical-bayes", "biased-population"],
+      "parameters": [
+        { "name": "P_male_in_pop", "kind": "probability", "source_value": "2/3" },
+        { "name": "P_cb_given_male", "kind": "probability", "source_value": 0.05 },
+        { "name": "P_cb_given_female", "kind": "probability", "source_value": 0.0025 }
+      ],
+      "answer": null,
+      "wrapping_notes": "Vision-defect prevalence differs across lineage; given a defective Reader, posterior on lineage."
+    },
+    {
+      "id": "lista2.13", "source": "lista2", "page": 2, "number": 13, "subitems": ["a", "b"],
+      "statement": "Suponha que um baralho comum de 52 cartas seja embaralhado e que suas cartas sejam então viradas uma a uma até que o primeiro ás apareça. Dado que o primeiro ás é a ℓ-ésima carta a aparecer, qual é a probabilidade condicional de que a carta seguinte seja (a) o ás de espadas? (b) o dois de paus?",
+      "family": 9, "foundations": false, "pattern": "bayes-direct", "difficulty": "advanced",
+      "concept_tags": ["card-position", "subtle-conditioning"],
+      "parameters": [{ "name": "deck_size", "kind": "count", "source_value": 52 }],
+      "answer": null,
+      "wrapping_notes": "Token-deck flipped one by one until first sun-mark; conditional on its position, what's next."
+    },
+    {
+      "id": "lista2.14", "source": "lista2", "page": 3, "number": 14, "subitems": null,
+      "statement": "Há 15 bolas de tênis em uma caixa, das quais 9 nunca foram usadas anteriormente. Três bolas são selecionadas aleatoriamente, utilizadas em uma partida, e então devolvidas para a caixa. Mais tarde, outras três bolas são retiradas aleatoriamente da caixa. Determine a probabilidade de que nenhuma dessas bolas tenha sido usada anteriormente.",
+      "family": 8, "foundations": false, "pattern": "urn-without-replacement", "difficulty": "advanced",
+      "concept_tags": ["multi-stage-draw", "law-of-total-probability"],
+      "parameters": [
+        { "name": "n_total", "kind": "count", "source_value": 15 },
+        { "name": "n_unused_initial", "kind": "count", "source_value": 9 },
+        { "name": "k_first", "kind": "count", "source_value": 3 },
+        { "name": "k_second", "kind": "count", "source_value": 3 }
+      ],
+      "answer": null,
+      "wrapping_notes": "Tokens used and returned to a pouch; later draws condition on previous use."
+    },
+    {
+      "id": "lista2.15", "source": "lista2", "page": 3, "number": 15, "subitems": null,
+      "statement": "Considere duas caixas: a primeira contém 1 bola branca e 1 bola preta, e a segunda contém 2 bolas pretas. Uma caixa é selecionada aleatoriamente e, em seguida, uma bola é retirada aleatoriamente. Qual é a probabilidade de que a bola retirada seja preta? Qual é a probabilidade condicional de que a caixa escolhida seja a primeira, dado que a bola retirada é preta?",
+      "family": 9, "foundations": false, "pattern": "bayes-partition", "difficulty": "standard",
+      "concept_tags": ["box-and-ball", "canonical-partition"],
+      "parameters": [],
+      "answer": null,
+      "wrapping_notes": "Choose between two pouches uniformly, then draw — backwards infer the pouch from the color."
+    },
+    {
+      "id": "lista2.16", "source": "lista2", "page": 3, "number": 16, "subitems": ["a", "b"],
+      "statement": "Dona Maria acabou de fazer uma biópsia para verificar a existência de um tumor cancerígeno. Evitando estragar um evento de família no final de semana, ela não quer ouvir nenhuma má notícia nos próximos dias. Mas se ela disser ao médico para telefonar-lhe somente se as notícias forem boas, então, se o médico não ligar, Dona Maria pode concluir que as notícias não são boas. Assim, sendo uma estudante de probabilidade, Dona Aquina instrui o médico a jogar uma moeda. Se der cara, o doutor deverá telefoná-lhe se as novidades forem boas e não telefonar-lhe se elas forem más. Se a moeda der coroa, o médico não deverá telefonar-lhe. Dessa maneira, mesmo se o médico não telefonar-lhe, as notícias não serão necessariamente más. Seja α a probabilidade de que o tumor seja cancerígeno e β a probabilidade condicional de que o tumor seja cancerígeno dado que o médico não faça o telefonema. (a) Qual probabilidade é maior, α ou β? (b) Determine β em termos de α e demonstre a sua resposta da letra (a).",
+      "family": 9, "foundations": false, "pattern": "bayes-counterintuitive", "difficulty": "advanced",
+      "concept_tags": ["randomized-disclosure", "posterior-shift"],
+      "parameters": [{ "name": "alpha_prior", "kind": "probability", "source_value": "α" }],
+      "answer": null,
+      "wrapping_notes": "Strong candidate for an in-game vignette: an apprentice asks the Mestra a question with a randomized 'silence' protocol to soften bad news."
+    },
+    {
+      "id": "lista2.17", "source": "lista2", "page": 3, "number": 17, "subitems": ["a", "b"],
+      "statement": "Uma família tem r crianças com probabilidade p_r, onde p_1 = 0,1, p_2 = 0,25, p_3 = 0,35, p_4 = 0,3. Uma criança desta família é escolhida aleatoriamente. Dado que é a primogênita, determine a probabilidade condicional de que a família tenha (a) apenas 1 criança; (b) 4 crianças. Repita as letras (a) e (b) quando a criança selecionada aleatoriamente for a caçula.",
+      "family": 9, "foundations": false, "pattern": "bayes-partition", "difficulty": "standard",
+      "concept_tags": ["size-biased", "birth-order"],
+      "parameters": [{ "name": "family_size_pmf", "kind": "distribution-shape", "source_value": { "1": 0.1, "2": 0.25, "3": 0.35, "4": 0.3 } }],
+      "answer": null,
+      "wrapping_notes": "Tribal family-size distribution; given sampled child is firstborn or youngest, posterior on family size."
+    },
+    {
+      "id": "lista2.18", "source": "lista2", "page": 3, "number": 18, "subitems": ["a", "b"],
+      "statement": "Em dias chuvosos, Joe chega atrasado ao trabalho com probabilidade 0,7; em dias não chuvosos, ele chega atrasado com probabilidade 0,1. Com probabilidade 0,7, choverá amanhã. (a) Determine a probabilidade de Joe chegar cedo amanhã. (b) Dado que Joe tenha chegado cedo, qual é a probabilidade condicional de que tenha chovido?",
+      "family": 9, "foundations": false, "pattern": "bayes-direct", "difficulty": "standard",
+      "concept_tags": ["weather-bayes", "two-state"],
+      "parameters": [
+        { "name": "P_late_given_rain", "kind": "probability", "source_value": 0.7 },
+        { "name": "P_late_given_dry", "kind": "probability", "source_value": 0.1 },
+        { "name": "P_rain", "kind": "probability", "source_value": 0.7 }
+      ],
+      "answer": null,
+      "wrapping_notes": "A scout is delayed more on tide-days; given they returned on time, posterior on whether the tide came."
+    },
+    {
+      "id": "lista2.19", "source": "lista2", "page": 3, "number": 19, "subitems": ["a", "b"],
+      "statement": "Com probabilidade 0,6, o presente foi escondido pela mãe; com probabilidade 0,4, foi escondido pelo pai. Quando a mãe esconde o presente, ela o esconde em 70% das vezes no segundo andar, e em 30% das vezes no primeiro andar. Quando o pai esconde o presente, ele o esconde em 50% das vezes no primeiro andar e em 50% das vezes no segundo andar. (a) Qual é a probabilidade de o presente estar no segundo andar? (b) Dado que ele está no primeiro andar, qual é a probabilidade de que tenha sido escondido pelo pai?",
+      "family": 9, "foundations": false, "pattern": "bayes-partition", "difficulty": "standard",
+      "concept_tags": ["two-source-bayes", "location-inference"],
+      "parameters": [
+        { "name": "P_mother", "kind": "probability", "source_value": 0.6 },
+        { "name": "P_2f_given_mother", "kind": "probability", "source_value": 0.7 },
+        { "name": "P_1f_given_father", "kind": "probability", "source_value": 0.5 }
+      ],
+      "answer": null,
+      "wrapping_notes": "Tender or apprentice hid the spare flint; observed location → who hid it."
+    },
+    {
+      "id": "lista2.20", "source": "lista2", "page": 4, "number": 20, "subitems": ["a", "b", "c"],
+      "statement": "Um jogador tem uma moeda honesta e uma moeda com duas caras em seus bolsos. Ele seleciona uma moeda aleatoriamente; quando a joga, ela dá cara. (a) Qual é a probabilidade de esta moeda ser a honesta? (b) Suponha que o jogador jogue a mesma moeda uma segunda vez e novamente dê cara. Qual é a probabilidade de esta moeda ser a honesta? (c) Suponha que ele jogue a mesma moeda uma terceira vez e que agora dê coroa. Qual é a probabilidade de esta moeda ser a honesta?",
+      "family": 9, "foundations": false, "pattern": "bayes-multiple-update", "difficulty": "standard",
+      "concept_tags": ["sequential-evidence", "fair-vs-biased"],
+      "parameters": [],
+      "answer": null,
+      "wrapping_notes": "Direct A Leitura analog: sample tested multiple times, each test updates the posterior on whether the sample is mirror-touched."
+    },
+    {
+      "id": "lista2.21", "source": "lista2", "page": 4, "number": 21, "subitems": ["a", "b", "c", "d"],
+      "statement": "Considere uma amostra de 3 bolas retirada de uma urna contendo 5 bolas brancas e 7 bolas pretas. Em cada rodada, uma bola é retirada da urna e, em seguida, recolocada juntamente com outra bola da mesma cor. Determine a probabilidade de que a amostra contenha exatamente (a) 0 bolas brancas; (b) 1 bola branca; (c) 2 bolas brancas; (d) 3 bolas brancas.",
+      "family": 8, "foundations": false, "pattern": "urn-polya", "difficulty": "advanced",
+      "concept_tags": ["polya-urn", "reinforcement"],
+      "parameters": [
+        { "name": "n_white_initial", "kind": "count", "source_value": 5 },
+        { "name": "n_black_initial", "kind": "count", "source_value": 7 },
+        { "name": "n_draws", "kind": "count", "source_value": 3 }
+      ],
+      "answer": null,
+      "wrapping_notes": "A reinforcement-style draw: each Reading reinforces its own outcome's prior. Beautiful for showing how prior updates can dominate."
+    },
+    {
+      "id": "lista2.22", "source": "lista2", "page": 4, "number": 22, "subitems": null,
+      "statement": "Três cozinheiros, A, B e C, assam um tipo especial de bolo, com respectivas probabilidades 0,02, 0,03 e 0,05 de o bolo não crescer. No restaurante em que trabalham, A cozinha 50%, B cozinha 30% e C cozinha 20% desses bolos. Qual é a proporção de 'fracassos' causados por A?",
+      "family": 9, "foundations": false, "pattern": "bayes-direct", "difficulty": "standard",
+      "concept_tags": ["weighted-failure-attribution"],
+      "parameters": [
+        { "name": "P_A", "kind": "probability", "source_value": 0.5 },
+        { "name": "P_fail_given_A", "kind": "probability", "source_value": 0.02 }
+      ],
+      "answer": null,
+      "wrapping_notes": "Three Tenders rotate Hearth-vigil; given an ember-failure, posterior on whose vigil it happened during."
+    },
+    {
+      "id": "lista2.23", "source": "lista2", "page": 4, "number": 23, "subitems": null,
+      "statement": "Há 3 moedas em uma caixa. Uma delas tem duas caras, outra é honesta e a terceira é uma moeda viciada que dá cara em 75% das vezes. Quando uma das 3 moedas é selecionada aleatoriamente e jogada, ela dá cara. Qual é a probabilidade de ela ser a moeda com duas caras?",
+      "family": 9, "foundations": false, "pattern": "bayes-direct", "difficulty": "standard",
+      "concept_tags": ["three-coin", "posterior-among-three"],
+      "parameters": [],
+      "answer": null,
+      "wrapping_notes": "Three Cinders, each with a different reading-bias profile; given a positive Reading, posterior on which Cinder did it."
+    },
+    {
+      "id": "lista2.24", "source": "lista2", "page": 4, "number": 24, "subitems": null,
+      "statement": "Três prisioneiros são informados pelo vigia de que um deles foi escolhido aleatoriamente para ser executado e os outros dois serão libertados. O prisioneiro A pede ao vigia para que lhe informe reservadamente qual de seus companheiros de prisão será libertado, dizendo que não haveria dano em divulgar esta informação porque ele já sabe que pelo menos um dos dois será libertado. O vigia recusa-se a responder a essa questão, dizendo que se A soubesse qual de seus colegas prisioneiros seria libertado, então a probabilidade de que ele mesmo viesse a ser executado aumentaria de 1/3 para 1/2. O que você pensa do raciocínio do vigia?",
+      "family": 9, "foundations": false, "pattern": "bayes-counterintuitive", "difficulty": "advanced",
+      "concept_tags": ["three-prisoners", "monty-hall-cousin", "selective-disclosure"],
+      "parameters": [{ "name": "n_prisoners", "kind": "count", "source_value": 3 }],
+      "answer": null,
+      "wrapping_notes": "★ Strong candidate for an in-game ritual scenario: three captives held by a hostile band, partial info from a turncoat. The vigia's reasoning is wrong (P(A) stays 1/3); the conditional info doesn't update A's status the way naive intuition suggests."
+    },
+    {
+      "id": "lista2.25", "source": "lista2", "page": 4, "number": 25, "subitems": null,
+      "statement": "Suponha que tenhamos 10 moedas, tais que a i-ésima moeda for jogada, a probabilidade de ela dar cara é igual a i/10, i = 1, 2, ..., 10. Quando uma dessas moedas é selecionada aleatoriamente e jogada, ela dá cara. Qual é a probabilidade condicional de que tenha sido a quinta moeda?",
+      "family": 9, "foundations": false, "pattern": "bayes-partition", "difficulty": "standard",
+      "concept_tags": ["graded-bias", "uniform-prior-over-classes"],
+      "parameters": [{ "name": "n_coins", "kind": "count", "source_value": 10 }],
+      "answer": null,
+      "wrapping_notes": "Ten Cinders graded from dim to bright; given one fired a positive reading, posterior on which one."
+    },
+    {
+      "id": "lista2.26", "source": "lista2", "page": 5, "number": 26, "subitems": null,
+      "statement": "Uma urna contém 5 bolas brancas e 10 bolas pretas. Um dado honesto é rolado e um número de bolas é retirado da urna aleatoriamente de acordo com o número que sai no dado. Qual é a probabilidade de que todas as bolas selecionadas sejam brancas? Qual é a probabilidade condicional de que tenha saído 3 no dado se todas as bolas selecionadas forem brancas?",
+      "family": 8, "foundations": false, "pattern": "urn-randomized-count", "difficulty": "advanced",
+      "concept_tags": ["random-sample-size", "law-of-total-probability"],
+      "parameters": [{ "name": "n_white", "kind": "count", "source_value": 5 }, { "name": "n_black", "kind": "count", "source_value": 10 }],
+      "answer": null,
+      "wrapping_notes": "A bone-shake decides how many tokens to draw; given all-white outcome, posterior on the shake."
+    },
+    {
+      "id": "lista2.27", "source": "lista2", "page": 5, "number": 27, "subitems": ["a", "b"],
+      "statement": "O câncer de próstata é o tipo de câncer mais comum entre os homens. Para verificar se alguém tem câncer de próstata, os médicos realizam com frequência um teste que mede o nível de PSA produzido pela próstata. Embora altos níveis de PSA sejam indicativos de câncer, o teste é notoriamente pouco confiável. De fato, a probabilidade de que um homem que não tenha câncer apresente níveis elevados de PSA é de aproximadamente 0,135, valor que cresce para aproximadamente 0,268 se o homem tiver câncer. Se, com base em outros fatores, um fisiologista tiver 70% de certeza de que um homem tem câncer de próstata, qual é a probabilidade condicional de que ele tenha câncer dado que (a) o teste de PSA tenha indicado um nível elevado? (b) o teste de PSA não tenha indicado um nível elevado? Repita os cálculos anteriores, dessa vez supondo que o fisiologista acredite inicialmente que existam 30% de chance de que o homem em questão tenha câncer de próstata.",
+      "family": 9, "foundations": false, "pattern": "bayes-diagnostic", "difficulty": "standard",
+      "concept_tags": ["sensitivity", "specificity", "prior-sensitivity-analysis"],
+      "parameters": [
+        { "name": "P_pos_given_no_cancer", "kind": "probability", "source_value": 0.135, "_role": "1 - specificity" },
+        { "name": "P_pos_given_cancer", "kind": "probability", "source_value": 0.268, "_role": "sensitivity" },
+        { "name": "prior_high", "kind": "probability", "source_value": 0.7 },
+        { "name": "prior_low", "kind": "probability", "source_value": 0.3 }
+      ],
+      "answer": null,
+      "wrapping_notes": "★★ CANONICAL A LEITURA TEMPLATE. Sensitivity + (1-specificity) + prior → posterior. The bible §11 says A Leitura instantiates this exactly. Wrap: Cinder Reading on a sample, with the apprentice's prior shaped by where the sample came from."
+    },
+    {
+      "id": "lista2.28", "source": "lista2", "page": 5, "number": 28, "subitems": null,
+      "statement": "Suponha que uma companhia de seguros classifique as pessoas em uma de três classes: risco baixo, risco médio e risco elevado. Os registros da companhia indicam que as probabilidades de que pessoas com riscos baixo, médio e elevado estejam envolvidas em acidentes ao longo de um ano são 0,05, 0,15 e 0,30, respectivamente. Se 20% da população são classificados como risco baixo, 50% de risco médio e 30% de risco elevado, que proporção de pessoas sofre acidentes ao longo de um ano? Se o segurado não sofreu acidentes em 1997, qual é a probabilidade de que ele ou ela seja uma pessoa de risco baixo ou médio?",
+      "family": 9, "foundations": false, "pattern": "bayes-partition", "difficulty": "standard",
+      "concept_tags": ["risk-classification", "no-event-update"],
+      "parameters": [],
+      "answer": null,
+      "wrapping_notes": "Tribe-member risk-classes for catastrophic events; absence of evidence as updating signal."
+    },
+    {
+      "id": "lista2.29", "source": "lista2", "page": 5, "number": 29, "subitems": null,
+      "statement": "Em uma turma, há 4 calouros homens, 6 calouras, 6 veteranos homens e um certo número de veteranas. Quantas veteranas devem estar presentes para que o sexo do estudante e sua condição (calouro ou veterano) sejam eventos independentes, ao selecionar um estudante aleatoriamente?",
+      "family": 7, "foundations": false, "pattern": "independence-construct", "difficulty": "standard",
+      "concept_tags": ["independence", "solve-for-count"],
+      "parameters": [],
+      "answer": null,
+      "wrapping_notes": "Find the count that makes lineage and rank independent in tribe-meeting attendance."
+    },
+    {
+      "id": "lista2.30", "source": "lista2", "page": 5, "number": 30, "subitems": ["a", "b"],
+      "statement": "Suponha que queiramos gerar o resultado da jogada de uma moeda honesta, mas que tudo o que tenhamos à nossa disposição seja uma moeda viciada que dá cara com alguma probabilidade desconhecida p diferente de 1/2. Considere o seguinte procedimento para realizar nossa tarefa: (1) Jogue a moeda. (2) Jogue a moeda de novo. (3) Se ambas as jogadas resultarem em duas caras ou duas coroas, volte para o passo 1. (4) Deixe que o resultado da última jogada seja o resultado do experimento. (a) Mostre que o resultado tem a mesma probabilidade de dar cara ou coroa. (b) Poderíamos usar um procedimento mais simples no qual continuamos a lançar a moeda até que as duas últimas jogadas sejam diferentes e então deixamos com que o resultado seja aquele obtido na última jogada?",
+      "family": 7, "foundations": false, "pattern": "bernoulli-trials", "difficulty": "advanced",
+      "concept_tags": ["von-neumann", "fair-from-biased", "rejection-sampling"],
+      "parameters": [{ "name": "p_unknown", "kind": "probability", "source_value": "p" }],
+      "answer": null,
+      "wrapping_notes": "★ Strong candidate for in-game subgame: 'the Cinder is unreliable today; you can still extract a fair Reading by combining its pairs cleverly.' Maps to Reading-reliability under stress."
+    },
+    {
+      "id": "lista2.31", "source": "lista2", "page": 6, "number": 31, "subitems": ["i", "ii.a", "ii.b"],
+      "statement": "Uma questão de verdadeiro ou falso é colocada para um time formado por um marido e sua esposa em um jogo de perguntas e respostas. Tanto o homem quanto a mulher dão, de forma independente, a resposta correta com probabilidade p. Considere as seguintes estratégias para o casal: (a) Escolher um deles e deixar que a pessoa escolhida responda à questão. (b) Ambos pensarem na questão e darem a resposta comum se estiverem de acordo; caso contrário, jogarem uma moeda para decidir qual resposta dar. (i) Qual das estratégias é melhor? (ii) Para p=0,6, prob. condicional de que o casal dê a resposta correta dado que (a) estejam de acordo? (b) não estejam de acordo?",
+      "family": 7, "foundations": false, "pattern": "bernoulli-trials", "difficulty": "standard",
+      "concept_tags": ["independent-respondents", "strategy-comparison"],
+      "parameters": [{ "name": "p_correct", "kind": "probability", "source_value": "p" }, { "name": "p_specific", "kind": "probability", "source_value": 0.6 }],
+      "answer": null,
+      "wrapping_notes": "Two apprentices answering a Mestra's question; compare voting protocols."
+    },
+    {
+      "id": "lista2.32", "source": "lista2", "page": 6, "number": 32, "subitems": null,
+      "statement": "Há uma chance de 50% de que a rainha seja portadora do gene da hemofilia. Se ela é portadora, então cada um de seus filhos homens tem probabilidade 1/2 de ter hemofilia. Se a rainha tiver tido três filhos homens saudáveis, qual é a probabilidade de que ela seja portadora? Se houver um quarto filho homem, qual é a probabilidade de que ele venha a desenvolver hemofilia?",
+      "family": 9, "foundations": false, "pattern": "bayes-multiple-update", "difficulty": "standard",
+      "concept_tags": ["genetic-bayes", "absence-of-evidence"],
+      "parameters": [{ "name": "n_sons_observed", "kind": "count", "source_value": 3 }],
+      "answer": null,
+      "wrapping_notes": "Lineage-marker carrier status updated by absence of trait in offspring; predict next-child trait."
+    },
+    {
+      "id": "lista2.33", "source": "lista2", "page": 6, "number": 33, "subitems": ["a", "b", "c"],
+      "statement": "O dado A tem 4 faces vermelhas e 2 brancas, enquanto o dado B tem 2 faces vermelhas e 4 brancas. Uma moeda honesta é lançada uma vez. Se ela der cara, o jogo continua com o dado A; se ela der coroa, então o dado B deve ser usado. (a) Mostre que a probabilidade de sair uma face vermelha em cada jogada é 1/2. (b) Se as primeiras duas jogadas resultarem em vermelho, qual é a probabilidade de que dê vermelho na terceira jogada? (c) Se o vermelho aparecer nas duas primeiras jogadas, qual é a probabilidade de que tenha sido escolhido o dado A?",
+      "family": 9, "foundations": false, "pattern": "bayes-multiple-update", "difficulty": "advanced",
+      "concept_tags": ["latent-die-selection", "predictive-update"],
+      "parameters": [],
+      "answer": null,
+      "wrapping_notes": "Latent choice of one of two reading-instruments; observed outputs update both posterior on instrument and predictive on next reading."
+    },
+    {
+      "id": "lista2.34", "source": "lista2", "page": 6, "number": 34, "subitems": ["a", "b"],
+      "statement": "Uma urna contém 12 bolas, das quais 4 são brancas. Três jogadores — A, B e C — retiram bolas da urna sucessivamente: primeiro A, depois B, depois C, depois A novamente, e assim por diante. O vencedor é o primeiro a retirar uma bola branca. Determine a probabilidade de vitória de cada jogador nos seguintes casos: (a) cada bola é recolocada na urna após ser retirada; (b) as bolas retiradas não são recolocadas na urna. Repita o problema no caso em que cada jogador retira bolas de sua própria urna. Isto é, suponha que existam 3 urnas distintas, cada uma contendo 12 bolas, das quais 4 são brancas.",
+      "family": 8, "foundations": false, "pattern": "urn-without-replacement", "difficulty": "advanced",
+      "concept_tags": ["competitive-draws", "geometric-distribution-cousin"],
+      "parameters": [{ "name": "n_total", "kind": "count", "source_value": 12 }, { "name": "n_white", "kind": "count", "source_value": 4 }, { "name": "n_players", "kind": "count", "source_value": 3 }],
+      "answer": null,
+      "wrapping_notes": "Three apprentices alternating Cinder-readings until one fires positive; with vs without sample-replacement; each-player-own-pouch variant."
+    }
+  ],
+
+  "_TODO": [
+    "Pass through lista1 Soluções pages 1-27 to verify which L1 problems carry the (**) advanced marker (only L1.21 visually confirmed so far via page 20). Update difficulty fields accordingly.",
+    "Populate answers for lista2 problems by working them or sourcing solutions if a soluções file becomes available.",
+    "Cross-check pattern strings against families.md (single source of truth)."
+  ]
+}

@@ -1,4 +1,4 @@
-// Family 6 — O Caminho de Volta — Bayesian inversion.
+// Family 9 — O Caminho de Volta — Bayesian inversion.
 // Alpha-zero hand-authored set; A-style transposition to fire-voice.
 // Brazilian Portuguese (você-form).
 
@@ -7,7 +7,7 @@ import { Exercise } from '../../core/exercises/exercise-model';
 export const oCaminhoDeVolta: Exercise[] = [
   {
     id: 'ocdv-1',
-    family: 6,
+    family: 9,
     conceptName: 'O Caminho de Volta',
     difficulty: 1,
     statement:
@@ -17,7 +17,7 @@ export const oCaminhoDeVolta: Exercise[] = [
   },
   {
     id: 'ocdv-2',
-    family: 6,
+    family: 9,
     conceptName: 'O Caminho de Volta',
     difficulty: 2,
     statement:
@@ -27,7 +27,7 @@ export const oCaminhoDeVolta: Exercise[] = [
   },
   {
     id: 'ocdv-3',
-    family: 6,
+    family: 9,
     conceptName: 'O Caminho de Volta',
     difficulty: 3,
     statement:
@@ -37,7 +37,7 @@ export const oCaminhoDeVolta: Exercise[] = [
   },
   {
     id: 'ocdv-4',
-    family: 6,
+    family: 9,
     conceptName: 'O Caminho de Volta',
     difficulty: 4,
     statement:
@@ -47,7 +47,7 @@ export const oCaminhoDeVolta: Exercise[] = [
   },
   {
     id: 'ocdv-5',
-    family: 6,
+    family: 9,
     conceptName: 'O Caminho de Volta',
     difficulty: 5,
     statement:
@@ -57,7 +57,7 @@ export const oCaminhoDeVolta: Exercise[] = [
   },
   {
     id: 'ocdv-6',
-    family: 6,
+    family: 9,
     conceptName: 'O Caminho de Volta',
     difficulty: 2,
     statement:
@@ -67,7 +67,7 @@ export const oCaminhoDeVolta: Exercise[] = [
   },
   {
     id: 'ocdv-7',
-    family: 6,
+    family: 9,
     conceptName: 'O Caminho de Volta',
     difficulty: 3,
     statement:
@@ -77,7 +77,7 @@ export const oCaminhoDeVolta: Exercise[] = [
   },
   {
     id: 'ocdv-8',
-    family: 6,
+    family: 9,
     conceptName: 'O Caminho de Volta',
     difficulty: 4,
     statement:
@@ -87,7 +87,7 @@ export const oCaminhoDeVolta: Exercise[] = [
   },
   {
     id: 'ocdv-9',
-    family: 6,
+    family: 9,
     conceptName: 'O Caminho de Volta',
     difficulty: 3,
     statement:
@@ -97,7 +97,7 @@ export const oCaminhoDeVolta: Exercise[] = [
   },
   {
     id: 'ocdv-10',
-    family: 6,
+    family: 9,
     conceptName: 'O Caminho de Volta',
     difficulty: 4,
     statement:

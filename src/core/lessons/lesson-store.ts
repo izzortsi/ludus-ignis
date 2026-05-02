@@ -69,3 +69,32 @@ export function markTheoryIntroduced(): void {
     setLessonState('theoryIntroduced', true);
   }
 }
+
+// Called when the apprentice answers the Elder Fire's test question
+// correctly. Stage moves to 'tested'; the lesson is now passed and the
+// next-lesson advance becomes available.
+export function markTested(): void {
+  if (lessonState.stage === 'practiced') {
+    setLessonState('stage', 'tested');
+  }
+}
+
+// Whether a lesson exists after the current one in ALL_LESSONS.
+export function hasNextLesson(): boolean {
+  const idx = ALL_LESSONS.findIndex((l) => l.id === lessonState.currentLessonId);
+  return idx >= 0 && idx < ALL_LESSONS.length - 1;
+}
+
+// Advance to the next lesson in ALL_LESSONS order. Resets stage to 'parable',
+// clears practice progress, and forgets the theory walk-through so the next
+// Cinder visit replays it for the new lesson. No-op at the end of the array.
+export function advanceToNextLesson(): void {
+  const idx = ALL_LESSONS.findIndex((l) => l.id === lessonState.currentLessonId);
+  if (idx < 0 || idx >= ALL_LESSONS.length - 1) return;
+  setLessonState({
+    currentLessonId: ALL_LESSONS[idx + 1].id,
+    stage: 'parable',
+    practiceCorrect: 0,
+    theoryIntroduced: false
+  });
+}

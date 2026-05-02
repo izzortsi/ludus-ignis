@@ -25,7 +25,7 @@ export interface TheoryPage {
 
 export interface Lesson {
   id: string;
-  /** Index into the 18-family taxonomy from the bible (§14). */
+  /** Index into the 21-family taxonomy from the bible (§14, iteration 6). */
   family: number;
   parable: ParableContent;
   /** Cinder's conversational lead-in lines before the formal theory. */

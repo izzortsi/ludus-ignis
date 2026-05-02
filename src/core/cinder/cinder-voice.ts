@@ -88,15 +88,35 @@ interface ConceptInfo {
 }
 
 const CONCEPTS: Record<string, ConceptInfo> = {
-  'O Caminho de Volta': {
-    name: 'O Caminho de Volta',
-    definition: 'Quando o sinal chega e queremos voltar à fonte.',
-    formalName: 'Bayes'
+  'A Forma do Mundo Possível': {
+    name: 'A Forma do Mundo Possível',
+    definition: 'O cesto de mundos antes da Leitura, e os agrupamentos que dele se tiram.',
+    formalName: 'espaço amostral e eventos'
+  },
+  'A Roda das Inclusões': {
+    name: 'A Roda das Inclusões',
+    definition: 'Quando o "alguma vez" e o "sempre" se convertem um no outro pelo avesso.',
+    formalName: 'sequências de eventos e De Morgan'
+  },
+  'As Juras da Chama': {
+    name: 'As Juras da Chama',
+    definition: 'As três promessas que toda chance honesta cumpre — e o resto que delas decorre.',
+    formalName: 'axiomas de Kolmogorov'
+  },
+  'Os Dois Sinais': {
+    name: 'Os Dois Sinais',
+    definition: 'Quando dois sinais não se tocam, suas chances multiplicam.',
+    formalName: 'independência'
   },
   'A Mão Cega no Jarro': {
     name: 'A Mão Cega no Jarro',
     definition: 'Quando o que sai depende do que está dentro — e do jeito de tirar.',
     formalName: 'amostragem'
+  },
+  'O Caminho de Volta': {
+    name: 'O Caminho de Volta',
+    definition: 'Quando o sinal chega e queremos voltar à fonte.',
+    formalName: 'Bayes'
   }
 };
 

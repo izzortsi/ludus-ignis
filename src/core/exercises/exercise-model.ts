@@ -11,7 +11,7 @@ export interface ExerciseSource {
 
 export interface Exercise {
   id: string;
-  family: number;            // index into the 18-family taxonomy (bible §14)
+  family: number;            // index into the 21-family taxonomy (bible §14, iteration 6)
   conceptName: string;       // diegetic family name, revealed within immersion
   difficulty: Difficulty;
   statement: string;         // Portuguese; fire-voice transposition of the source

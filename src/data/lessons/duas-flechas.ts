@@ -1,11 +1,11 @@
-// Lesson 1 — Duas Flechas → Family 4 (Os Dois Sinais).
+// Lesson — Duas Flechas → Family 7 (Os Dois Sinais).
 // Topic: independence of joint events; multiplication rule.
 
 import { Lesson } from '../../core/lessons/lesson-model';
 
 export const duasFlechas: Lesson = {
   id: 'duas-flechas',
-  family: 4,
+  family: 7,
   parable: {
     title: 'Duas flechas',
     paragraphs: [

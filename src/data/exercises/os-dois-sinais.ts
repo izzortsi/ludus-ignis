@@ -1,4 +1,4 @@
-// Family 4 — Os Dois Sinais — independence of joint events.
+// Family 7 — Os Dois Sinais — independence of joint events.
 // Counterpart to the Elder Fire's parable "Duas flechas".
 // Brazilian Portuguese (você-form).
 
@@ -7,7 +7,7 @@ import { Exercise } from '../../core/exercises/exercise-model';
 export const osDoisSinais: Exercise[] = [
   {
     id: 'ods-1',
-    family: 4,
+    family: 7,
     conceptName: 'Os Dois Sinais',
     difficulty: 1,
     statement:
@@ -17,7 +17,7 @@ export const osDoisSinais: Exercise[] = [
   },
   {
     id: 'ods-2',
-    family: 4,
+    family: 7,
     conceptName: 'Os Dois Sinais',
     difficulty: 2,
     statement:
@@ -27,7 +27,7 @@ export const osDoisSinais: Exercise[] = [
   },
   {
     id: 'ods-3',
-    family: 4,
+    family: 7,
     conceptName: 'Os Dois Sinais',
     difficulty: 3,
     statement:
@@ -37,7 +37,7 @@ export const osDoisSinais: Exercise[] = [
   },
   {
     id: 'ods-4',
-    family: 4,
+    family: 7,
     conceptName: 'Os Dois Sinais',
     difficulty: 2,
     statement:

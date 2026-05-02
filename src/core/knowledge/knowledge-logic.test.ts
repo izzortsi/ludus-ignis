@@ -1,7 +1,7 @@
 import { describe, it, expect } from 'vitest';
 import { emptyKnowledge, recordCorrect, recordWrong, REVEAL_THRESHOLD } from './knowledge-logic';
 
-const FAMILY = 6;
+const FAMILY = 9;
 const CONCEPT = 'O Caminho de Volta';
 
 describe('Knowledge tracking', () => {
@@ -39,8 +39,8 @@ describe('Knowledge tracking', () => {
     let state = emptyKnowledge();
     state = recordCorrect(state, 1, 'A').state;
     state = recordCorrect(state, 1, 'A').state;
-    state = recordWrong(state, 6);
+    state = recordWrong(state, 9);
     expect(state.perFamilyStreak['1']).toBe(2);
-    expect(state.perFamilyStreak['6']).toBe(0);
+    expect(state.perFamilyStreak['9']).toBe(0);
   });
 });
