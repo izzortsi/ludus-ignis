@@ -7,9 +7,6 @@ import {
   STAR_FIELD, STARS_MED_FRAMES, STARS_BRIGHT_FRAMES,
   AURORA_FRAMES, AURORA_FRAMES_COUNT,
   MOUNTAINS_FAR, MOUNTAINS_NEAR, GROUND,
-  TENDER, APPRENTICE, WALKING_FRAMES, WALKING_FRAMES_COUNT,
-  WALK_PAIR_BEHIND_FRAMES, WALK_PAIR_FRONT_FRAMES, WALK_PAIR_FRAMES_COUNT,
-  DANCING_TRIBE_FRAMES,
   HUT_FRAME, APPRENTICE_IN_BED, SUN,
   HEARTH_PIT, HEARTH_FIRE_FRAMES,
   HEARTH_SMOKE_FRAMES, HEARTH_EMBER_FRAMES,
@@ -18,6 +15,7 @@ import {
   CINDER_SMOKE_FRAMES, EMBER_FALL_FRAMES,
   RIO_MIYAKE, MIRROR_LEAK
 } from './scene-art';
+import { HieroglyphFigures } from './HieroglyphFigures';
 import { cinder, setCinder } from '../../core/cinder/cinder-store';
 
 const TICK_MS = 140;
@@ -183,9 +181,6 @@ export function IntroScene(props: Props) {
   });
   const phaseTick = createMemo(() => tick() - phaseEnteredTick());
 
-  const walkIdx     = createMemo(() => Math.min(phaseTick(), WALKING_FRAMES_COUNT - 1));
-  const walkPairIdx = createMemo(() => Math.min(phaseTick(), WALK_PAIR_FRAMES_COUNT - 1));
-
   // Phase groupings.
   const isNightCamp = createMemo(
     () => phase() === 'walking_to_fire' || phase() === 'arriving'
@@ -239,43 +234,21 @@ export function IntroScene(props: Props) {
           <Layer art={GROUND} className="intro-ground" />
           <Layer art={HEARTH_PIT} className="intro-hearth-pit" />
 
-          {/* walking_to_fire's Apprentice renders BEFORE the fire so she
-              passes behind the flames as she walks past. */}
-          <Show when={phase() === 'walking_to_fire'}>
-            <Layer art={WALK_PAIR_BEHIND_FRAMES[walkPairIdx()]} className="intro-apprentice" />
-          </Show>
-
           <Layer art={HEARTH_FIRE_FRAMES[f()]} className="intro-hearth-fire" />
           <Layer art={HEARTH_EMBER_FRAMES[f()]} className="intro-hearth-embers" />
           <Layer art={HEARTH_SMOKE_FRAMES[f()]} className="intro-hearth-smoke" />
           <Layer art={BREEZE_FRAMES[f()]} className="intro-breeze" />
 
-          {/* walking_to_fire's Tender stays on the left of the fire and so
-              renders in front of the flames here (no overlap risk). */}
-          <Show when={phase() === 'walking_to_fire'}>
-            <Layer art={WALK_PAIR_FRONT_FRAMES[walkPairIdx()]} className="intro-tender" />
-          </Show>
+          {/* Tribe figures rendered as Egyptian hieroglyphs in a DOM
+              overlay — the apprentice is internally hidden while
+              traversing the fire's column range during walking_to_fire,
+              same effect as the original WALK_PAIR_BEHIND mask. */}
+          <HieroglyphFigures phase={phase()} tick={tick()} phaseTick={phaseTick()} />
 
-          {/* arriving — outer 4 walk in (front-row baked frames), back row
-              pops in over time, Tender + Apprentice always-there. */}
-          <Show when={phase() === 'arriving'}>
-            <Layer art={WALKING_FRAMES[walkIdx()]} className="intro-tribe" />
-            <Layer art={TENDER} className="intro-tender" />
-            <Layer art={APPRENTICE} className="intro-apprentice" />
-          </Show>
-
-          {/* dancing + lore_speech — same composition: front-row tribe +
-              back row + Tender dancing, no cinder yet. */}
-          <Show when={phase() === 'dancing' || phase() === 'lore_speech'}>
-            <Layer art={DANCING_TRIBE_FRAMES[f()]} className="intro-tribe-dancing" />
-            <Layer art={APPRENTICE} className="intro-apprentice" />
-          </Show>
-
-          {/* receiving_cinder — dance continues; cinder vessel + ember
-              fall + kindle animation play out. */}
+          {/* receiving_cinder — Cinder vessel, ember fall, and the
+              apprentice's own fire kindling. Rendered after the figure
+              overlay so they sit in front of the apprentice hieroglyph. */}
           <Show when={phase() === 'receiving_cinder'}>
-            <Layer art={DANCING_TRIBE_FRAMES[f()]} className="intro-tribe-dancing" />
-            <Layer art={APPRENTICE} className="intro-apprentice" />
             <Layer art={CINDER_VESSEL} className="intro-cinder-vessel" />
             <Layer art={EMBER_FALL_FRAMES[f()]} className="intro-ember-fall" />
             <Layer art={CINDER_KINDLE_FRAMES[f()]} className="intro-cinder-fire" />
@@ -299,7 +272,7 @@ export function IntroScene(props: Props) {
           <Layer art={HEARTH_FIRE_FRAMES[f()]} className="intro-hearth-fire is-morning" />
           <Layer art={HEARTH_SMOKE_FRAMES[f()]} className="intro-hearth-smoke" />
           <Layer art={BREEZE_FRAMES[f()]} className="intro-breeze" />
-          <Layer art={APPRENTICE} className="intro-apprentice" />
+          <HieroglyphFigures phase={phase()} tick={tick()} phaseTick={phaseTick()} />
           <Layer art={CINDER_VESSEL} className="intro-cinder-vessel" />
           <Layer art={CINDER_FIRE_FRAMES[f()]} className="intro-cinder-fire" />
           <Layer art={CINDER_SMOKE_FRAMES[f()]} className="intro-cinder-smoke" />
@@ -320,7 +293,7 @@ export function IntroScene(props: Props) {
           <Layer art={HEARTH_SMOKE_FRAMES[(f() + 5) % FRAMES]} className="intro-hearth-smoke is-test-morning is-extra" />
           <Layer art={HEARTH_SMOKE_FRAMES[(f() + 10) % FRAMES]} className="intro-hearth-smoke is-test-morning is-extra" />
           <Layer art={BREEZE_FRAMES[f()]} className="intro-breeze" />
-          <Layer art={APPRENTICE} className="intro-apprentice is-test-morning" />
+          <HieroglyphFigures phase={phase()} tick={tick()} phaseTick={phaseTick()} />
           <Layer art={CINDER_VESSEL} className="intro-cinder-vessel is-test-morning" />
           <Layer art={CINDER_FIRE_FRAMES[f()]} className="intro-cinder-fire is-test-morning" />
           <Layer art={CINDER_SMOKE_FRAMES[f()]} className="intro-cinder-smoke is-test-morning" />

@@ -1344,3 +1344,100 @@ html, body {
   font-style: italic;
   color: var(--fg-dim);
 }
+
+/* === Egyptian-hieroglyph tribe figures =====================================
+   The ritual scene's figures (Tender, Apprentice, Drummer, dancers) render
+   as hieroglyphs in this overlay layer instead of as ASCII inside the <pre>
+   grid. The fire/smoke/embers/aurora layers stay untouched.
+
+   Two-span structure per figure:
+     - .intro-glyph-pos  — anchors at a (col,row) grid cell using the parent
+                           stage's 1ch/1lh (NOT the glyph's own font).
+     - .intro-glyph-render — child span that sets font-size:5em and the
+                           hieroglyph fallback chain. Sized large without
+                           perturbing the position math, since 1ch/1lh on
+                           the parent are already resolved.
+
+   Figures left of the fire are mirrored (scaleX(-1)) so they face the
+   flames; right-of-fire figures keep their natural left-facing posture.
+*/
+
+.intro-figures {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  user-select: none;
+}
+
+.intro-glyph-pos {
+  position: absolute;
+  /* (col, row) → top-left in stage cells. Bottom-anchored via translateY in
+     the inner span so the glyph's feet sit at row+1 regardless of glyph
+     height. */
+  left: calc(var(--g-col) * 1ch);
+  top:  calc((var(--g-row) + 1) * 1lh);
+  width: 0;
+  height: 0;
+  /* Smooth col interpolation while walking — purely cosmetic, the JS still
+     ticks discretely. Disable for non-walking phases via .is-static. */
+  transition: left 90ms linear;
+}
+.intro-glyph-pos.is-static { transition: none; }
+.intro-glyph-pos.is-hidden { opacity: 0; }
+
+.intro-glyph-render {
+  position: absolute;
+  display: inline-block;
+  /* Bottom-edge of glyph aligns with the row+1 anchor; horizontal center
+     sits on the col anchor so the figure is placed AROUND its grid
+     position rather than overflowing rightward. */
+  left: 0;
+  bottom: 0;
+  transform: translate(-50%, 0);
+  transform-origin: 50% 100%;
+  font-family: 'Segoe UI Historic', 'Aegyptus', 'Noto Sans Egyptian Hieroglyphs',
+               'Menlo', 'Consolas', monospace;
+  /* font-size is set inline per figure (size: 5em for front-row, 2-2.5em
+     for back/far-back, 3-3.5em for compounds). */
+  line-height: 1;
+  white-space: nowrap;
+  letter-spacing: -0.05em;   /* slight tightening for multi-glyph compounds */
+}
+
+/* Mirror is composed with the centering translate — order matters: scale
+   first so translate-and-mirror cancel correctly into "mirror around the
+   anchor point." */
+.intro-glyph-render.is-mirrored {
+  transform: translate(-50%, 0) scaleX(-1);
+}
+
+/* Tier-based opacity to suggest depth — back row and far-back fade with
+   distance. Size itself comes from the inline font-size (per figure). */
+.intro-glyph-render.is-back     { opacity: 0.82; }
+.intro-glyph-render.is-far-back { opacity: 0.62; }
+
+/* A subtle vertical bob for dance frames — not the pose change (which
+   swaps the glyph itself), just a small animation cue so the figure
+   doesn't look frozen between glyph swaps. */
+.intro-glyph-render.is-dance-up   { transform: translate(-50%, -0.06em); }
+.intro-glyph-render.is-dance-down { transform: translate(-50%, 0); }
+.intro-glyph-render.is-mirrored.is-dance-up   { transform: translate(-50%, -0.06em) scaleX(-1); }
+.intro-glyph-render.is-mirrored.is-dance-down { transform: translate(-50%, 0) scaleX(-1); }
+
+/* Per-figure colorway — match the existing intro palette so hieroglyphs
+   don't clash with the aurora/fire treatment. */
+.intro-glyph-render.is-tender     { color: rgba(212, 184, 150, 0.95); }
+.intro-glyph-render.is-apprentice { color: rgba(255, 220, 170, 1); }
+.intro-glyph-render.is-tribe      { color: rgba(220, 190, 150, 0.95); }
+.intro-glyph-render.is-observer   { color: rgba(190, 165, 130, 0.88); }
+
+/* Daylight palette — dark hieroglyphs on the warm test_morning sky so the
+   figure reads against a pale background instead of disappearing into it. */
+.intro-stage.is-test-morning .intro-glyph-render.is-apprentice {
+  color: rgba(60, 40, 25, 1);
+}
+.intro-stage.is-test-morning .intro-glyph-render.is-tender,
+.intro-stage.is-test-morning .intro-glyph-render.is-tribe,
+.intro-stage.is-test-morning .intro-glyph-render.is-observer {
+  color: rgba(80, 55, 35, 0.92);
+}
