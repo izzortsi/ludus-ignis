@@ -19,6 +19,21 @@ import { exerciseIntro, correctFeedback, wrongFeedback, hubGreeting } from '../.
 import { knowledge, recordCorrect, recordWrong, dismissReveal } from '../../core/knowledge/knowledge-store';
 import { RevealPanel } from '../components/RevealPanel';
 import type { Lesson } from '../../core/lessons/lesson-model';
+import {
+  apprenticeStats, awardXp, pendingLevelUp, dismissLevelUp
+} from '../../core/apprentice/apprentice-stats-store';
+import {
+  RANK_NAMES, MAX_LEVEL, LEVEL_THRESHOLDS,
+  xpForCorrect, levelOf, rankNameOf, isMaxLevel, xpProgressInLevel
+} from '../../core/apprentice/apprentice-stats-logic';
+import { inventory, add as addToInventory, spend as spendFromInventory, countOf as inventoryCountOf } from '../../core/inventory/inventory-store';
+import {
+  ITEM_INFO, pluralize,
+  grainsForCorrect,
+  FEED_PRICE_GRAINS, FEED_VITALITY_GAIN,
+  REROLL_PRICE_GRAINS, REVEAL_PRICE_GRAINS,
+  type ItemId
+} from '../../core/inventory/inventory-logic';
 
 interface Props {
   onClose: () => void;
@@ -37,7 +52,9 @@ type HubView =
   | 'rever-family'
   | 'rever-parable'
   | 'rever-theory'
-  | 'galeria-list';
+  | 'galeria-list'
+  | 'aprendiz'
+  | 'inventario';
 
 // The Cinder dialog renders the modal hub *always* (so the apprentice can
 // review prior lessons even before talking to the Elder about a new one) and,
@@ -138,6 +155,10 @@ function CinderHub(props: HubProps) {
   return (
     <MapDialog title={`Cinder — ${cinder.name}`} onClose={onClose}>
       <CinderView />
+      <ApprenticeStrip />
+      <Show when={pendingLevelUp() !== null}>
+        <LevelUpPanel level={pendingLevelUp()!} onDismiss={dismissLevelUp} />
+      </Show>
 
       <Show when={!hubOpen()}>
         <p class="cinder-no-lesson">
@@ -184,6 +205,14 @@ function CinderHub(props: HubProps) {
               <span class="cinder-hub-option-label">Galeria</span>
               <span class="cinder-hub-option-desc">cenas guardadas pela brasa</span>
             </button>
+            <button class="cinder-hub-option" onClick={() => setView('aprendiz')}>
+              <span class="cinder-hub-option-label">Aprendiz</span>
+              <span class="cinder-hub-option-desc">teu posto, teu caminho</span>
+            </button>
+            <button class="cinder-hub-option" onClick={() => setView('inventario')}>
+              <span class="cinder-hub-option-label">Inventário</span>
+              <span class="cinder-hub-option-desc">o que carregas, o que podes gastar</span>
+            </button>
           </div>
           <Show when={lessonState.stage === 'practiced'}>
             <p class="cinder-practiced-hint">
@@ -218,6 +247,12 @@ function CinderHub(props: HubProps) {
       </Show>
       <Show when={view() === 'galeria-list'}>
         <GalleryListView onPick={props.onOpenCard} onBack={backToHub} />
+      </Show>
+      <Show when={view() === 'aprendiz'}>
+        <ApprenticeView onBack={backToHub} />
+      </Show>
+      <Show when={view() === 'inventario'}>
+        <InventoryView onBack={backToHub} />
       </Show>
     </MapDialog>
   );
@@ -318,6 +353,201 @@ function GalleryCardViewer(props: { card: GalleryCard; onClose: () => void }) {
   );
 }
 
+// === Apprentice stats ======================================================
+//
+// Compact strip rendered at the top of every Cinder modal view: the rank
+// title and an XP progress bar. Cheap to render so it can sit unconditionally
+// inside the modal body — gives the player constant feedback that practice
+// matters beyond the per-lesson loop.
+
+function ApprenticeStrip() {
+  const xp = createMemo(() => apprenticeStats.xp);
+  const rank = createMemo(() => rankNameOf(xp()));
+  const progress = createMemo(() => xpProgressInLevel(xp()));
+  const pct = createMemo(() => {
+    const p = progress();
+    if (p.span == null) return 100;
+    return Math.min(100, Math.round((p.current / p.span) * 100));
+  });
+  const counter = createMemo(() => {
+    const p = progress();
+    if (p.span == null) return `${p.current} XP`;
+    return `${p.current} / ${p.span} XP`;
+  });
+  const grainCount = createMemo(() => inventory.items.graos ?? 0);
+  return (
+    <div class="apprentice-strip">
+      <div class="apprentice-strip-line">
+        <span class="apprentice-strip-rank">aprendiz · {rank()}</span>
+        <span class="apprentice-strip-grains">
+          {grainCount()} {pluralize('graos', grainCount())}
+        </span>
+      </div>
+      <div class="apprentice-strip-bar">
+        <div class="apprentice-strip-bar-fill" style={{ width: `${pct()}%` }} />
+      </div>
+      <div class="apprentice-strip-line apprentice-strip-line-bottom">
+        <span class="apprentice-strip-xp">{counter()}</span>
+      </div>
+    </div>
+  );
+}
+
+// Full breakdown — the rank list with the player's current rank highlighted
+// and per-rank thresholds. Reachable from the hub's "Aprendiz" option.
+function ApprenticeView(props: { onBack: () => void }) {
+  const xp = createMemo(() => apprenticeStats.xp);
+  const level = createMemo(() => levelOf(xp()));
+  const progress = createMemo(() => xpProgressInLevel(xp()));
+  const atMax = createMemo(() => isMaxLevel(xp()));
+
+  return (
+    <div class="cinder-section">
+      <BackLink onBack={props.onBack} />
+      <div class="cinder-section-header">
+        <span class="cinder-section-label">aprendiz</span>
+        <span class="cinder-section-meta">{xp()} XP</span>
+      </div>
+      <p class="apprentice-current">
+        Estás como <strong>{rankNameOf(xp())}</strong>
+        <Show when={!atMax()}>
+          {' '}— faltam {(progress().span ?? 0) - progress().current} XP para o próximo posto.
+        </Show>
+        <Show when={atMax()}>
+          {' '}— posto mais alto. O fogo te chama de igual.
+        </Show>
+      </p>
+      <div class="apprentice-rank-list">
+        <For each={RANK_NAMES}>
+          {(name, i) => {
+            const isCurrent = level() === i() + 1;
+            const isReached = xp() >= LEVEL_THRESHOLDS[i()];
+            const cls = [
+              'apprentice-rank-row',
+              isCurrent ? 'is-current' : '',
+              isReached ? 'is-reached' : 'is-locked'
+            ].filter(Boolean).join(' ');
+            return (
+              <div class={cls}>
+                <span class="apprentice-rank-num">{i() + 1}</span>
+                <span class="apprentice-rank-name">{name}</span>
+                <span class="apprentice-rank-threshold">
+                  {LEVEL_THRESHOLDS[i()]} XP
+                </span>
+              </div>
+            );
+          }}
+        </For>
+      </div>
+      <Show when={!atMax()}>
+        <p class="apprentice-hint">
+          Cada resposta certa: <em>5 × dificuldade</em> XP. Cada parábola
+          dominada na prova do Fogo Ancião: <em>+{50}</em> XP.
+        </p>
+      </Show>
+      <Show when={level() >= MAX_LEVEL}>
+        {/* placeholder — exists only so the linter sees MAX_LEVEL used here too */}
+        {''}
+      </Show>
+    </div>
+  );
+}
+
+// Brief inline panel shown after a level-up. Mirrors RevealPanel: the
+// caller dismisses it when the player has read the news.
+function LevelUpPanel(props: { level: number; onDismiss: () => void }) {
+  const rank = RANK_NAMES[props.level - 1];
+  return (
+    <div class="apprentice-levelup-panel">
+      <p class="apprentice-levelup-prologue">subiste de posto</p>
+      <p class="apprentice-levelup-title">
+        nível {props.level} — <strong>{rank}</strong>
+      </p>
+      <p class="apprentice-levelup-text">
+        O Cinder reconhece o teu progresso. A vitalidade dele se renova.
+      </p>
+      <button class="apprentice-levelup-dismiss" onClick={props.onDismiss}>
+        seguir →
+      </button>
+    </div>
+  );
+}
+
+// === Inventory ============================================================
+//
+// Lists every item the apprentice currently holds (counts > 0). For each
+// item, shows the label + flavour and any spend actions that apply (right
+// now: feed-Cinder for grãos). Future items drop in here without UI work
+// once they have ITEM_INFO + a spend handler.
+
+function InventoryView(props: { onBack: () => void }) {
+  const heldIds = createMemo<ItemId[]>(() => {
+    const out: ItemId[] = [];
+    for (const id of Object.keys(ITEM_INFO) as ItemId[]) {
+      if ((inventory.items[id] ?? 0) > 0) out.push(id);
+    }
+    return out;
+  });
+
+  function feedOnce() {
+    if (!spendFromInventory('graos', FEED_PRICE_GRAINS)) return;
+    setCinder(feedCinder(cinder, FEED_VITALITY_GAIN));
+  }
+
+  return (
+    <div class="cinder-section">
+      <BackLink onBack={props.onBack} />
+      <div class="cinder-section-header">
+        <span class="cinder-section-label">inventário</span>
+        <span class="cinder-section-meta">o que carregas</span>
+      </div>
+      <Show
+        when={heldIds().length > 0}
+        fallback={
+          <p class="cinder-no-lesson">
+            Não carregas nada ainda. Acerta perguntas com o teu Cinder e vão
+            aparecer grãos.
+          </p>
+        }
+      >
+        <For each={heldIds()}>
+          {(id) => {
+            const info = ITEM_INFO[id];
+            const count = createMemo(() => inventory.items[id] ?? 0);
+            return (
+              <div class="inventory-item">
+                <div class="inventory-item-header">
+                  <span class="inventory-item-label">{info.label}</span>
+                  <span class="inventory-item-count">
+                    {count()} {pluralize(id, count())}
+                  </span>
+                </div>
+                <p class="inventory-item-flavour">{info.flavour}</p>
+                <Show when={id === 'graos'}>
+                  <div class="inventory-item-actions">
+                    <button
+                      class="cinder-cta inventory-action-btn"
+                      disabled={count() < FEED_PRICE_GRAINS}
+                      onClick={feedOnce}
+                    >
+                      alimentar Cinder · −{FEED_PRICE_GRAINS} grão · +{FEED_VITALITY_GAIN} vitalidade
+                    </button>
+                  </div>
+                </Show>
+              </div>
+            );
+          }}
+        </For>
+        <p class="apprentice-hint">
+          Outras saídas para grãos aparecem nas perguntas do Cinder e na prova
+          do Fogo Ancião — botões para trocar de pergunta ou ver a resposta
+          sem quebrar a sequência.
+        </p>
+      </Show>
+    </div>
+  );
+}
+
 function ReviewFamilyView(props: {
   lesson: Lesson;
   onPickParable: () => void;
@@ -411,6 +641,9 @@ function PracticeView(props: { lesson: Lesson; onBack: () => void }) {
       if (newlyRevealed) {
         setCinder(feedCinder(cinder, REVEAL_VITALITY_BONUS));
       }
+      const award = awardXp(xpForCorrect(ex.difficulty));
+      if (award.leveledUp) setCinder(feedCinder(cinder, 100));
+      addToInventory('graos', grainsForCorrect(ex.difficulty));
       if (ex.family === props.lesson.family) {
         recordPracticeCorrect();
       }
@@ -423,11 +656,30 @@ function PracticeView(props: { lesson: Lesson; onBack: () => void }) {
   function onReveal() {
     if (!exerciseState.current || exerciseState.result !== null) return;
     revealAnswer();
-    // Reveal also breaks the streak — the player saw the answer rather than
-    // arriving at it. No vitality penalty (they didn't pick wrong).
+    // Free reveal breaks the streak — the player saw the answer rather
+    // than arriving at it. No vitality penalty (they didn't pick wrong).
     if (exerciseState.current.family) {
       recordWrong(exerciseState.current.family);
     }
+  }
+
+  // Paid reveal: spend grãos to see the answer *without* breaking the
+  // family streak. The visual outcome is the same as a free reveal (correct
+  // option gets `is-truth`; solution panel shows), but recordWrong is
+  // skipped — the player paid to keep their concept-reveal progress.
+  function onPaidReveal() {
+    if (!exerciseState.current || exerciseState.result !== null) return;
+    if (!spendFromInventory('graos', REVEAL_PRICE_GRAINS)) return;
+    revealAnswer();
+  }
+
+  // Re-roll: spend grãos to swap the current question for another from
+  // the same family (uses the existing seenIdsByFamily logic so the
+  // replacement is fresh). Only valid before the player has answered.
+  function onReroll() {
+    if (!exerciseState.current || exerciseState.result !== null) return;
+    if (!spendFromInventory('graos', REROLL_PRICE_GRAINS)) return;
+    loadNextExercise(props.lesson.family);
   }
 
   function onDismissReveal() {
@@ -484,9 +736,25 @@ function PracticeView(props: { lesson: Lesson; onBack: () => void }) {
               </For>
             </div>
             <Show when={exerciseState.result === null}>
-              <button class="cinder-reveal-link" onClick={onReveal}>
-                ver resposta
-              </button>
+              <div class="cinder-paid-actions">
+                <button class="cinder-reveal-link" onClick={onReveal}>
+                  ver resposta
+                </button>
+                <button
+                  class="cinder-reveal-link"
+                  disabled={inventoryCountOf('graos') < REROLL_PRICE_GRAINS}
+                  onClick={onReroll}
+                >
+                  outra pergunta · {REROLL_PRICE_GRAINS} grãos
+                </button>
+                <button
+                  class="cinder-reveal-link"
+                  disabled={inventoryCountOf('graos') < REVEAL_PRICE_GRAINS}
+                  onClick={onPaidReveal}
+                >
+                  ver sem quebrar a sequência · {REVEAL_PRICE_GRAINS} grãos
+                </button>
+              </div>
             </Show>
             <Show when={exerciseState.result === 'correct'}>
               <p class="study-feedback is-correct">

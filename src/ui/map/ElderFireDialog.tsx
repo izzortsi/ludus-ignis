@@ -12,6 +12,10 @@ import { vitalityGainOnCorrect, VITALITY_PENALTY_ON_WRONG } from '../../core/exe
 import { feedCinder } from '../../core/cinder/cinder-model';
 import { cinder, setCinder } from '../../core/cinder/cinder-store';
 import { recordCorrect, recordWrong } from '../../core/knowledge/knowledge-store';
+import { awardXp } from '../../core/apprentice/apprentice-stats-store';
+import { xpForCorrect, LESSON_BONUS_XP } from '../../core/apprentice/apprentice-stats-logic';
+import { add as addToInventory, spend as spendFromInventory, countOf as inventoryCountOf } from '../../core/inventory/inventory-store';
+import { grainsForCorrect, GRAINS_PROVA_BONUS, REROLL_PRICE_GRAINS, REVEAL_PRICE_GRAINS } from '../../core/inventory/inventory-logic';
 
 interface Props {
   onClose: () => void;
@@ -116,6 +120,12 @@ function ElderTest(props: Props) {
     if (isCorrect) {
       setCinder(feedCinder(cinder, vitalityGainOnCorrect(ex.difficulty)));
       recordCorrect(ex.family, ex.conceptName);
+      // Award the per-question XP plus the lesson-completion bonus in a
+      // single call so a single level-up event covers the full reward.
+      const award = awardXp(xpForCorrect(ex.difficulty) + LESSON_BONUS_XP);
+      if (award.leveledUp) setCinder(feedCinder(cinder, 100));
+      // Grain reward: per-correct + prova bonus.
+      addToInventory('graos', grainsForCorrect(ex.difficulty) + GRAINS_PROVA_BONUS);
       markTested();
     } else {
       setCinder(feedCinder(cinder, -VITALITY_PENALTY_ON_WRONG));
@@ -127,10 +137,28 @@ function ElderTest(props: Props) {
     const ex = exerciseState.current;
     if (!ex || exerciseState.result !== null) return;
     revealAnswer();
-    // Reveal in the test breaks the streak — the answer was shown, not
-    // earned. No vitality penalty (no wrong pick), but the lesson stage
-    // does not advance to 'tested'.
+    // Free reveal in the test breaks the streak — the answer was shown,
+    // not earned. No vitality penalty (no wrong pick), but the lesson
+    // stage does not advance to 'tested'.
     recordWrong(ex.family);
+  }
+
+  // Paid reveal in the prova: spend grãos to see the answer without the
+  // streak-break penalty. Still doesn't pass the test (no markTested) —
+  // the player has to answer one correctly under their own power.
+  function onPaidReveal() {
+    const ex = exerciseState.current;
+    if (!ex || exerciseState.result !== null) return;
+    if (!spendFromInventory('graos', REVEAL_PRICE_GRAINS)) return;
+    revealAnswer();
+  }
+
+  // Re-roll the prova question itself — same family, fresh draw.
+  function onReroll() {
+    const ex = exerciseState.current;
+    if (!ex || exerciseState.result !== null) return;
+    if (!spendFromInventory('graos', REROLL_PRICE_GRAINS)) return;
+    loadNextExercise(lesson().family);
   }
 
   function close() {
@@ -180,9 +208,25 @@ function ElderTest(props: Props) {
             </div>
 
             <Show when={exerciseState.result === null}>
-              <button class="cinder-reveal-link" onClick={onReveal}>
-                ver resposta
-              </button>
+              <div class="cinder-paid-actions">
+                <button class="cinder-reveal-link" onClick={onReveal}>
+                  ver resposta
+                </button>
+                <button
+                  class="cinder-reveal-link"
+                  disabled={inventoryCountOf('graos') < REROLL_PRICE_GRAINS}
+                  onClick={onReroll}
+                >
+                  outra pergunta · {REROLL_PRICE_GRAINS} grãos
+                </button>
+                <button
+                  class="cinder-reveal-link"
+                  disabled={inventoryCountOf('graos') < REVEAL_PRICE_GRAINS}
+                  onClick={onPaidReveal}
+                >
+                  ver sem quebrar a sequência · {REVEAL_PRICE_GRAINS} grãos
+                </button>
+              </div>
             </Show>
 
             <Show when={exerciseState.result === 'correct'}>

@@ -10,6 +10,8 @@ import {
   restoreKnowledgeFromStorage,
   persistKnowledge,
   persistLesson,
+  persistApprenticeStats,
+  persistInventory,
   isIntroSeen,
   setIntroSeen
 } from './persistence/local-storage';
@@ -17,6 +19,8 @@ import { cinder, setCinder } from './core/cinder/cinder-store';
 import { tribe, restoreTribe } from './core/tribe/tribe-store';
 import { knowledge, restoreKnowledge } from './core/knowledge/knowledge-store';
 import { lessonState } from './core/lessons/lesson-store';
+import { apprenticeStats } from './core/apprentice/apprentice-stats-store';
+import { inventory } from './core/inventory/inventory-store';
 
 export function App() {
   // Restore from local storage on first load. A returning player (Cinder
@@ -75,6 +79,14 @@ export function App() {
       theoryIntroduced: lessonState.theoryIntroduced,
       presentedLessonIds: [...lessonState.presentedLessonIds]
     });
+  });
+
+  createEffect(() => {
+    persistApprenticeStats({ xp: apprenticeStats.xp });
+  });
+
+  createEffect(() => {
+    persistInventory({ items: { ...inventory.items } });
   });
 
   function onIntroComplete() {

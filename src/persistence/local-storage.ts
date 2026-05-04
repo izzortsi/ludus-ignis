@@ -1,13 +1,16 @@
 import { CinderState } from '../core/cinder/cinder-model';
 import { TribeState } from '../core/tribe/tribe-model';
 import type { LessonStage } from '../core/lessons/lesson-model';
+import type { InventoryState } from '../core/inventory/inventory-logic';
 
-const CINDER_KEY     = 'probgame.cinder.v1';
-const TRIBE_KEY      = 'probgame.tribe.v1';
-const KNOWLEDGE_KEY  = 'probgame.knowledge.v1';
-const INTRO_KEY      = 'probgame.intro.seen.v1';
-const APPRENTICE_KEY = 'probgame.apprentice.v1';
-const LESSON_KEY     = 'probgame.lesson.v1';
+const CINDER_KEY            = 'probgame.cinder.v1';
+const TRIBE_KEY             = 'probgame.tribe.v1';
+const KNOWLEDGE_KEY         = 'probgame.knowledge.v1';
+const INTRO_KEY             = 'probgame.intro.seen.v1';
+const APPRENTICE_KEY        = 'probgame.apprentice.v1';
+const APPRENTICE_STATS_KEY  = 'probgame.apprentice.stats.v1';
+const INVENTORY_KEY         = 'probgame.inventory.v1';
+const LESSON_KEY            = 'probgame.lesson.v1';
 
 function persistJson<T>(key: string, value: T): void {
   try {
@@ -76,6 +79,24 @@ export function restoreApprentice(): PersistedApprentice | null {
   return restoreJson<PersistedApprentice>(APPRENTICE_KEY);
 }
 
+export interface PersistedApprenticeStats {
+  xp: number;
+}
+
+export function persistApprenticeStats(state: PersistedApprenticeStats): void {
+  persistJson(APPRENTICE_STATS_KEY, state);
+}
+export function restoreApprenticeStats(): PersistedApprenticeStats | null {
+  return restoreJson<PersistedApprenticeStats>(APPRENTICE_STATS_KEY);
+}
+
+export function persistInventory(state: InventoryState): void {
+  persistJson(INVENTORY_KEY, state);
+}
+export function restoreInventory(): InventoryState | null {
+  return restoreJson<InventoryState>(INVENTORY_KEY);
+}
+
 export interface PersistedLesson {
   currentLessonId: string;
   stage: LessonStage;
@@ -98,5 +119,7 @@ export function clearAll(): void {
   localStorage.removeItem(KNOWLEDGE_KEY);
   localStorage.removeItem(INTRO_KEY);
   localStorage.removeItem(APPRENTICE_KEY);
+  localStorage.removeItem(APPRENTICE_STATS_KEY);
+  localStorage.removeItem(INVENTORY_KEY);
   localStorage.removeItem(LESSON_KEY);
 }

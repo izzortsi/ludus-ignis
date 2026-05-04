@@ -810,6 +810,251 @@ html, body {
   color: rgba(220, 200, 160, 0.5);
 }
 
+/* === Apprentice stats strip + rank list + level-up panel ============ */
+
+/* Compact always-on strip below the Cinder figure. Two lines: the rank
+   label/XP counter, and a thin progress bar to next level. */
+.apprentice-strip {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+  padding: 0.5rem 0.7rem;
+  border: 1px solid rgba(220, 200, 160, 0.2);
+  border-radius: 3px;
+  background: rgba(255, 200, 100, 0.04);
+}
+
+.apprentice-strip-line {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  font-size: 0.82rem;
+  letter-spacing: 0.05em;
+}
+
+.apprentice-strip-rank {
+  color: rgba(255, 220, 160, 0.95);
+}
+
+.apprentice-strip-grains {
+  font-size: 0.78rem;
+  color: rgba(255, 200, 120, 0.85);
+  letter-spacing: 0.04em;
+}
+
+.apprentice-strip-line-bottom {
+  margin-top: 0.15rem;
+  justify-content: flex-end;
+}
+
+.apprentice-strip-xp {
+  font-size: 0.72rem;
+  color: rgba(220, 200, 160, 0.65);
+}
+
+.apprentice-strip-bar {
+  height: 4px;
+  background: rgba(220, 200, 160, 0.15);
+  border-radius: 2px;
+  overflow: hidden;
+}
+
+.apprentice-strip-bar-fill {
+  height: 100%;
+  background: linear-gradient(to right,
+    rgba(255, 170, 68, 0.65),
+    rgba(255, 200, 120, 0.95));
+  transition: width 250ms ease-out;
+}
+
+/* Aprendiz hub sub-view — the rank ladder. */
+.apprentice-current {
+  margin: 0;
+  font-size: 0.95rem;
+  color: rgba(235, 220, 180, 0.95);
+  line-height: 1.55;
+}
+
+.apprentice-rank-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.apprentice-rank-row {
+  display: grid;
+  grid-template-columns: 2rem 1fr auto;
+  align-items: baseline;
+  gap: 0.6rem;
+  padding: 0.4rem 0.6rem;
+  border: 1px solid rgba(220, 200, 160, 0.15);
+  border-radius: 3px;
+  font-size: 0.9rem;
+}
+
+.apprentice-rank-row.is-locked {
+  opacity: 0.5;
+}
+
+.apprentice-rank-row.is-current {
+  border-color: rgba(255, 200, 120, 0.7);
+  background: linear-gradient(to bottom,
+    rgba(255, 170, 68, 0.16),
+    rgba(255, 170, 68, 0.06));
+  box-shadow: 0 0 12px rgba(255, 150, 60, 0.18);
+}
+
+.apprentice-rank-num {
+  color: rgba(220, 200, 160, 0.55);
+  font-size: 0.78rem;
+  text-align: right;
+}
+
+.apprentice-rank-name {
+  color: rgba(255, 220, 160, 0.95);
+  letter-spacing: 0.04em;
+}
+
+.apprentice-rank-threshold {
+  color: rgba(220, 200, 160, 0.6);
+  font-size: 0.78rem;
+}
+
+.apprentice-hint {
+  margin: 0.25rem 0 0;
+  color: rgba(220, 200, 160, 0.65);
+  font-size: 0.82rem;
+  font-style: italic;
+  line-height: 1.5;
+}
+
+/* Level-up announcement — sits at the top of the modal body when
+   pendingLevelUp is set. Mirrors RevealPanel's visual register. */
+.apprentice-levelup-panel {
+  border: 1px solid rgba(255, 200, 120, 0.7);
+  background: linear-gradient(to bottom,
+    rgba(255, 170, 68, 0.18),
+    rgba(255, 170, 68, 0.04) 80%);
+  padding: 1rem 1rem 0.85rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  border-radius: 3px;
+  box-shadow: 0 0 16px rgba(255, 150, 60, 0.22);
+}
+
+.apprentice-levelup-prologue {
+  margin: 0;
+  text-align: center;
+  font-style: italic;
+  color: rgba(255, 200, 120, 0.85);
+  font-size: 0.78rem;
+  letter-spacing: 0.18em;
+  text-transform: lowercase;
+}
+
+.apprentice-levelup-title {
+  margin: 0;
+  text-align: center;
+  font-size: 1.1rem;
+  letter-spacing: 0.06em;
+  color: rgba(255, 220, 160, 1);
+}
+
+.apprentice-levelup-text {
+  margin: 0;
+  text-align: center;
+  font-size: 0.88rem;
+  color: rgba(235, 220, 180, 0.9);
+  line-height: 1.5;
+}
+
+.apprentice-levelup-dismiss {
+  align-self: center;
+  margin-top: 0.4rem;
+  background: transparent;
+  color: rgba(255, 220, 160, 0.95);
+  border: 1px solid rgba(220, 200, 160, 0.5);
+  padding: 0.4rem 0.95rem;
+  font-family: inherit;
+  font-size: 0.88rem;
+  cursor: pointer;
+}
+
+.apprentice-levelup-dismiss:hover {
+  background: rgba(255, 220, 160, 0.1);
+}
+
+/* === Inventory sub-view ============================================ */
+
+.inventory-item {
+  display: flex;
+  flex-direction: column;
+  gap: 0.45rem;
+  padding: 0.7rem 0.8rem;
+  border: 1px solid rgba(220, 200, 160, 0.2);
+  border-left: 3px solid rgba(255, 200, 120, 0.55);
+  background: rgba(255, 200, 100, 0.04);
+  border-radius: 3px;
+}
+
+.inventory-item-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+}
+
+.inventory-item-label {
+  font-size: 0.95rem;
+  color: rgba(255, 220, 160, 0.95);
+  letter-spacing: 0.04em;
+}
+
+.inventory-item-count {
+  font-size: 0.85rem;
+  color: rgba(255, 200, 120, 0.95);
+}
+
+.inventory-item-flavour {
+  margin: 0;
+  font-size: 0.82rem;
+  font-style: italic;
+  color: rgba(220, 200, 160, 0.7);
+  line-height: 1.5;
+}
+
+.inventory-item-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+.inventory-action-btn {
+  text-align: center;
+  font-size: 0.85rem;
+}
+
+.inventory-action-btn:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+/* === Paid actions row (re-roll, paid reveal) under exercise options === */
+
+.cinder-paid-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+  align-items: center;
+  margin-top: 0.3rem;
+}
+
+.cinder-reveal-link:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+  text-decoration: none;
+}
+
 /* Subtle, low-stakes "give me the answer" link. Less visually weighty than
    the option buttons, but findable. Aligned center between options and
    feedback. */
