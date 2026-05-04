@@ -1,136 +1,88 @@
-// Personality + reading-manner voice helpers.
-// All text in Brazilian Portuguese (você-form, BR vocabulary).
+// Personality + reading-manner voice helpers. All user-visible strings now
+// route through the i18n dictionary so locale switching re-renders cleanly.
 
 import { CinderPersonality, CinderReadingManner } from './cinder-model';
 import type { LessonStage } from '../lessons/lesson-model';
+import { t } from '../../i18n';
 
 // --- hub greeting -----------------------------------------------------------
 // What the Cinder says when its modal opens (after the spontaneous theory
 // walk-through has already happened). Personality + lesson stage modulate
 // the phrasing.
 
+type GreetingStage = 'studying' | 'practiced' | 'other';
+
+function stageKey(stage: LessonStage): GreetingStage {
+  if (stage === 'studying')  return 'studying';
+  if (stage === 'practiced') return 'practiced';
+  return 'other';
+}
+
 export function hubGreeting(personality: CinderPersonality, stage: LessonStage): string {
-  if (stage === 'studying') {
-    switch (personality) {
-      case 'warm':    return 'Voltaste. Que queres? Posso rever a teoria contigo, ou pesar uns números.';
-      case 'laconic': return 'Hm? Teoria, prática, ou parábola.';
-      case 'playful': return 'De volta! Teoria de novo, ou já vamos pesar?';
-      case 'severe':  return 'Ainda não terminamos. Escolhe: teoria, prática, ou parábola.';
-    }
-  }
-  if (stage === 'practiced') {
-    switch (personality) {
-      case 'warm':    return 'Estás pronto, parece. Queres rever antes de ele te provar?';
-      case 'laconic': return 'Pronto. Revê, ou vai.';
-      case 'playful': return 'Conseguiste! Queres dar uma última olhada antes da prova?';
-      case 'severe':  return 'Preparado. Se queres rever, revê.';
-    }
-  }
-  // tested or other
-  switch (personality) {
-    case 'warm':    return 'Aguardamos. Mas se queres rever o que falamos, fica à vontade.';
-    case 'laconic': return 'Espera.';
-    case 'playful': return 'Esperando o próximo!';
-    case 'severe':  return 'Aguarda.';
-  }
+  return t().cinderVoice.greeting[personality][stageKey(stage)];
 }
 
 // --- exercise framing -------------------------------------------------------
 
 export function exerciseIntro(personality: CinderPersonality): string {
-  switch (personality) {
-    case 'warm':    return 'Venha. Vamos pensar juntos.';
-    case 'laconic': return 'Pense.';
-    case 'playful': return 'Outro enigma?';
-    case 'severe':  return 'Atenção. Esta é a questão.';
-  }
+  return t().cinderVoice.exerciseIntro[personality];
 }
 
 export function correctFeedback(personality: CinderPersonality): string {
-  switch (personality) {
-    case 'warm':    return 'Bem feito. Isso nos fortalece.';
-    case 'laconic': return 'Sim.';
-    case 'playful': return 'Boa! Você pegou o jeito.';
-    case 'severe':  return 'Correto.';
-  }
+  return t().cinderVoice.correctFeedback[personality];
 }
 
 export function wrongFeedback(personality: CinderPersonality): string {
-  switch (personality) {
-    case 'warm':    return 'Não foi assim. Vamos olhar de novo, com calma.';
-    case 'laconic': return 'Não.';
-    case 'playful': return 'Hmmm... não. Tente de novo.';
-    case 'severe':  return 'Errado. Decore a senda.';
-  }
+  return t().cinderVoice.wrongFeedback[personality];
 }
 
 // --- reading verdict --------------------------------------------------------
 
 export interface VerdictPhrase {
-  prefix: string; // before the band label
-  suffix: string; // after the band label
+  prefix: string;
+  suffix: string;
 }
 
 export function verdictPhrase(manner: CinderReadingManner, name: string): VerdictPhrase {
-  switch (manner) {
-    case 'confident':  return { prefix: `${name} diz: `, suffix: '.' };
-    case 'cautious':   return { prefix: `${name} olha por mais tempo. Hesita. Diz: `, suffix: '.' };
-    case 'histrionic': return { prefix: `${name} estala e quase grita: `, suffix: '!' };
-  }
+  return t().reading[manner](name);
 }
 
 // --- concept reveal ---------------------------------------------------------
 
-interface ConceptInfo {
-  name: string;
-  definition: string;   // a short phrase capturing what the family is about
-  formalName: string;   // name carried over from before the collapse
-}
+// Concept ids match the dictionary's `conceptReveal.concept` keys. The
+// per-personality wording is built from those entries.
+type ConceptId =
+  | 'forma-mundo-possivel'
+  | 'roda-inclusoes'
+  | 'juras-chama'
+  | 'dois-sinais'
+  | 'mao-cega'
+  | 'caminho-de-volta';
 
-const CONCEPTS: Record<string, ConceptInfo> = {
-  'A Forma do Mundo Possível': {
-    name: 'A Forma do Mundo Possível',
-    definition: 'O cesto de mundos antes da Leitura, e os agrupamentos que dele se tiram.',
-    formalName: 'espaço amostral e eventos'
-  },
-  'A Roda das Inclusões': {
-    name: 'A Roda das Inclusões',
-    definition: 'Quando o "alguma vez" e o "sempre" se convertem um no outro pelo avesso.',
-    formalName: 'sequências de eventos e De Morgan'
-  },
-  'As Juras da Chama': {
-    name: 'As Juras da Chama',
-    definition: 'As três promessas que toda chance honesta cumpre — e o resto que delas decorre.',
-    formalName: 'axiomas de Kolmogorov'
-  },
-  'Os Dois Sinais': {
-    name: 'Os Dois Sinais',
-    definition: 'Quando dois sinais não se tocam, suas chances multiplicam.',
-    formalName: 'independência'
-  },
-  'A Mão Cega no Jarro': {
-    name: 'A Mão Cega no Jarro',
-    definition: 'Quando o que sai depende do que está dentro — e do jeito de tirar.',
-    formalName: 'amostragem'
-  },
-  'O Caminho de Volta': {
-    name: 'O Caminho de Volta',
-    definition: 'Quando o sinal chega e queremos voltar à fonte.',
-    formalName: 'Bayes'
-  }
+// Map from the diegetic concept name (used as a key by the knowledge
+// store to decide whether reveal has fired) to the dictionary id. The
+// names on the left exist in BOTH locales — see below for resolution.
+const NAME_TO_ID: Record<string, ConceptId> = {
+  // PT names (canonical knowledge-store keys)
+  'A Forma do Mundo Possível': 'forma-mundo-possivel',
+  'A Roda das Inclusões':       'roda-inclusoes',
+  'As Juras da Chama':          'juras-chama',
+  'Os Dois Sinais':             'dois-sinais',
+  'A Mão Cega no Jarro':        'mao-cega',
+  'O Caminho de Volta':         'caminho-de-volta',
+  // EN names — when content runs in EN locale, the exercise file uses
+  // the translated conceptName, so look up by either spelling.
+  'The Shape of the Possible World': 'forma-mundo-possivel',
+  'The Wheel of Inclusions':         'roda-inclusoes',
+  'The Oaths of the Flame':          'juras-chama',
+  'The Two Signs':                   'dois-sinais',
+  'The Blind Hand in the Jar':       'mao-cega',
+  'The Way Back':                    'caminho-de-volta',
 };
 
 export function conceptRevealText(personality: CinderPersonality, conceptName: string): string {
-  const info = CONCEPTS[conceptName];
-  if (!info) return '';
-  switch (personality) {
-    case 'warm':
-      return `Veja. Isto que você aprendeu — chama-se ${info.name}. ${info.definition} Os antigos chamavam isso de ${info.formalName}; o nome quase se perdeu.`;
-    case 'laconic':
-      return `${info.name}. ${info.definition} Os antigos: ${info.formalName}.`;
-    case 'playful':
-      return `Você descobriu sozinho. Tem nome: ${info.name}. ${info.definition} Os antigos chamavam ${info.formalName}, mas o termo se esqueceu.`;
-    case 'severe':
-      return `Saiba o nome. ${info.name}. ${info.definition} Os antigos chamavam ${info.formalName}.`;
-  }
+  const id = NAME_TO_ID[conceptName];
+  if (!id) return '';
+  const info = t().conceptReveal.concept[id];
+  return t().conceptReveal.prologue[personality](info.name, info.definition, info.formal);
 }

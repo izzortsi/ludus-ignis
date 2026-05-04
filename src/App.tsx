@@ -12,6 +12,7 @@ import {
   persistLesson,
   persistApprenticeStats,
   persistInventory,
+  persistLocale,
   isIntroSeen,
   setIntroSeen
 } from './persistence/local-storage';
@@ -21,6 +22,8 @@ import { knowledge, restoreKnowledge } from './core/knowledge/knowledge-store';
 import { lessonState } from './core/lessons/lesson-store';
 import { apprenticeStats } from './core/apprentice/apprentice-stats-store';
 import { inventory } from './core/inventory/inventory-store';
+import { currentLocale } from './i18n';
+import { Settings } from './ui/components/SettingsPanel';
 
 export function App() {
   // Restore from local storage on first load. A returning player (Cinder
@@ -89,6 +92,10 @@ export function App() {
     persistInventory({ items: { ...inventory.items } });
   });
 
+  createEffect(() => {
+    persistLocale(currentLocale());
+  });
+
   function onIntroComplete() {
     setIntroSeen();
     setShowIntro(false);
@@ -96,13 +103,7 @@ export function App() {
 
   return (
     <Show when={!showIntro()} fallback={<IntroScene onComplete={onIntroComplete} />}>
-      <button
-        class="back-to-intro"
-        onClick={() => setShowIntro(true)}
-        title="rever introdução"
-      >
-        ← introdução
-      </button>
+      <Settings onReplayIntro={() => setShowIntro(true)} />
       <main class="app">
         <CampMap />
       </main>

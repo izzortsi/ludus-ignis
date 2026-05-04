@@ -1,17 +1,11 @@
 import { createMemo, createSignal, onMount, onCleanup } from 'solid-js';
 import { cinder } from '../../core/cinder/cinder-store';
-import { currentVitality, bandOf, VitalityBand } from '../../core/cinder/cinder-model';
+import { currentVitality, bandOf } from '../../core/cinder/cinder-model';
 import { now } from '../../core/world/clock';
 import { computeFlameLayers } from '../ascii/flame';
+import { t } from '../../i18n';
 
 const FLICKER_FPS = 6;
-
-const BAND_LABEL: Record<VitalityBand, string> = {
-  bright: 'viva',
-  warm:   'quente',
-  low:    'fraca',
-  ember:  'brasa'
-};
 
 export function CinderView() {
   const [tick, setTick] = createSignal(0);
@@ -36,7 +30,7 @@ export function CinderView() {
         <pre class="flame-layer flame-sparks">{layers().sparks}</pre>
       </div>
       <div class="cinder-vitality">
-        vitalidade: {Math.round(vitality())}/100 — {BAND_LABEL[band()]}
+        {t().cinder.vitalidade}: {Math.round(vitality())}/100 — {t().cinder.band[band()]}
       </div>
     </div>
   );

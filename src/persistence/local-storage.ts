@@ -11,6 +11,7 @@ const APPRENTICE_KEY        = 'probgame.apprentice.v1';
 const APPRENTICE_STATS_KEY  = 'probgame.apprentice.stats.v1';
 const INVENTORY_KEY         = 'probgame.inventory.v1';
 const LESSON_KEY            = 'probgame.lesson.v1';
+const LOCALE_KEY            = 'probgame.locale.v1';
 
 function persistJson<T>(key: string, value: T): void {
   try {
@@ -97,6 +98,17 @@ export function restoreInventory(): InventoryState | null {
   return restoreJson<InventoryState>(INVENTORY_KEY);
 }
 
+// Locale persistence — stored as a bare string so the i18n layer can
+// read it without owning a JSON shape. Returns null if unset or invalid.
+export function persistLocale(locale: string): void {
+  try { localStorage.setItem(LOCALE_KEY, locale); } catch (err) {
+    console.warn('Could not persist locale:', err);
+  }
+}
+export function restoreLocale(): string | null {
+  try { return localStorage.getItem(LOCALE_KEY); } catch { return null; }
+}
+
 export interface PersistedLesson {
   currentLessonId: string;
   stage: LessonStage;
@@ -122,4 +134,5 @@ export function clearAll(): void {
   localStorage.removeItem(APPRENTICE_STATS_KEY);
   localStorage.removeItem(INVENTORY_KEY);
   localStorage.removeItem(LESSON_KEY);
+  localStorage.removeItem(LOCALE_KEY);
 }

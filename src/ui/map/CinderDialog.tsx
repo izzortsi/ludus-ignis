@@ -23,23 +23,41 @@ import {
   apprenticeStats, awardXp, pendingLevelUp, dismissLevelUp
 } from '../../core/apprentice/apprentice-stats-store';
 import {
-  RANK_NAMES, MAX_LEVEL, LEVEL_THRESHOLDS,
-  xpForCorrect, levelOf, rankNameOf, isMaxLevel, xpProgressInLevel
+  RANK_NAMES, MAX_LEVEL, LEVEL_THRESHOLDS, LESSON_BONUS_XP,
+  xpForCorrect, levelOf, isMaxLevel, xpProgressInLevel
 } from '../../core/apprentice/apprentice-stats-logic';
 import { inventory, add as addToInventory, spend as spendFromInventory, countOf as inventoryCountOf } from '../../core/inventory/inventory-store';
 import {
-  ITEM_INFO, pluralize,
   grainsForCorrect,
   FEED_PRICE_GRAINS, FEED_VITALITY_GAIN,
   REROLL_PRICE_GRAINS, REVEAL_PRICE_GRAINS,
   type ItemId
 } from '../../core/inventory/inventory-logic';
+import { t } from '../../i18n';
 
 interface Props {
   onClose: () => void;
 }
 
 const REVEAL_VITALITY_BONUS = 10;
+
+// Rank dictionary keys ordered to match LEVEL_THRESHOLDS / RANK_NAMES.
+// Used to look up the localized rank label for a given level.
+const RANK_KEYS = ['apprentice', 'novice', 'reader', 'weaver', 'shaman', 'master'] as const;
+
+function localizedRankName(level: number): string {
+  const key = RANK_KEYS[Math.max(0, Math.min(RANK_KEYS.length - 1, level - 1))];
+  return t().apprentice.rank[key];
+}
+
+function localizedRankFromXp(xp: number): string {
+  return localizedRankName(levelOf(xp));
+}
+
+function localizedPluralize(id: ItemId, n: number): string {
+  const info = t().inventory.items[id];
+  return n === 1 ? info.singular : info.plural;
+}
 
 // Hub navigation state. The review tree (rever-list → rever-family) lets the
 // apprentice replay any presented lesson's parable or theory; pratica is the
@@ -92,10 +110,10 @@ function CinderSpontaneous() {
   return (
     <SpeechPresentation
       speaker={cinder.name}
-      title="estudo"
+      title={t().spontaneous.title}
       parts={parts()}
-      finalHint="vamos praticar →"
-      skipLabel="pular"
+      finalHint={t().spontaneous.finalHint}
+      skipLabel={t().spontaneous.skipLabel}
       onClose={markTheoryIntroduced}
     />
   );
@@ -153,7 +171,7 @@ function CinderHub(props: HubProps) {
   }
 
   return (
-    <MapDialog title={`Cinder — ${cinder.name}`} onClose={onClose}>
+    <MapDialog title={`${t().cinder.titlePrefix} — ${cinder.name}`} onClose={onClose}>
       <CinderView />
       <ApprenticeStrip />
       <Show when={pendingLevelUp() !== null}>
@@ -162,7 +180,7 @@ function CinderHub(props: HubProps) {
 
       <Show when={!hubOpen()}>
         <p class="cinder-no-lesson">
-          O Cinder está quieto. <em>Vai primeiro até o Fogo Ancião.</em>
+          {t().cinder.quietHint} <em>{t().cinder.quietDirective}</em>
         </p>
       </Show>
 
@@ -171,15 +189,15 @@ function CinderHub(props: HubProps) {
           <p class="cinder-greeting">
             <Show
               when={currentStarted()}
-              fallback={'O Fogo Ancião ainda não acendeu a próxima parábola. Mas posso te mostrar o que já estudámos.'}
+              fallback={t().hub.greetingPreParable}
             >
               {hubGreeting(cinder.personality, lessonState.stage)}
             </Show>
           </p>
           <div class="cinder-hub-options">
             <button class="cinder-hub-option" onClick={() => setView('rever-list')}>
-              <span class="cinder-hub-option-label">Teoria</span>
-              <span class="cinder-hub-option-desc">rever famílias já apresentadas</span>
+              <span class="cinder-hub-option-label">{t().hub.teoria.label}</span>
+              <span class="cinder-hub-option-desc">{t().hub.teoria.desc}</span>
             </button>
             <button
               class="cinder-hub-option"
@@ -191,32 +209,32 @@ function CinderHub(props: HubProps) {
                 setView('pratica');
               }}
             >
-              <span class="cinder-hub-option-label">Prática</span>
+              <span class="cinder-hub-option-label">{t().hub.pratica.label}</span>
               <span class="cinder-hub-option-desc">
                 <Show
                   when={currentStarted()}
-                  fallback={'aguarda a próxima parábola'}
+                  fallback={t().hub.pratica.descWaiting}
                 >
-                  questões da família atual
+                  {t().hub.pratica.descActive}
                 </Show>
               </span>
             </button>
             <button class="cinder-hub-option" onClick={() => setView('galeria-list')}>
-              <span class="cinder-hub-option-label">Galeria</span>
-              <span class="cinder-hub-option-desc">cenas guardadas pela brasa</span>
+              <span class="cinder-hub-option-label">{t().hub.galeria.label}</span>
+              <span class="cinder-hub-option-desc">{t().hub.galeria.desc}</span>
             </button>
             <button class="cinder-hub-option" onClick={() => setView('aprendiz')}>
-              <span class="cinder-hub-option-label">Aprendiz</span>
-              <span class="cinder-hub-option-desc">teu posto, teu caminho</span>
+              <span class="cinder-hub-option-label">{t().hub.aprendiz.label}</span>
+              <span class="cinder-hub-option-desc">{t().hub.aprendiz.desc}</span>
             </button>
             <button class="cinder-hub-option" onClick={() => setView('inventario')}>
-              <span class="cinder-hub-option-label">Inventário</span>
-              <span class="cinder-hub-option-desc">o que carregas, o que podes gastar</span>
+              <span class="cinder-hub-option-label">{t().hub.inventario.label}</span>
+              <span class="cinder-hub-option-desc">{t().hub.inventario.desc}</span>
             </button>
           </div>
           <Show when={lessonState.stage === 'practiced'}>
             <p class="cinder-practiced-hint">
-              <em>O Fogo Ancião espera te provar.</em>
+              <em>{t().cinder.practicedHint}</em>
             </p>
           </Show>
         </div>
@@ -263,7 +281,7 @@ function CinderHub(props: HubProps) {
 function BackLink(props: { onBack: () => void; label?: string }) {
   return (
     <button class="cinder-back-link" onClick={props.onBack}>
-      ← {props.label ?? 'voltar'}
+      ← {props.label ?? t().cinder.backLink}
     </button>
   );
 }
@@ -274,21 +292,21 @@ function ReviewListView(props: { onPick: (id: string) => void; onBack: () => voi
     <div class="cinder-section">
       <BackLink onBack={props.onBack} />
       <div class="cinder-section-header">
-        <span class="cinder-section-label">teoria</span>
-        <span class="cinder-section-meta">famílias já apresentadas</span>
+        <span class="cinder-section-label">{t().review.sectionLabel}</span>
+        <span class="cinder-section-meta">{t().review.sectionMeta}</span>
       </div>
       <Show
         when={list().length > 0}
-        fallback={<p class="cinder-no-lesson">Nada apresentado ainda.</p>}
+        fallback={<p class="cinder-no-lesson">{t().review.nothingYet}</p>}
       >
         <div class="cinder-hub-options">
           <For each={list()}>
             {(l) => (
               <button class="cinder-hub-option" onClick={() => props.onPick(l.id)}>
                 <span class="cinder-hub-option-label">
-                  Família {l.family} — {l.parable.title}
+                  {t().review.cardLabel(l.family, l.parable.title)}
                 </span>
-                <span class="cinder-hub-option-desc">parábola e teoria</span>
+                <span class="cinder-hub-option-desc">{t().review.cardDesc}</span>
               </button>
             )}
           </For>
@@ -302,24 +320,31 @@ function ReviewListView(props: { onPick: (id: string) => void; onBack: () => voi
 // intro's flashbacks. Clicking a card opens its full-size view as a
 // fullscreen overlay (handled at the CinderDialog level).
 function GalleryListView(props: { onPick: (card: GalleryCard) => void; onBack: () => void }) {
+  const dictCardFor = (id: string) => {
+    const cards = t().gallery.cards as Record<string, { title: string; caption: string }>;
+    return cards[id];
+  };
   return (
     <div class="cinder-section">
       <BackLink onBack={props.onBack} />
       <div class="cinder-section-header">
-        <span class="cinder-section-label">galeria</span>
-        <span class="cinder-section-meta">cenas guardadas pela brasa</span>
+        <span class="cinder-section-label">{t().gallery.sectionLabel}</span>
+        <span class="cinder-section-meta">{t().gallery.sectionMeta}</span>
       </div>
       <div class="cinder-hub-options">
         <For each={GALLERY}>
-          {(card) => (
-            <button class="cinder-hub-option" onClick={() => props.onPick(card)}>
-              <span class="cinder-hub-option-label">{card.title}</span>
-              <span
-                class="cinder-hub-option-desc"
-                innerHTML={renderInlineMarkup(card.caption)}
-              />
-            </button>
-          )}
+          {(card) => {
+            const dict = () => dictCardFor(card.id) ?? { title: card.title, caption: card.caption };
+            return (
+              <button class="cinder-hub-option" onClick={() => props.onPick(card)}>
+                <span class="cinder-hub-option-label">{dict().title}</span>
+                <span
+                  class="cinder-hub-option-desc"
+                  innerHTML={renderInlineMarkup(dict().caption)}
+                />
+              </button>
+            );
+          }}
         </For>
       </div>
     </div>
@@ -330,6 +355,12 @@ function GalleryListView(props: { onPick: (card: GalleryCard) => void; onBack: (
 // intro stage uses, so the art reads at full fidelity. Click anywhere to
 // dismiss (matches the "collectible card flipped over" gesture).
 function GalleryCardViewer(props: { card: GalleryCard; onClose: () => void }) {
+  // Pull localized title + caption from the dict; fall back to the card's
+  // baked-in PT text if the dict doesn't know this card id (forward-compat).
+  const dictCard = () => {
+    const cards = t().gallery.cards as Record<string, { title: string; caption: string }>;
+    return cards[props.card.id] ?? { title: props.card.title, caption: props.card.caption };
+  };
   return (
     <div class="cinder-gallery-overlay" onClick={props.onClose}>
       <pre
@@ -342,12 +373,12 @@ function GalleryCardViewer(props: { card: GalleryCard; onClose: () => void }) {
         {props.card.art.join('\n')}
       </pre>
       <div class="cinder-gallery-card-caption">
-        <span class="cinder-gallery-card-title">{props.card.title}</span>
+        <span class="cinder-gallery-card-title">{dictCard().title}</span>
         <span
           class="cinder-gallery-card-text"
-          innerHTML={renderInlineMarkup(props.card.caption)}
+          innerHTML={renderInlineMarkup(dictCard().caption)}
         />
-        <span class="cinder-gallery-card-hint">toque para fechar</span>
+        <span class="cinder-gallery-card-hint">{t().gallery.closeHint}</span>
       </div>
     </div>
   );
@@ -362,7 +393,7 @@ function GalleryCardViewer(props: { card: GalleryCard; onClose: () => void }) {
 
 function ApprenticeStrip() {
   const xp = createMemo(() => apprenticeStats.xp);
-  const rank = createMemo(() => rankNameOf(xp()));
+  const rank = createMemo(() => localizedRankFromXp(xp()));
   const progress = createMemo(() => xpProgressInLevel(xp()));
   const pct = createMemo(() => {
     const p = progress();
@@ -378,9 +409,9 @@ function ApprenticeStrip() {
   return (
     <div class="apprentice-strip">
       <div class="apprentice-strip-line">
-        <span class="apprentice-strip-rank">aprendiz · {rank()}</span>
+        <span class="apprentice-strip-rank">{t().apprentice.stripPrefix} · {rank()}</span>
         <span class="apprentice-strip-grains">
-          {grainCount()} {pluralize('graos', grainCount())}
+          {grainCount()} {localizedPluralize('graos', grainCount())}
         </span>
       </div>
       <div class="apprentice-strip-bar">
@@ -405,21 +436,22 @@ function ApprenticeView(props: { onBack: () => void }) {
     <div class="cinder-section">
       <BackLink onBack={props.onBack} />
       <div class="cinder-section-header">
-        <span class="cinder-section-label">aprendiz</span>
-        <span class="cinder-section-meta">{xp()} XP</span>
+        <span class="cinder-section-label">{t().apprentice.sectionLabel}</span>
+        <span class="cinder-section-meta">{t().apprentice.sectionMeta(xp())}</span>
       </div>
       <p class="apprentice-current">
-        Estás como <strong>{rankNameOf(xp())}</strong>
+        {t().apprentice.youAre(localizedRankFromXp(xp()))}
+        {' '}<strong>{localizedRankFromXp(xp())}</strong>
         <Show when={!atMax()}>
-          {' '}— faltam {(progress().span ?? 0) - progress().current} XP para o próximo posto.
+          {' '}{t().apprentice.rankTo((progress().span ?? 0) - progress().current)}
         </Show>
         <Show when={atMax()}>
-          {' '}— posto mais alto. O fogo te chama de igual.
+          {' '}{t().apprentice.atMax}
         </Show>
       </p>
       <div class="apprentice-rank-list">
         <For each={RANK_NAMES}>
-          {(name, i) => {
+          {(_name, i) => {
             const isCurrent = level() === i() + 1;
             const isReached = xp() >= LEVEL_THRESHOLDS[i()];
             const cls = [
@@ -430,9 +462,9 @@ function ApprenticeView(props: { onBack: () => void }) {
             return (
               <div class={cls}>
                 <span class="apprentice-rank-num">{i() + 1}</span>
-                <span class="apprentice-rank-name">{name}</span>
+                <span class="apprentice-rank-name">{localizedRankName(i() + 1)}</span>
                 <span class="apprentice-rank-threshold">
-                  {LEVEL_THRESHOLDS[i()]} XP
+                  {t().apprentice.rankN(LEVEL_THRESHOLDS[i()])}
                 </span>
               </div>
             );
@@ -440,10 +472,7 @@ function ApprenticeView(props: { onBack: () => void }) {
         </For>
       </div>
       <Show when={!atMax()}>
-        <p class="apprentice-hint">
-          Cada resposta certa: <em>5 × dificuldade</em> XP. Cada parábola
-          dominada na prova do Fogo Ancião: <em>+{50}</em> XP.
-        </p>
+        <p class="apprentice-hint">{t().apprentice.earnHint(LESSON_BONUS_XP)}</p>
       </Show>
       <Show when={level() >= MAX_LEVEL}>
         {/* placeholder — exists only so the linter sees MAX_LEVEL used here too */}
@@ -456,18 +485,15 @@ function ApprenticeView(props: { onBack: () => void }) {
 // Brief inline panel shown after a level-up. Mirrors RevealPanel: the
 // caller dismisses it when the player has read the news.
 function LevelUpPanel(props: { level: number; onDismiss: () => void }) {
-  const rank = RANK_NAMES[props.level - 1];
   return (
     <div class="apprentice-levelup-panel">
-      <p class="apprentice-levelup-prologue">subiste de posto</p>
+      <p class="apprentice-levelup-prologue">{t().levelup.prologue}</p>
       <p class="apprentice-levelup-title">
-        nível {props.level} — <strong>{rank}</strong>
+        {t().levelup.title(props.level, localizedRankName(props.level))}
       </p>
-      <p class="apprentice-levelup-text">
-        O Cinder reconhece o teu progresso. A vitalidade dele se renova.
-      </p>
+      <p class="apprentice-levelup-text">{t().levelup.text}</p>
       <button class="apprentice-levelup-dismiss" onClick={props.onDismiss}>
-        seguir →
+        {t().levelup.dismiss}
       </button>
     </div>
   );
@@ -483,7 +509,8 @@ function LevelUpPanel(props: { level: number; onDismiss: () => void }) {
 function InventoryView(props: { onBack: () => void }) {
   const heldIds = createMemo<ItemId[]>(() => {
     const out: ItemId[] = [];
-    for (const id of Object.keys(ITEM_INFO) as ItemId[]) {
+    const known = Object.keys(t().inventory.items) as ItemId[];
+    for (const id of known) {
       if ((inventory.items[id] ?? 0) > 0) out.push(id);
     }
     return out;
@@ -498,31 +525,26 @@ function InventoryView(props: { onBack: () => void }) {
     <div class="cinder-section">
       <BackLink onBack={props.onBack} />
       <div class="cinder-section-header">
-        <span class="cinder-section-label">inventário</span>
-        <span class="cinder-section-meta">o que carregas</span>
+        <span class="cinder-section-label">{t().inventory.sectionLabel}</span>
+        <span class="cinder-section-meta">{t().inventory.sectionMeta}</span>
       </div>
       <Show
         when={heldIds().length > 0}
-        fallback={
-          <p class="cinder-no-lesson">
-            Não carregas nada ainda. Acerta perguntas com o teu Cinder e vão
-            aparecer grãos.
-          </p>
-        }
+        fallback={<p class="cinder-no-lesson">{t().inventory.emptyHint}</p>}
       >
         <For each={heldIds()}>
           {(id) => {
-            const info = ITEM_INFO[id];
+            const info = () => t().inventory.items[id];
             const count = createMemo(() => inventory.items[id] ?? 0);
             return (
               <div class="inventory-item">
                 <div class="inventory-item-header">
-                  <span class="inventory-item-label">{info.label}</span>
+                  <span class="inventory-item-label">{info().label}</span>
                   <span class="inventory-item-count">
-                    {count()} {pluralize(id, count())}
+                    {count()} {localizedPluralize(id, count())}
                   </span>
                 </div>
-                <p class="inventory-item-flavour">{info.flavour}</p>
+                <p class="inventory-item-flavour">{info().flavour}</p>
                 <Show when={id === 'graos'}>
                   <div class="inventory-item-actions">
                     <button
@@ -530,7 +552,7 @@ function InventoryView(props: { onBack: () => void }) {
                       disabled={count() < FEED_PRICE_GRAINS}
                       onClick={feedOnce}
                     >
-                      alimentar Cinder · −{FEED_PRICE_GRAINS} grão · +{FEED_VITALITY_GAIN} vitalidade
+                      {t().inventory.feedAction(FEED_PRICE_GRAINS, FEED_VITALITY_GAIN)}
                     </button>
                   </div>
                 </Show>
@@ -538,11 +560,7 @@ function InventoryView(props: { onBack: () => void }) {
             );
           }}
         </For>
-        <p class="apprentice-hint">
-          Outras saídas para grãos aparecem nas perguntas do Cinder e na prova
-          do Fogo Ancião — botões para trocar de pergunta ou ver a resposta
-          sem quebrar a sequência.
-        </p>
+        <p class="apprentice-hint">{t().inventory.spendsElsewhere}</p>
       </Show>
     </div>
   );
@@ -556,19 +574,19 @@ function ReviewFamilyView(props: {
 }) {
   return (
     <div class="cinder-section">
-      <BackLink onBack={props.onBack} label="famílias" />
+      <BackLink onBack={props.onBack} label={t().review.backFamilies} />
       <div class="cinder-section-header">
-        <span class="cinder-section-label">família {props.lesson.family}</span>
+        <span class="cinder-section-label">{t().cinder.familyN(props.lesson.family)}</span>
         <span class="cinder-section-meta">{props.lesson.parable.title}</span>
       </div>
       <div class="cinder-hub-options">
         <button class="cinder-hub-option" onClick={props.onPickParable}>
-          <span class="cinder-hub-option-label">Parábola</span>
-          <span class="cinder-hub-option-desc">o que o Fogo Ancião disse</span>
+          <span class="cinder-hub-option-label">{t().review.parableOption.label}</span>
+          <span class="cinder-hub-option-desc">{t().review.parableOption.desc}</span>
         </button>
         <button class="cinder-hub-option" onClick={props.onPickTheory}>
-          <span class="cinder-hub-option-label">Teoria</span>
-          <span class="cinder-hub-option-desc">o que o Cinder ensinou</span>
+          <span class="cinder-hub-option-label">{t().review.theoryOption.label}</span>
+          <span class="cinder-hub-option-desc">{t().review.theoryOption.desc}</span>
         </button>
       </div>
     </div>
@@ -580,8 +598,8 @@ function TheoryView(props: { lesson: Lesson; onBack: () => void }) {
     <div class="cinder-section">
       <BackLink onBack={props.onBack} />
       <div class="cinder-section-header">
-        <span class="cinder-section-label">teoria</span>
-        <span class="cinder-section-meta">{props.lesson.parable.title} — família {props.lesson.family}</span>
+        <span class="cinder-section-label">{t().cinder.theory}</span>
+        <span class="cinder-section-meta">{props.lesson.parable.title} — {t().cinder.familyN(props.lesson.family)}</span>
       </div>
       <For each={props.lesson.theory}>
         {(page) => (
@@ -604,7 +622,7 @@ function TheoryView(props: { lesson: Lesson; onBack: () => void }) {
 function SolutionPanel(props: { solution: string }) {
   return (
     <div class="study-solution">
-      <div class="study-solution-label">caminho da resposta</div>
+      <div class="study-solution-label">{t().solution.label}</div>
       <p class="study-solution-text" innerHTML={renderInlineMarkup(props.solution)} />
     </div>
   );
@@ -615,7 +633,7 @@ function ParableView(props: { lesson: Lesson; onBack: () => void }) {
     <div class="cinder-section">
       <BackLink onBack={props.onBack} />
       <div class="cinder-section-header">
-        <span class="cinder-section-label">parábola</span>
+        <span class="cinder-section-label">{t().cinder.parable}</span>
         <span class="cinder-section-meta">{props.lesson.parable.title}</span>
       </div>
       <For each={props.lesson.parable.paragraphs}>
@@ -694,14 +712,14 @@ function PracticeView(props: { lesson: Lesson; onBack: () => void }) {
     <div class="cinder-section">
       <BackLink onBack={props.onBack} />
       <div class="cinder-section-header">
-        <span class="cinder-section-label">prática</span>
-        <span class="cinder-section-meta">{correct()}/{target()} corretas</span>
+        <span class="cinder-section-label">{t().cinder.practice}</span>
+        <span class="cinder-section-meta">{t().cinder.correctsOf(correct(), target())}</span>
       </div>
       <Show
         when={exerciseState.current}
         fallback={
           <button class="cinder-cta" onClick={() => loadNextExercise(props.lesson.family)}>
-            pedir uma questão →
+            {t().cinder.askQuestion}
           </button>
         }
       >
@@ -738,37 +756,37 @@ function PracticeView(props: { lesson: Lesson; onBack: () => void }) {
             <Show when={exerciseState.result === null}>
               <div class="cinder-paid-actions">
                 <button class="cinder-reveal-link" onClick={onReveal}>
-                  ver resposta
+                  {t().cinder.revealLink}
                 </button>
                 <button
                   class="cinder-reveal-link"
                   disabled={inventoryCountOf('graos') < REROLL_PRICE_GRAINS}
                   onClick={onReroll}
                 >
-                  outra pergunta · {REROLL_PRICE_GRAINS} grãos
+                  {t().cinder.rerollOption(REROLL_PRICE_GRAINS)}
                 </button>
                 <button
                   class="cinder-reveal-link"
                   disabled={inventoryCountOf('graos') < REVEAL_PRICE_GRAINS}
                   onClick={onPaidReveal}
                 >
-                  ver sem quebrar a sequência · {REVEAL_PRICE_GRAINS} grãos
+                  {t().cinder.seeWithoutBreaking(REVEAL_PRICE_GRAINS)}
                 </button>
               </div>
             </Show>
             <Show when={exerciseState.result === 'correct'}>
               <p class="study-feedback is-correct">
-                {correctFeedback(cinder.personality)} +{vitalityGainOnCorrect(ex().difficulty)} vitalidade.
+                {correctFeedback(cinder.personality)} {t().cinderVoice.correctVitalitySuffix(vitalityGainOnCorrect(ex().difficulty))}
               </p>
             </Show>
             <Show when={exerciseState.result === 'wrong'}>
               <p class="study-feedback is-wrong">
-                {wrongFeedback(cinder.personality)} −{VITALITY_PENALTY_ON_WRONG} vitalidade.
+                {wrongFeedback(cinder.personality)} {t().cinderVoice.wrongVitalitySuffix(VITALITY_PENALTY_ON_WRONG)}
               </p>
             </Show>
             <Show when={exerciseState.result === 'revealed'}>
               <p class="study-feedback is-revealed">
-                <em>A resposta certa está marcada. A sequência foi quebrada.</em>
+                <em>{t().cinderVoice.revealedNotice}</em>
               </p>
             </Show>
             <Show when={(exerciseState.result === 'wrong' || exerciseState.result === 'revealed') && ex().solution}>
@@ -779,7 +797,7 @@ function PracticeView(props: { lesson: Lesson; onBack: () => void }) {
             </Show>
             <Show when={exerciseState.result !== null && !knowledge.pendingReveal}>
               <button class="cinder-cta" onClick={() => loadNextExercise(props.lesson.family)}>
-                próxima →
+                {t().cinder.next}
               </button>
             </Show>
           </>
@@ -787,7 +805,7 @@ function PracticeView(props: { lesson: Lesson; onBack: () => void }) {
       </Show>
       <Show when={lessonState.stage === 'practiced'}>
         <p class="cinder-practiced-hint">
-          <em>O Fogo Ancião espera te provar.</em>
+          <em>{t().cinder.practicedHint}</em>
         </p>
       </Show>
     </div>

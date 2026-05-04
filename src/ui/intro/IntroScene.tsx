@@ -17,6 +17,7 @@ import {
 } from './scene-art';
 import { HieroglyphFigures } from './HieroglyphFigures';
 import { cinder, setCinder } from '../../core/cinder/cinder-store';
+import { t } from '../../i18n';
 
 const TICK_MS = 140;
 const TYPE_MS = 32;
@@ -52,30 +53,23 @@ const PHASE_DURATIONS: Partial<Record<Phase, number>> = {
   flashback2: 5500
 };
 
-// The Hearth-Tender's opening monologue, framed around the lore.
-const TEXTS: Partial<Record<Phase, string>> = {
-  text1:
-    'Escutem. O fogo está bom esta noite. Puxem a pele para perto.',
-  text2:
-    'Vocês já viram o futuro chegar. Já se perguntaram se a chuva cairá, se a caça passará pelo vale do oeste, se a criança viverá. Falam dessas coisas com palavras como talvez e provavelmente.',
-  text3:
-    'Quero dizer a vocês que o talvez não é nada. É uma forma de saber — uma forma que o amanhã lança de volta sobre o hoje. Aqueles do outro lado das águas grandes aprenderam a pesar essa forma. Aqui está um pouco do que aprenderam.'
-};
+// All intro narration is now sourced from the i18n dict; the helpers below
+// re-pull the current locale on each call so language switching takes
+// effect immediately.
 
-// The Apprentice's monologue waking from the dream (phase 1).
-const APPRENTICE_DREAM_TEXT =
-  'Tive o sonho mais estranho... e hoje, hoje é o Dia do Ritual.';
+function textFor(phase: Phase): string | undefined {
+  if (phase === 'text1') return t().intro.text.one;
+  if (phase === 'text2') return t().intro.text.two;
+  if (phase === 'text3') return t().intro.text.three;
+  return undefined;
+}
 
-// Lore monologue spoken by the Elder Fire during phase 5. Placeholder — the
-// user will iterate. Tone: solemn, terse, hard-SF lore (CME / Age of Men).
-const LORE_PARTS: SpeechPart[] = [
-  { text: 'Aproxima-te. Senta. O fogo escuta.' },
-  { text: 'Houve uma Era dos Homens. Eram muitos. Construíam com aço, e o céu era amigo.' },
-  { text: 'Mas o Sol se voltou contra eles. Soltou a serpente verde — e ela ainda gira lá em cima, onde podes ver.' },
-  { text: 'As cidades silenciaram. As águas grandes engoliram o que sobrou. Os antigos morreram.' },
-  { text: 'Nós somos os que ficaram. Poucos, sob a serpente.' },
-  { text: 'O fogo é o que nos resta dos antigos. Hoje, recebes o teu.', variant: 'directive' }
-];
+function loreParts(): SpeechPart[] {
+  const lore = t().intro.lore;
+  return lore.map((line, i): SpeechPart => i === lore.length - 1
+    ? { text: line, variant: 'directive' }
+    : { text: line });
+}
 
 function nextPhase(p: Phase): Phase | null {
   const i = PHASE_ORDER.indexOf(p);
@@ -302,31 +296,31 @@ export function IntroScene(props: Props) {
 
       {/* === text overlays =========================================== */}
       <Show when={isTextPhase()}>
-        <IntroTypewriter text={TEXTS[phase()]!} />
+        <IntroTypewriter text={textFor(phase())!} />
       </Show>
 
       <Show when={phase() === 'wake_dream'}>
-        <IntroTypewriter text={APPRENTICE_DREAM_TEXT} position="bottom" />
+        <IntroTypewriter text={t().intro.apprenticeDream} position="bottom" />
       </Show>
 
       <Show when={phase() === 'walking_to_fire'}>
-        <p class="intro-subtitle">o Velho me leva ao Fogo Ancião.</p>
+        <p class="intro-subtitle">{t().intro.subtitle.walkingToFire}</p>
       </Show>
 
       <Show when={phase() === 'arriving'}>
-        <p class="intro-subtitle">a tribo se reúne.</p>
+        <p class="intro-subtitle">{t().intro.subtitle.arriving}</p>
       </Show>
 
       <Show when={phase() === 'dancing'}>
-        <p class="intro-subtitle">a dança começa.</p>
+        <p class="intro-subtitle">{t().intro.subtitle.dancing}</p>
       </Show>
 
       <Show when={phase() === 'receiving_cinder'}>
-        <p class="intro-subtitle">a brasa passa.</p>
+        <p class="intro-subtitle">{t().intro.subtitle.receivingCinder}</p>
       </Show>
 
       <Show when={phase() === 'black_wake'}>
-        <p class="intro-wake-text">Acorda.</p>
+        <p class="intro-wake-text">{t().intro.wakeText}</p>
       </Show>
 
       <Show when={phase() === 'morning' || phase() === 'test_morning'}>
@@ -335,7 +329,7 @@ export function IntroScene(props: Props) {
             when={nameChosen()}
             fallback={
               <form class="intro-name-form" onSubmit={submitName}>
-                <p class="intro-name-prompt">dá um nome à tua brasa.</p>
+                <p class="intro-name-prompt">{t().intro.nameForm.prompt}</p>
                 <input
                   class="intro-name-input"
                   type="text"
@@ -347,16 +341,16 @@ export function IntroScene(props: Props) {
                   autofocus
                 />
                 <button type="submit" class="intro-begin" disabled={nameInput().trim().length === 0}>
-                  nomear →
+                  {t().intro.nameForm.submit}
                 </button>
               </form>
             }
           >
             <p class="intro-cinder-says">
-              <em>"eu sou {cinder.name}."</em>
+              <em>{t().intro.nameForm.cinderSays(cinder.name)}</em>
             </p>
             <button class="intro-begin" onClick={onBegin}>
-              começar
+              {t().intro.nameForm.begin}
             </button>
           </Show>
         </div>
@@ -365,19 +359,19 @@ export function IntroScene(props: Props) {
       {/* === lore speech overlay ===================================== */}
       <Show when={phase() === 'lore_speech'}>
         <SpeechPresentation
-          speaker="Fogo Ancião"
-          parts={LORE_PARTS}
-          finalHint="receber a brasa →"
+          speaker={t().elder.speaker}
+          parts={loreParts()}
+          finalHint={t().intro.loreFinalHint}
           onClose={() => setPhase('receiving_cinder')}
         />
       </Show>
 
       <Show when={phase() !== 'morning' && phase() !== 'test_morning' && phase() !== 'lore_speech'}>
-        <p class="intro-skip-hint">toque para continuar</p>
+        <p class="intro-skip-hint">{t().intro.skipHint}</p>
       </Show>
 
       <Show when={phase() === 'morning'}>
-        <p class="intro-skip-hint">→ toque para variante de manhã</p>
+        <p class="intro-skip-hint">{t().intro.morningSkipHint}</p>
       </Show>
     </div>
   );

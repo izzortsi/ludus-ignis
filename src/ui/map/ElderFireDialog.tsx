@@ -16,6 +16,7 @@ import { awardXp } from '../../core/apprentice/apprentice-stats-store';
 import { xpForCorrect, LESSON_BONUS_XP } from '../../core/apprentice/apprentice-stats-logic';
 import { add as addToInventory, spend as spendFromInventory, countOf as inventoryCountOf } from '../../core/inventory/inventory-store';
 import { grainsForCorrect, GRAINS_PROVA_BONUS, REROLL_PRICE_GRAINS, REVEAL_PRICE_GRAINS } from '../../core/inventory/inventory-logic';
+import { t } from '../../i18n';
 
 interface Props {
   onClose: () => void;
@@ -53,30 +54,23 @@ function ElderSpeech(props: Props) {
       ];
     }
     if (stage === 'studying') {
-      return [{
-        text: 'Já te disse o que tinha a dizer. Vai pensar com o teu Cinder. Quando os números pesarem firme na tua mão, eu te provo.'
-      }];
+      return [{ text: t().elder.studyingRemark }];
     }
     // tested
     if (hasNextLesson()) {
+      const [first, second] = t().elder.testedHasNext;
       return [
-        { text: 'Bem. Aprendeste o que esta parábola tinha a ensinar.' },
-        {
-          text: 'Há outra história à minha espera, e outra brasa que ela acende. Quando estiveres pronto, conta-me — começo a próxima.',
-          variant: 'directive'
-        }
+        { text: first },
+        { text: second, variant: 'directive' }
       ];
     }
-    return [{
-      text: 'Bem. Aprendeste o que esta parábola tinha a ensinar. Por ora, descansa — outras virão, mas não esta noite.',
-      variant: 'directive'
-    }];
+    return [{ text: t().elder.testedAtEnd, variant: 'directive' }];
   });
 
   const finalHint = createMemo(() => {
-    if (lessonState.stage === 'parable') return 'ir até o cinder →';
-    if (lessonState.stage === 'tested' && hasNextLesson()) return 'próxima parábola →';
-    return 'fechar →';
+    if (lessonState.stage === 'parable') return t().elder.finalHints.parable;
+    if (lessonState.stage === 'tested' && hasNextLesson()) return t().elder.finalHints.tested;
+    return t().elder.finalHints.close;
   });
 
   function close() {
@@ -87,7 +81,7 @@ function ElderSpeech(props: Props) {
 
   return (
     <SpeechPresentation
-      speaker="Fogo Ancião"
+      speaker={t().elder.speaker}
       title={lessonState.stage === 'parable' ? lesson().parable.title : undefined}
       parts={parts()}
       finalHint={finalHint()}
@@ -171,9 +165,9 @@ function ElderTest(props: Props) {
   }
 
   return (
-    <MapDialog title="Fogo Ancião — a prova" onClose={close}>
+    <MapDialog title={t().elder.test.title} onClose={close}>
       <p class="elder-test-intro">
-        <em>Senta. Esta é a prova. Uma só pergunta — vê se os números pesam firme na tua mão.</em>
+        <em>{t().elder.test.intro}</em>
       </p>
 
       <Show when={exerciseState.current}>
@@ -210,65 +204,65 @@ function ElderTest(props: Props) {
             <Show when={exerciseState.result === null}>
               <div class="cinder-paid-actions">
                 <button class="cinder-reveal-link" onClick={onReveal}>
-                  ver resposta
+                  {t().cinder.revealLink}
                 </button>
                 <button
                   class="cinder-reveal-link"
                   disabled={inventoryCountOf('graos') < REROLL_PRICE_GRAINS}
                   onClick={onReroll}
                 >
-                  outra pergunta · {REROLL_PRICE_GRAINS} grãos
+                  {t().cinder.rerollOption(REROLL_PRICE_GRAINS)}
                 </button>
                 <button
                   class="cinder-reveal-link"
                   disabled={inventoryCountOf('graos') < REVEAL_PRICE_GRAINS}
                   onClick={onPaidReveal}
                 >
-                  ver sem quebrar a sequência · {REVEAL_PRICE_GRAINS} grãos
+                  {t().cinder.seeWithoutBreaking(REVEAL_PRICE_GRAINS)}
                 </button>
               </div>
             </Show>
 
             <Show when={exerciseState.result === 'correct'}>
               <p class="study-feedback is-correct">
-                <em>Bem. Já tens o passo.</em>
+                <em>{t().elder.test.correctTitle}</em>
               </p>
               <button class="cinder-cta" onClick={close}>
-                ouvir o Fogo Ancião →
+                {t().elder.test.hearElder}
               </button>
             </Show>
 
             <Show when={exerciseState.result === 'wrong'}>
               <p class="study-feedback is-wrong">
-                <em>Não foi assim. Volta ao teu Cinder ou tenta outra pergunta.</em> −{VITALITY_PENALTY_ON_WRONG} vitalidade.
+                <em>{t().elder.test.wrongHint}</em> {t().cinderVoice.wrongVitalitySuffix(VITALITY_PENALTY_ON_WRONG)}
               </p>
               <div class="elder-test-retry">
                 <button class="cinder-cta" onClick={nextQuestion}>
-                  outra pergunta →
+                  {t().elder.test.anotherQuestion}
                 </button>
                 <button class="cinder-back-link" onClick={close}>
-                  voltar ao Cinder
+                  {t().elder.test.backToCinder}
                 </button>
               </div>
             </Show>
 
             <Show when={exerciseState.result === 'revealed'}>
               <p class="study-feedback is-revealed">
-                <em>A resposta certa está marcada. A prova não passa assim — tenta outra.</em>
+                <em>{t().elder.test.revealedHint}</em>
               </p>
               <div class="elder-test-retry">
                 <button class="cinder-cta" onClick={nextQuestion}>
-                  outra pergunta →
+                  {t().elder.test.anotherQuestion}
                 </button>
                 <button class="cinder-back-link" onClick={close}>
-                  voltar ao Cinder
+                  {t().elder.test.backToCinder}
                 </button>
               </div>
             </Show>
 
             <Show when={(exerciseState.result === 'wrong' || exerciseState.result === 'revealed') && ex().solution}>
               <div class="study-solution">
-                <div class="study-solution-label">caminho da resposta</div>
+                <div class="study-solution-label">{t().solution.label}</div>
                 <p class="study-solution-text" innerHTML={renderInlineMarkup(ex().solution!)} />
               </div>
             </Show>

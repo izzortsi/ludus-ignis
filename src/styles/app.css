@@ -1257,26 +1257,147 @@ html, body {
 .tribe-line.is-well { color: var(--safe); }
 .tribe-line.is-sick { color: var(--danger); font-style: italic; }
 
-.back-to-intro {
+/* === Settings (gear button + panel) ============================== */
+
+.settings-trigger {
   position: fixed;
   top: 0.5rem;
-  left: 0.5rem;
+  right: 0.5rem;
   z-index: 100;
-  padding: 0.4rem 0.7rem;
+  width: 2rem;
+  height: 2rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   background: transparent;
   color: var(--fg-dim);
   border: 1px solid transparent;
   font-family: 'Menlo', 'Consolas', 'Courier New', monospace;
-  font-size: 0.75rem;
-  letter-spacing: 0.15em;
-  text-transform: lowercase;
+  font-size: 1.1rem;
   cursor: pointer;
-  opacity: 0.45;
+  opacity: 0.55;
   transition: opacity 200ms, color 200ms, border-color 200ms;
+  border-radius: 3px;
 }
 
-.back-to-intro:hover {
+.settings-trigger:hover {
   opacity: 1;
+  color: var(--fg);
+  border-color: var(--fg-dim);
+}
+
+.settings-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.65);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 110;
+  padding: 1rem;
+}
+
+.settings-panel {
+  background: var(--bg, #14110d);
+  color: var(--fg, #d8c8a8);
+  border: 1px solid rgba(220, 200, 160, 0.3);
+  border-radius: 6px;
+  max-width: 22rem;
+  width: 100%;
+  padding: 1.1rem 1.3rem;
+  font-family: 'Menlo', 'Consolas', 'Courier New', monospace;
+}
+
+.settings-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 0.8rem;
+  padding-bottom: 0.5rem;
+  border-bottom: 1px solid rgba(220, 200, 160, 0.18);
+}
+
+.settings-title {
+  margin: 0;
+  font-size: 0.95rem;
+  font-weight: normal;
+  letter-spacing: 0.06em;
+  color: rgba(255, 220, 160, 0.95);
+}
+
+.settings-close {
+  background: none;
+  border: none;
+  color: var(--fg);
+  font-size: 1.4rem;
+  line-height: 1;
+  cursor: pointer;
+  padding: 0 0.25rem;
+}
+
+.settings-close:hover { color: rgba(255, 220, 160, 1); }
+
+.settings-body {
+  display: flex;
+  flex-direction: column;
+  gap: 0.9rem;
+}
+
+.settings-row {
+  display: flex;
+  flex-direction: column;
+  gap: 0.45rem;
+}
+
+.settings-row-label {
+  font-size: 0.78rem;
+  color: rgba(220, 200, 160, 0.7);
+  letter-spacing: 0.1em;
+  text-transform: lowercase;
+}
+
+.settings-row-options {
+  display: flex;
+  gap: 0.4rem;
+  flex-wrap: wrap;
+}
+
+.settings-pill {
+  background: transparent;
+  color: var(--fg);
+  border: 1px solid rgba(220, 200, 160, 0.4);
+  padding: 0.4rem 0.85rem;
+  font-family: inherit;
+  font-size: 0.85rem;
+  cursor: pointer;
+  border-radius: 3px;
+  transition: background 150ms, border-color 150ms;
+}
+
+.settings-pill:hover {
+  background: rgba(255, 200, 100, 0.08);
+}
+
+.settings-pill.is-active {
+  background: rgba(255, 200, 100, 0.18);
+  border-color: rgba(255, 200, 120, 0.85);
+  color: rgba(255, 220, 160, 1);
+}
+
+.settings-replay {
+  background: transparent;
+  color: var(--fg-dim);
+  border: 1px solid rgba(220, 200, 160, 0.25);
+  padding: 0.4rem 0.85rem;
+  font-family: inherit;
+  font-size: 0.78rem;
+  letter-spacing: 0.06em;
+  cursor: pointer;
+  border-radius: 3px;
+  align-self: flex-start;
+}
+
+.settings-replay:hover {
   color: var(--fg);
   border-color: var(--fg-dim);
 }
