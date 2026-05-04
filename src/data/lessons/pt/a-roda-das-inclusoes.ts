@@ -2,7 +2,7 @@
 // Topic: sequences of events; ⋃, ⋂; De Morgan; monotone limits.
 // Parable text drawn verbatim from lore/contos_do_fogo_anciao.md.
 
-import { Lesson } from '../../core/lessons/lesson-model';
+import { Lesson } from '../../../core/lessons/lesson-model';
 
 export const aRodaDasInclusoes: Lesson = {
   id: 'a-roda-das-inclusoes',

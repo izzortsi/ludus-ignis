@@ -3,7 +3,7 @@
 // Source-derived (L1.5 disjoint events, L1.7 3-set inclusion-exclusion,
 // foundations §3 of foundations.md). Brazilian Portuguese (você-form).
 
-import { Exercise } from '../../core/exercises/exercise-model';
+import { Exercise } from '../../../core/exercises/exercise-model';
 
 export const asJurasDaChama: Exercise[] = [
   {

@@ -1,6 +1,6 @@
 import { createStore } from 'solid-js/store';
 import { Exercise } from './exercise-model';
-import { ALL_EXERCISES } from '../../data/exercises';
+import { ALL_EXERCISES_LIVE } from '../../data/exercises';
 
 interface ExerciseState {
   current: Exercise | null;
@@ -20,11 +20,12 @@ const [exerciseState, setExerciseState] = createStore<ExerciseState>({
   seenIdsByFamily: {}
 });
 
-export const POOL: Exercise[] = ALL_EXERCISES;
-
 // Load a random exercise. If `family` is given, restricts the pool to that
 // family — used by lesson-driven practice so the Cinder asks questions
-// matching what the Elder Fire just talked about.
+// matching what the Elder Fire just talked about. Pool is read live from
+// the active locale so a mid-session language switch picks up translated
+// content immediately (exercise IDs are stable across locales, so
+// seenIdsByFamily memory still applies).
 //
 // No-repeat policy: tracks the ids already served for this family in
 // `seenIdsByFamily` and excludes them. When all exercises in the family
@@ -32,7 +33,8 @@ export const POOL: Exercise[] = ALL_EXERCISES;
 // fresh (still excluding the immediately-previous one when possible, so
 // the pool feels reshuffled rather than instantly looping).
 export function loadNextExercise(family?: number): void {
-  const pool = family != null ? POOL.filter((e) => e.family === family) : POOL;
+  const all = ALL_EXERCISES_LIVE();
+  const pool = family != null ? all.filter((e) => e.family === family) : all;
   if (pool.length === 0) return;
 
   const familyKey = String(family ?? 'all');

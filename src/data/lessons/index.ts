@@ -1,15 +1,28 @@
-import { Lesson } from '../../core/lessons/lesson-model';
-import { aFormaDoMundoPossivel } from './a-forma-do-mundo-possivel';
-import { aRodaDasInclusoes } from './a-roda-das-inclusoes';
-import { asJurasDaChama } from './as-juras-da-chama';
-import { duasFlechas } from './duas-flechas';
+// Locale-aware lesson access. Reads the current locale lazily so callers
+// inside reactive scopes (Solid effects, memos) get re-evaluated when the
+// locale changes. Lesson IDs are stable across locales — `currentLessonId`
+// in lesson-store keeps resolving across switches.
 
-// Order matters: ALL_LESSONS[0] is the lesson a fresh player begins with,
-// and lesson advancement (lesson-store) walks the array in order. P0
-// foundations come first, then P1.
-export const ALL_LESSONS: Lesson[] = [
-  aFormaDoMundoPossivel,  // family 1 (P0)
-  aRodaDasInclusoes,      // family 2 (P0)
-  asJurasDaChama,         // family 3 (P0)
-  duasFlechas             // family 7 (P1, Os Dois Sinais)
-];
+import { Lesson } from '../../core/lessons/lesson-model';
+import { lessonsPt } from './pt';
+import { lessonsEn } from './en';
+import { currentLocale, type Locale } from '../../i18n';
+
+function poolFor(locale: Locale): Lesson[] {
+  return locale === 'en' ? lessonsEn : lessonsPt;
+}
+
+/** Read the lesson list for an explicit locale (use during store init). */
+export function getAllLessons(locale: Locale): Lesson[] {
+  return poolFor(locale);
+}
+
+/** Reactive: returns the lesson list for the current locale. */
+export function ALL_LESSONS_LIVE(): Lesson[] {
+  return poolFor(currentLocale());
+}
+
+/** Stable lesson lookup by id across the current locale. */
+export function findLesson(id: string): Lesson | undefined {
+  return poolFor(currentLocale()).find((l) => l.id === id);
+}

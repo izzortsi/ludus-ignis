@@ -1,7 +1,7 @@
 // Lesson — Duas Flechas → Family 7 (Os Dois Sinais).
 // Topic: independence of joint events; multiplication rule.
 
-import { Lesson } from '../../core/lessons/lesson-model';
+import { Lesson } from '../../../core/lessons/lesson-model';
 
 export const duasFlechas: Lesson = {
   id: 'duas-flechas',

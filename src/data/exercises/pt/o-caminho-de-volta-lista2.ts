@@ -5,7 +5,7 @@
 // by hand. Multiple-choice options synthesized (the source has free-form
 // answers); correct option matches the canonical answer.
 
-import { Exercise } from '../../core/exercises/exercise-model';
+import { Exercise } from '../../../core/exercises/exercise-model';
 
 export const oCaminhoDeVoltaLista2: Exercise[] = [
   {

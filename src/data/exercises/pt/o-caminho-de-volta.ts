@@ -2,7 +2,7 @@
 // Alpha-zero hand-authored set; A-style transposition to fire-voice.
 // Brazilian Portuguese (você-form).
 
-import { Exercise } from '../../core/exercises/exercise-model';
+import { Exercise } from '../../../core/exercises/exercise-model';
 
 export const oCaminhoDeVolta: Exercise[] = [
   {

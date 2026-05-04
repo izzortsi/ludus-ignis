@@ -5,7 +5,7 @@
 // idioms) and adapted to multiple-choice form.
 // Brazilian Portuguese (você-form).
 
-import { Exercise } from '../../core/exercises/exercise-model';
+import { Exercise } from '../../../core/exercises/exercise-model';
 
 export const aRodaDasInclusoes: Exercise[] = [
   {

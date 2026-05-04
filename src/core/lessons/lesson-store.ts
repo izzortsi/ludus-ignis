@@ -1,8 +1,9 @@
 import { createStore } from 'solid-js/store';
 import { Lesson, LessonStage } from './lesson-model';
-import { ALL_LESSONS } from '../../data/lessons';
+import { ALL_LESSONS_LIVE, getAllLessons } from '../../data/lessons';
 import { restoreLesson } from '../../persistence/local-storage';
 import { clearSeenExercises } from '../exercises/exercise-store';
+import { getLocale } from '../../i18n';
 
 interface LessonState {
   currentLessonId: string;
@@ -20,11 +21,16 @@ interface LessonState {
 }
 
 function initial(): LessonState {
+  // Init only — uses the locale snapshot at boot time. Subsequent locale
+  // changes don't reshape the persisted state because lesson IDs are
+  // stable across locales.
+  const bootPool = getAllLessons(getLocale());
   const saved = restoreLesson();
   if (saved) {
-    const exists = ALL_LESSONS.some((l) => l.id === saved.currentLessonId);
+    const exists = bootPool.some((l) => l.id === saved.currentLessonId);
     if (exists) {
       const presented = backfillPresented(
+        bootPool,
         saved.presentedLessonIds ?? [],
         saved.currentLessonId,
         saved.stage
@@ -39,7 +45,7 @@ function initial(): LessonState {
     }
   }
   return {
-    currentLessonId: ALL_LESSONS[0].id,
+    currentLessonId: bootPool[0].id,
     stage: 'parable',
     practiceCorrect: 0,
     theoryIntroduced: false,
@@ -52,15 +58,16 @@ function initial(): LessonState {
 // presented; the current lesson is presented iff the saved stage has moved
 // past 'parable'.
 function backfillPresented(
+  pool: Lesson[],
   saved: string[],
   currentId: string,
   stage: LessonStage
 ): string[] {
   const result = [...saved];
-  const currentIdx = ALL_LESSONS.findIndex((l) => l.id === currentId);
+  const currentIdx = pool.findIndex((l) => l.id === currentId);
   if (currentIdx < 0) return result;
   for (let i = 0; i < currentIdx; i++) {
-    const id = ALL_LESSONS[i].id;
+    const id = pool[i].id;
     if (!result.includes(id)) result.push(id);
   }
   if (stage !== 'parable' && !result.includes(currentId)) {
@@ -72,14 +79,15 @@ function backfillPresented(
 export const [lessonState, setLessonState] = createStore<LessonState>(initial());
 
 export function currentLesson(): Lesson {
-  return ALL_LESSONS.find((l) => l.id === lessonState.currentLessonId) ?? ALL_LESSONS[0];
+  const pool = ALL_LESSONS_LIVE();
+  return pool.find((l) => l.id === lessonState.currentLessonId) ?? pool[0];
 }
 
-// Lessons whose parable has been heard, in the order they appear in
-// ALL_LESSONS. Drives the review tree.
+// Lessons whose parable has been heard, in the order they appear in the
+// active locale's lesson pool. Drives the review tree.
 export function presentedLessons(): Lesson[] {
   const set = new Set(lessonState.presentedLessonIds);
-  return ALL_LESSONS.filter((l) => set.has(l.id));
+  return ALL_LESSONS_LIVE().filter((l) => set.has(l.id));
 }
 
 // Whether the apprentice has ever talked to the Elder Fire. The Cinder is
@@ -133,21 +141,23 @@ export function markTested(): void {
   }
 }
 
-// Whether a lesson exists after the current one in ALL_LESSONS.
+// Whether a lesson exists after the current one in the active locale's pool.
 export function hasNextLesson(): boolean {
-  const idx = ALL_LESSONS.findIndex((l) => l.id === lessonState.currentLessonId);
-  return idx >= 0 && idx < ALL_LESSONS.length - 1;
+  const pool = ALL_LESSONS_LIVE();
+  const idx = pool.findIndex((l) => l.id === lessonState.currentLessonId);
+  return idx >= 0 && idx < pool.length - 1;
 }
 
-// Advance to the next lesson in ALL_LESSONS order. Resets stage to 'parable',
+// Advance to the next lesson in pool order. Resets stage to 'parable',
 // clears practice progress, and forgets the theory walk-through so the next
 // Cinder visit replays it for the new lesson. Also flushes the no-repeat
 // memory so the new family's pool feels fresh. No-op at the end of the array.
 export function advanceToNextLesson(): void {
-  const idx = ALL_LESSONS.findIndex((l) => l.id === lessonState.currentLessonId);
-  if (idx < 0 || idx >= ALL_LESSONS.length - 1) return;
+  const pool = ALL_LESSONS_LIVE();
+  const idx = pool.findIndex((l) => l.id === lessonState.currentLessonId);
+  if (idx < 0 || idx >= pool.length - 1) return;
   setLessonState({
-    currentLessonId: ALL_LESSONS[idx + 1].id,
+    currentLessonId: pool[idx + 1].id,
     stage: 'parable',
     practiceCorrect: 0,
     theoryIntroduced: false

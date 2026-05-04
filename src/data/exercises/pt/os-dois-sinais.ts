@@ -2,7 +2,7 @@
 // Counterpart to the Elder Fire's parable "Duas flechas".
 // Brazilian Portuguese (você-form).
 
-import { Exercise } from '../../core/exercises/exercise-model';
+import { Exercise } from '../../../core/exercises/exercise-model';
 
 export const osDoisSinais: Exercise[] = [
   {

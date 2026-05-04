@@ -1,22 +1,22 @@
-// Combined exercise pool. Add new family arrays here.
+// Locale-aware exercise pool access. Same pattern as lessons/index.ts.
+// Exercise IDs are stable across locales — seenIdsByFamily in
+// exercise-store keeps tracking correctly across switches.
 
 import { Exercise } from '../../core/exercises/exercise-model';
-import { aFormaDoMundoPossivel } from './a-forma-do-mundo-possivel';
-import { aRodaDasInclusoes } from './a-roda-das-inclusoes';
-import { asJurasDaChama } from './as-juras-da-chama';
-import { osDoisSinais } from './os-dois-sinais';
-import { aMaoCegaNoJarro } from './a-mao-cega-no-jarro';
-import { oCaminhoDeVolta } from './o-caminho-de-volta';
-import { oCaminhoDeVoltaLista2 } from './o-caminho-de-volta-lista2';
+import { exercisesPt } from './pt';
+import { exercisesEn } from './en';
+import { currentLocale, type Locale } from '../../i18n';
 
-export const ALL_EXERCISES: Exercise[] = [
-  // P0 (foundations)
-  ...aFormaDoMundoPossivel,
-  ...aRodaDasInclusoes,
-  ...asJurasDaChama,
-  // P1 (combinatorics & elementary probability)
-  ...osDoisSinais,
-  ...aMaoCegaNoJarro,
-  ...oCaminhoDeVolta,
-  ...oCaminhoDeVoltaLista2
-];
+function poolFor(locale: Locale): Exercise[] {
+  return locale === 'en' ? exercisesEn : exercisesPt;
+}
+
+/** Explicit-locale read (store init). */
+export function getAllExercises(locale: Locale): Exercise[] {
+  return poolFor(locale);
+}
+
+/** Reactive: current-locale exercise pool. */
+export function ALL_EXERCISES_LIVE(): Exercise[] {
+  return poolFor(currentLocale());
+}

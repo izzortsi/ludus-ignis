@@ -1,7 +1,7 @@
 // Family 8 — A Mão Cega no Jarro — urn draws / classical sampling.
 // Alpha-zero hand-authored set; A-style; Brazilian Portuguese.
 
-import { Exercise } from '../../core/exercises/exercise-model';
+import { Exercise } from '../../../core/exercises/exercise-model';
 
 export const aMaoCegaNoJarro: Exercise[] = [
   {
