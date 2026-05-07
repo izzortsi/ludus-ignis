@@ -12,6 +12,7 @@ const APPRENTICE_STATS_KEY  = 'probgame.apprentice.stats.v1';
 const INVENTORY_KEY         = 'probgame.inventory.v1';
 const LESSON_KEY            = 'probgame.lesson.v1';
 const LOCALE_KEY            = 'probgame.locale.v1';
+const VIEW_MODE_KEY         = 'probgame.viewMode.v1';
 
 function persistJson<T>(key: string, value: T): void {
   try {
@@ -109,6 +110,16 @@ export function restoreLocale(): string | null {
   try { return localStorage.getItem(LOCALE_KEY); } catch { return null; }
 }
 
+// View-mode persistence — same bare-string convention.
+export function persistViewMode(mode: string): void {
+  try { localStorage.setItem(VIEW_MODE_KEY, mode); } catch (err) {
+    console.warn('Could not persist view mode:', err);
+  }
+}
+export function restoreViewMode(): string | null {
+  try { return localStorage.getItem(VIEW_MODE_KEY); } catch { return null; }
+}
+
 export interface PersistedLesson {
   currentLessonId: string;
   stage: LessonStage;
@@ -135,4 +146,5 @@ export function clearAll(): void {
   localStorage.removeItem(INVENTORY_KEY);
   localStorage.removeItem(LESSON_KEY);
   localStorage.removeItem(LOCALE_KEY);
+  localStorage.removeItem(VIEW_MODE_KEY);
 }

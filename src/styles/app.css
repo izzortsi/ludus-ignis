@@ -1286,6 +1286,55 @@ html, body {
   border-color: var(--fg-dim);
 }
 
+/* View-mode toggle — pinned just left of the settings gear so the two
+   chrome buttons cluster in the corner without overlapping. */
+.view-mode-toggle {
+  position: fixed;
+  top: 0.5rem;
+  right: 2.7rem;
+  z-index: 100;
+  height: 2rem;
+  min-width: 2rem;
+  padding: 0 0.4rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.05em;
+  background: transparent;
+  color: var(--fg-dim);
+  border: 1px solid transparent;
+  font-family: 'Menlo', 'Consolas', 'Courier New', monospace;
+  font-size: 1.05rem;
+  line-height: 1;
+  cursor: pointer;
+  opacity: 0.55;
+  transition: opacity 200ms, color 200ms, border-color 200ms;
+  border-radius: 3px;
+  user-select: none;
+}
+
+.view-mode-toggle:hover {
+  opacity: 1;
+  color: var(--fg);
+  border-color: var(--fg-dim);
+}
+
+.view-mode-toggle-glyph {
+  font-size: 1.1rem;
+  letter-spacing: 0;
+}
+
+.view-mode-toggle-mark {
+  font-size: 0.65rem;
+  margin-left: 0.05em;
+  color: rgba(255, 200, 120, 0.85);
+  /* The "ᴬ" superscript: only visible (and pad-allocating) when in auto. */
+  min-width: 0.55em;
+  text-align: left;
+}
+
+.view-mode-toggle-mark.is-auto { color: rgba(255, 200, 120, 1); }
+
 .settings-backdrop {
   position: fixed;
   inset: 0;
@@ -1936,3 +1985,126 @@ html, body {
 .intro-stage.is-test-morning .intro-glyph-render.is-observer {
   color: rgba(80, 55, 35, 0.92);
 }
+
+/* === Desktop view mode ============================================ */
+/*
+ * Toggled by the view-mode store via [data-view-mode="desktop"] on
+ * <html>. The ASCII canvas font-size cap rises so wide screens render
+ * the map / intro / gallery cards larger; modals and the speech panel
+ * widen to match. Portrait mode (default / mobile) is unchanged.
+ *
+ * The fit-to-viewport floors (vw and vh) are kept identical — they
+ * always win when the cap would overflow the viewport, so a desktop
+ * window resized small still scales down gracefully.
+ */
+
+html[data-view-mode="desktop"] .map-stage {
+  font-size: min(
+    1.5rem,
+    calc(96vw / var(--cols) / 0.6),
+    calc(85vh / var(--rows) / 1.05)
+  );
+}
+
+html[data-view-mode="desktop"] .intro-stage {
+  font-size: min(
+    1.5rem,
+    calc(96vw / var(--cols) / 0.6),
+    calc(88vh / var(--rows) / 1.05)
+  );
+}
+
+html[data-view-mode="desktop"] .cinder-gallery-card {
+  font-size: min(
+    1.4rem,
+    calc(96vw / var(--cols) / 0.6),
+    calc(82vh / var(--rows) / 1.05)
+  );
+}
+
+html[data-view-mode="desktop"] .map-dialog {
+  max-width: 44rem;
+}
+
+html[data-view-mode="desktop"] .speech-panel {
+  width: min(94%, 36rem);
+  max-height: 48vh;
+}
+
+html[data-view-mode="desktop"] .settings-panel {
+  max-width: 26rem;
+}
+
+/* === Desktop: side-panel layout (option B) ========================
+ *
+ * In desktop mode, the modal dialog and the settings panel dock to the
+ * right edge as full-height rails instead of overlaying the centre. The
+ * map stays interactive on the left — the player can still walk the
+ * Apprentice while the dialog is open. There is no backdrop dim; the
+ * dialog "annotates" the map rather than hiding it.
+ *
+ * Implemented entirely in CSS via :has() so the components don't need
+ * to know about view mode. When a side panel is open, the .app
+ * container shifts to flex-start and reserves padding on the right
+ * matching the panel's width; the map's font-size cap is recomputed to
+ * subtract that width so the map doesn't overflow on smaller windows.
+ *
+ * Z-index order under desktop:
+ *   speech panel  200  (bottom overlay, sits over the map and panel)
+ *   gallery card  250  (fullscreen, covers everything)
+ *   settings      110  (over map dialog when both open)
+ *   map dialog    100  (right-docked rail)
+ */
+
+html[data-view-mode="desktop"] .map-dialog-backdrop {
+  background: transparent;
+  pointer-events: none;
+  align-items: stretch;
+  justify-content: flex-end;
+  padding: 0;
+}
+
+html[data-view-mode="desktop"] .map-dialog {
+  pointer-events: auto;
+  width: 28rem;
+  max-width: 28rem;
+  height: 100vh;
+  max-height: 100vh;
+  border-radius: 0;
+  border-top: none;
+  border-right: none;
+  border-bottom: none;
+  border-left: 1px solid rgba(220, 200, 160, 0.3);
+  box-shadow: -6px 0 28px rgba(0, 0, 0, 0.55);
+}
+
+html[data-view-mode="desktop"] .settings-backdrop {
+  background: transparent;
+  pointer-events: none;
+  align-items: stretch;
+  justify-content: flex-end;
+  padding: 0;
+}
+
+html[data-view-mode="desktop"] .settings-panel {
+  pointer-events: auto;
+  width: 22rem;
+  max-width: 22rem;
+  height: 100vh;
+  max-height: 100vh;
+  border-radius: 0;
+  border-top: none;
+  border-right: none;
+  border-bottom: none;
+  border-left: 1px solid rgba(220, 200, 160, 0.3);
+  box-shadow: -6px 0 28px rgba(0, 0, 0, 0.55);
+}
+
+/* The map stays anchored where it is when a side panel opens — no
+   reflow, no push. The dialog overlays the right portion of the screen;
+   the player accepts that the right edge of the map sits behind the
+   panel, in exchange for the map not jumping every time a modal opens
+   or closes. The map is still interactive on the visible portion
+   (panel is pointer-events: none on its backdrop, so clicks land on
+   the map underneath). */
+

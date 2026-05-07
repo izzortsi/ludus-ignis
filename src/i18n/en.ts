@@ -38,6 +38,13 @@ export const en: Dict = {
     open: 'settings',
   },
 
+  viewMode: {
+    auto:     'auto',
+    desktop:  'desktop',
+    portrait: 'phone',
+    tooltip:  (user: string, effective: string) => `view mode: ${user} · now: ${effective}`,
+  },
+
   cinder: {
     titlePrefix: 'Cinder',
     quietHint: 'The Cinder is quiet.',

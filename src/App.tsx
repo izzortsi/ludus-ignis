@@ -24,6 +24,9 @@ import { apprenticeStats } from './core/apprentice/apprentice-stats-store';
 import { inventory } from './core/inventory/inventory-store';
 import { currentLocale } from './i18n';
 import { Settings } from './ui/components/SettingsPanel';
+import { ViewModeToggle } from './ui/components/ViewModeToggle';
+import { viewModeUserChoice, wireDataAttribute } from './core/view/view-mode-store';
+import { persistViewMode } from './persistence/local-storage';
 
 export function App() {
   // Restore from local storage on first load. A returning player (Cinder
@@ -96,6 +99,13 @@ export function App() {
     persistLocale(currentLocale());
   });
 
+  createEffect(() => {
+    persistViewMode(viewModeUserChoice());
+  });
+
+  // Reflect effective view mode on <html data-view-mode="..."> for CSS.
+  wireDataAttribute();
+
   function onIntroComplete() {
     setIntroSeen();
     setShowIntro(false);
@@ -103,6 +113,7 @@ export function App() {
 
   return (
     <Show when={!showIntro()} fallback={<IntroScene onComplete={onIntroComplete} />}>
+      <ViewModeToggle />
       <Settings onReplayIntro={() => setShowIntro(true)} />
       <main class="app">
         <CampMap />

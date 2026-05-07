@@ -24,6 +24,15 @@ export const pt = {
     open: 'configurações',
   },
 
+  // === view-mode toggle (top-right) ======================================
+  viewMode: {
+    auto:     'automático',
+    desktop:  'desktop',
+    portrait: 'celular',
+    /** Tooltip on the toggle: "modo de tela: <user choice> · agora: <effective>" */
+    tooltip:  (user: string, effective: string) => `modo de tela: ${user} · agora: ${effective}`,
+  },
+
   // === Cinder modal — chrome + headers ===================================
   cinder: {
     titlePrefix: 'Cinder',
