@@ -12,7 +12,7 @@ export const asJurasDaChama: Exercise[] = [
     conceptName: 'The Oaths of the Flame',
     difficulty: 1,
     statement:
-      'Let A and B be two disjoint events with P(A) = 0.3 and P(B) = 0.5. What is the value of P(A ∪ B)?',
+      'Let $A$ and $B$ be two disjoint events with $P(A) = 0.3$ and $P(B) = 0.5$. What is the value of $P(A \\cup B)$?',
     options: ['0.15', '0.5', '0.8', '1.0'],
     correctIndex: 2,
     solution:
@@ -25,7 +25,7 @@ export const asJurasDaChama: Exercise[] = [
     conceptName: 'The Oaths of the Flame',
     difficulty: 1,
     statement:
-      'Same disjoint events A and B, with P(A) = 0.3 and P(B) = 0.5. What is the value of P(A ∩ B)?',
+      'Same disjoint events $A$ and $B$, with $P(A) = 0.3$ and $P(B) = 0.5$. What is the value of $P(A \\cap B)$?',
     options: ['0', '0.15', '0.2', '0.3'],
     correctIndex: 0,
     solution:
@@ -38,7 +38,7 @@ export const asJurasDaChama: Exercise[] = [
     conceptName: 'The Oaths of the Flame',
     difficulty: 2,
     statement:
-      'Same disjoint A and B, P(A) = 0.3 and P(B) = 0.5. What is the value of P(A \\ B), that is, "A happens and B does not"?',
+      'Same disjoint $A$ and $B$, $P(A) = 0.3$ and $P(B) = 0.5$. What is the value of $P(A \\setminus B)$, that is, "A happens and B does not"?',
     options: ['0', '0.2', '0.3', '0.5'],
     correctIndex: 2,
     solution:
@@ -51,7 +51,7 @@ export const asJurasDaChama: Exercise[] = [
     conceptName: 'The Oaths of the Flame',
     difficulty: 2,
     statement:
-      'Visible aurora and cutting north-wind are disjoint events on a given night, with P(aurora) = 0.3 and P(wind) = 0.5. What is the probability that the night brings neither aurora nor wind?',
+      'Visible aurora and cutting north-wind are disjoint events on a given night, with $P(\\text{aurora}) = 0.3$ and $P(\\text{wind}) = 0.5$. What is the probability that the night brings neither aurora nor wind?',
     options: ['0.1', '0.2', '0.4', '0.8'],
     correctIndex: 1,
     solution:
@@ -63,7 +63,7 @@ export const asJurasDaChama: Exercise[] = [
     conceptName: 'The Oaths of the Flame',
     difficulty: 2,
     statement:
-      'For a sample of pool-water, we know that P(touched) = 0.4, P(collected at night) = 0.6, and P(touched ∪ night) = 0.8. What is the value of P(touched ∩ night)?',
+      'For a sample of pool-water, we know that $P(\\text{touched}) = 0.4$, $P(\\text{night}) = 0.6$, and $P(\\text{touched} \\cup \\text{night}) = 0.8$. What is the value of $P(\\text{touched} \\cap \\text{night})$?',
     options: ['0.1', '0.2', '0.3', '0.4'],
     correctIndex: 1,
     solution:
@@ -75,7 +75,7 @@ export const asJurasDaChama: Exercise[] = [
     conceptName: 'The Oaths of the Flame',
     difficulty: 3,
     statement:
-      'Same sample: P(touched) = 0.4, P(night) = 0.6, P(touched ∩ night) = 0.2. What is the probability that the sample is touched but was not collected at night?',
+      'Same sample: $P(\\text{touched}) = 0.4$, $P(\\text{night}) = 0.6$, $P(\\text{touched} \\cap \\text{night}) = 0.2$. What is the probability that the sample is touched but was not collected at night?',
     options: ['0.1', '0.2', '0.3', '0.4'],
     correctIndex: 1,
     solution:
@@ -87,7 +87,7 @@ export const asJurasDaChama: Exercise[] = [
     conceptName: 'The Oaths of the Flame',
     difficulty: 2,
     statement:
-      'If P(E) = 0.4, what is the value of P(Eᶜ)?',
+      'If $P(E) = 0.4$, what is the value of $P(E^c)$?',
     options: ['0.4', '0.5', '0.6', '1.0'],
     correctIndex: 2,
     solution:
@@ -99,7 +99,7 @@ export const asJurasDaChama: Exercise[] = [
     conceptName: 'The Oaths of the Flame',
     difficulty: 4,
     statement:
-      'The Mistress observes three signs through the night: I, II, and III. We know: P(I) = 0.5, P(II) = 0.4, P(III) = 0.3, P(I ∩ II) = 0.2, P(I ∩ III) = 0.1, P(II ∩ III) = 0.1, P(I ∩ II ∩ III) = 0.05. What is the value of P(I ∪ II ∪ III)?',
+      'The Mistress observes three signs through the night: $I$, $II$, and $III$. We know: $P(I) = 0.5$, $P(II) = 0.4$, $P(III) = 0.3$, $P(I \\cap II) = 0.2$, $P(I \\cap III) = 0.1$, $P(II \\cap III) = 0.1$, $P(I \\cap II \\cap III) = 0.05$. What is the value of $P(I \\cup II \\cup III)$?',
     options: ['0.75', '0.80', '0.85', '0.90'],
     correctIndex: 2,
     solution:
@@ -112,7 +112,7 @@ export const asJurasDaChama: Exercise[] = [
     conceptName: 'The Oaths of the Flame',
     difficulty: 3,
     statement:
-      'A hunter promises his band: "the chance of game coming from the north is 0.6, and the chance of game coming from the east is 0.5; summing, we have 1.1 chance of eating". Which oath of the ember did the hunter violate?',
+      'A hunter promises his band: "the chance of game coming from the north is $0.6$, and the chance of game coming from the east is $0.5$; summing, we have $1.1$ chance of eating". Which oath of the ember did the hunter violate?',
     options: [
       'Oath A1: "every chance lies between nothing and everything".',
       'Oath A2: "the chance of something happening is one".',
@@ -129,10 +129,10 @@ export const asJurasDaChama: Exercise[] = [
     conceptName: 'The Oaths of the Flame',
     difficulty: 4,
     statement:
-      'An apprentice writes, for two events A and B: P(A) = 0.7 and P(A ∩ B) = 0.8. Which oath of the ember does this violate?',
+      'An apprentice writes, for two events $A$ and $B$: $P(A) = 0.7$ and $P(A \\cap B) = 0.8$. Which oath of the ember does this violate?',
     options: [
-      'A1: probabilities outside [0, 1] — for 0.8 > 0.7 = P(A).',
-      'A1: monotonicity requires P(A ∩ B) ≤ P(A); 0.8 ≤ 0.7 is false.',
+      'A1: probabilities outside $[0, 1]$ — for $0.8 > 0.7 = P(A)$.',
+      'A1: monotonicity requires $P(A \\cap B) \\leq P(A)$; $0.8 \\leq 0.7$ is false.',
       'A2: the whole basket weighs more than 1.',
       'A3: only disjoint events may have their chances summed.'
     ],

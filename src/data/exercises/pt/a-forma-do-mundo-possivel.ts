@@ -13,7 +13,7 @@ export const aFormaDoMundoPossivel: Exercise[] = [
     conceptName: 'A Forma do Mundo Possível',
     difficulty: 1,
     statement:
-      'Os pajés lançam dois ossos-de-osso de seis faces, um após o outro, e registram o par (i, j) de faces. Quantos pares ordenados o cesto contém?',
+      'Os pajés lançam dois ossos-de-osso de seis faces, um após o outro, e registram o par $(i, j)$ de faces. Quantos pares ordenados o cesto contém?',
     options: ['12', '21', '36', '64'],
     correctIndex: 2,
     solution:
@@ -26,7 +26,7 @@ export const aFormaDoMundoPossivel: Exercise[] = [
     conceptName: 'A Forma do Mundo Possível',
     difficulty: 2,
     statement:
-      'No mesmo lançamento de dois ossos, quantos pares ordenados (i, j) têm soma igual a 7?',
+      'No mesmo lançamento de dois ossos, quantos pares ordenados $(i, j)$ têm soma igual a 7?',
     options: ['4', '5', '6', '7'],
     correctIndex: 2,
     solution:
@@ -39,7 +39,7 @@ export const aFormaDoMundoPossivel: Exercise[] = [
     conceptName: 'A Forma do Mundo Possível',
     difficulty: 2,
     statement:
-      'Lança dois ossos. Sejam E o evento "a soma é ímpar" e F o evento "ao menos um osso mostra 1". Quantos pares pertencem a E ∩ F?',
+      'Lança dois ossos. Sejam $E$ o evento "a soma é ímpar" e $F$ o evento "ao menos um osso mostra 1". Quantos pares pertencem a $E \\cap F$?',
     options: ['4', '6', '11', '18'],
     correctIndex: 1,
     solution:
@@ -52,7 +52,7 @@ export const aFormaDoMundoPossivel: Exercise[] = [
     conceptName: 'A Forma do Mundo Possível',
     difficulty: 2,
     statement:
-      'Mesmo cenário (dois ossos). Sejam F = "ao menos um osso mostra 1" e G = "a soma é igual a 5". Quantos pares pertencem a F ∩ G?',
+      'Mesmo cenário (dois ossos). Sejam $F$ = "ao menos um osso mostra 1" e $G$ = "a soma é igual a 5". Quantos pares pertencem a $F \\cap G$?',
     options: ['1', '2', '3', '4'],
     correctIndex: 1,
     solution:
@@ -65,7 +65,7 @@ export const aFormaDoMundoPossivel: Exercise[] = [
     conceptName: 'A Forma do Mundo Possível',
     difficulty: 3,
     statement:
-      'A Mestra observa um aglomerado de 5 Cinders, cada um aceso (1) ou apagado (0). Ela registra o vetor (x₁, x₂, x₃, x₄, x₅). Quantos resultados possíveis o cesto contém?',
+      'A Mestra observa um aglomerado de 5 Cinders, cada um aceso (1) ou apagado (0). Ela registra o vetor $(x_1, x_2, x_3, x_4, x_5)$. Quantos resultados possíveis o cesto contém?',
     options: ['10', '25', '32', '120'],
     correctIndex: 2,
     solution:
@@ -78,7 +78,7 @@ export const aFormaDoMundoPossivel: Exercise[] = [
     conceptName: 'A Forma do Mundo Possível',
     difficulty: 3,
     statement:
-      'Mesmo aglomerado de 5 Cinders. Seja A o evento "os Cinders 4 e 5 estão apagados". Quantos resultados pertencem a A?',
+      'Mesmo aglomerado de 5 Cinders. Seja $A$ o evento "os Cinders 4 e 5 estão apagados". Quantos resultados pertencem a $A$?',
     options: ['2', '4', '8', '16'],
     correctIndex: 2,
     solution:
@@ -91,8 +91,8 @@ export const aFormaDoMundoPossivel: Exercise[] = [
     conceptName: 'A Forma do Mundo Possível',
     difficulty: 3,
     statement:
-      'Os pajés lançam um osso de seis faces continuamente até obter o "sinal-do-fim" (a face 6), e o ritual termina. Seja Eₙ o evento "o ritual termina exatamente no n-ésimo lançamento". Quantos resultados pertencem a Eₙ?',
-    options: ['n', '5 · n', '5ⁿ⁻¹', '6ⁿ'],
+      'Os pajés lançam um osso de seis faces continuamente até obter o "sinal-do-fim" (a face 6), e o ritual termina. Seja $E_n$ o evento "o ritual termina exatamente no $n$-ésimo lançamento". Quantos resultados pertencem a $E_n$?',
+    options: ['$n$', '$5 \\cdot n$', '$5^{n-1}$', '$6^n$'],
     correctIndex: 2,
     solution:
       'Para o ritual terminar exatamente no $n$-ésimo lançamento, os primeiros $n-1$ devem ser não-$6$ (cinco escolhas cada: $\\{1,2,3,4,5\\}$) e o $n$-ésimo deve ser $6$ (uma escolha). Pela multiplicação: $|E_n| = 5^{n-1} \\cdot 1 = 5^{n-1}$.',
@@ -104,7 +104,7 @@ export const aFormaDoMundoPossivel: Exercise[] = [
     conceptName: 'A Forma do Mundo Possível',
     difficulty: 4,
     statement:
-      'Mesmo ritual (osso lançado até sair 6). O que representa o evento (⋃ₙ₌₁^∞ Eₙ)ᶜ?',
+      'Mesmo ritual (osso lançado até sair 6). O que representa o evento $\\left(\\bigcup_{n=1}^{\\infty} E_n\\right)^c$?',
     options: [
       'O ritual termina no primeiro lançamento.',
       'O ritual termina em algum momento finito.',
@@ -134,8 +134,8 @@ export const aFormaDoMundoPossivel: Exercise[] = [
     conceptName: 'A Forma do Mundo Possível',
     difficulty: 2,
     statement:
-      'Seja Ω = {1, 2, 3, 4, 5, 6}. Sejam A = {1, 2, 3} e B = {2, 4, 6}. Qual conjunto descreve A ∩ Bᶜ?',
-    options: ['{2}', '{1, 3}', '{4, 6}', '{1, 2, 3, 5}'],
+      'Seja $\\Omega = \\{1, 2, 3, 4, 5, 6\\}$. Sejam $A = \\{1, 2, 3\\}$ e $B = \\{2, 4, 6\\}$. Qual conjunto descreve $A \\cap B^c$?',
+    options: ['$\\{2\\}$', '$\\{1, 3\\}$', '$\\{4, 6\\}$', '$\\{1, 2, 3, 5\\}$'],
     correctIndex: 1,
     solution:
       '$B^c = \\Omega \\setminus B = \\{1, 3, 5\\}$. Então $A \\cap B^c = \\{1,2,3\\} \\cap \\{1,3,5\\} = \\{1, 3\\}$. Equivalentemente, $A \\cap B^c = A \\setminus B$ — os elementos de $A$ que não estão em $B$.'

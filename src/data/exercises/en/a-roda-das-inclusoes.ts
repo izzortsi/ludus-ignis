@@ -11,12 +11,12 @@ export const aRodaDasInclusoes: Exercise[] = [
     conceptName: 'The Wheel of Inclusions',
     difficulty: 1,
     statement:
-      'The scout notes whether there is a cutting north-wind on each night i = 1, 2, 3, … Let Vᵢ be the event "north-wind on night i". Which expression captures "there was a north-wind on at least one night"?',
+      'The scout notes whether there is a cutting north-wind on each night $i = 1, 2, 3, \\ldots$ Let $V_i$ be the event "north-wind on night $i$". Which expression captures "there was a north-wind on at least one night"?',
     options: [
-      '⋂ᵢ Vᵢ',
-      '⋃ᵢ Vᵢ',
-      '⋂ᵢ Vᵢᶜ',
-      '(⋃ᵢ Vᵢ)ᶜ'
+      '$\\bigcap_i V_i$',
+      '$\\bigcup_i V_i$',
+      '$\\bigcap_i V_i^c$',
+      '$\\left(\\bigcup_i V_i\\right)^c$'
     ],
     correctIndex: 1,
     solution:
@@ -28,12 +28,12 @@ export const aRodaDasInclusoes: Exercise[] = [
     conceptName: 'The Wheel of Inclusions',
     difficulty: 1,
     statement:
-      'Same sequence of events Vᵢ. Which expression captures "north-wind occurred on every night"?',
+      'Same sequence of events $V_i$. Which expression captures "north-wind occurred on every night"?',
     options: [
-      '⋃ᵢ Vᵢ',
-      '⋃ᵢ Vᵢᶜ',
-      '⋂ᵢ Vᵢ',
-      'V₁ ∪ V₂'
+      '$\\bigcup_i V_i$',
+      '$\\bigcup_i V_i^c$',
+      '$\\bigcap_i V_i$',
+      '$V_1 \\cup V_2$'
     ],
     correctIndex: 2,
     solution:
@@ -45,12 +45,12 @@ export const aRodaDasInclusoes: Exercise[] = [
     conceptName: 'The Wheel of Inclusions',
     difficulty: 2,
     statement:
-      'Same sequence Vᵢ. Which expression captures "north-wind did not occur on any night"?',
+      'Same sequence $V_i$. Which expression captures "north-wind did not occur on any night"?',
     options: [
-      '⋂ᵢ Vᵢ',
-      '⋃ᵢ Vᵢᶜ',
-      '⋂ᵢ Vᵢᶜ',
-      '⋃ᵢ Vᵢ'
+      '$\\bigcap_i V_i$',
+      '$\\bigcup_i V_i^c$',
+      '$\\bigcap_i V_i^c$',
+      '$\\bigcup_i V_i$'
     ],
     correctIndex: 2,
     solution:
@@ -62,12 +62,12 @@ export const aRodaDasInclusoes: Exercise[] = [
     conceptName: 'The Wheel of Inclusions',
     difficulty: 3,
     statement:
-      'Same sequence Vᵢ. Which expression captures "north-wind occurred on at least one night, but not on every one"?',
+      'Same sequence $V_i$. Which expression captures "north-wind occurred on at least one night, but not on every one"?',
     options: [
-      '⋃ᵢ Vᵢ ∩ (⋂ᵢ Vᵢ)ᶜ',
-      '⋃ᵢ Vᵢ ∩ ⋂ᵢ Vᵢ',
-      '⋂ᵢ Vᵢᶜ',
-      '(⋃ᵢ Vᵢ)ᶜ'
+      '$\\bigcup_i V_i \\cap \\left(\\bigcap_i V_i\\right)^c$',
+      '$\\bigcup_i V_i \\cap \\bigcap_i V_i$',
+      '$\\bigcap_i V_i^c$',
+      '$\\left(\\bigcup_i V_i\\right)^c$'
     ],
     correctIndex: 0,
     solution:
@@ -79,12 +79,12 @@ export const aRodaDasInclusoes: Exercise[] = [
     conceptName: 'The Wheel of Inclusions',
     difficulty: 3,
     statement:
-      'The Mistress records the intensity of the mirror-tide each dawn (real ≥ 0). For each n ≥ 1, define the band Aₙ = [0, 1/n]. Which set is ⋂ₙ₌₁^∞ Aₙ?',
+      'The Mistress records the intensity of the mirror-tide each dawn (real $\\geq 0$). For each $n \\geq 1$, define the band $A_n = [0, 1/n]$. Which set is $\\bigcap_{n=1}^{\\infty} A_n$?',
     options: [
-      '{0}',
-      '[0, 1]',
-      '(0, 1)',
-      '∅'
+      '$\\{0\\}$',
+      '$[0, 1]$',
+      '$(0, 1)$',
+      '$\\emptyset$'
     ],
     correctIndex: 0,
     solution:
@@ -97,12 +97,12 @@ export const aRodaDasInclusoes: Exercise[] = [
     conceptName: 'The Wheel of Inclusions',
     difficulty: 4,
     statement:
-      'Same Mistress; now Bₙ = (0, 1/n) (interval open at 0). Which set is ⋂ₙ₌₁^∞ Bₙ?',
+      'Same Mistress; now $B_n = (0, 1/n)$ (interval open at 0). Which set is $\\bigcap_{n=1}^{\\infty} B_n$?',
     options: [
-      '{0}',
-      '(0, 1)',
-      '[0, 1]',
-      '∅'
+      '$\\{0\\}$',
+      '$(0, 1)$',
+      '$[0, 1]$',
+      '$\\emptyset$'
     ],
     correctIndex: 3,
     solution:
@@ -115,12 +115,12 @@ export const aRodaDasInclusoes: Exercise[] = [
     conceptName: 'The Wheel of Inclusions',
     difficulty: 3,
     statement:
-      'Intensity bands Cₙ = [n, n+1] for n = 1, 2, 3, … Which set is ⋃ₙ₌₁^∞ Cₙ?',
+      'Intensity bands $C_n = [n, n+1]$ for $n = 1, 2, 3, \\ldots$ Which set is $\\bigcup_{n=1}^{\\infty} C_n$?',
     options: [
-      '[1, 2]',
-      '[1, ∞)',
-      '(0, ∞)',
-      '∅'
+      '$[1, 2]$',
+      '$[1, \\infty)$',
+      '$(0, \\infty)$',
+      '$\\emptyset$'
     ],
     correctIndex: 1,
     solution:
@@ -133,12 +133,12 @@ export const aRodaDasInclusoes: Exercise[] = [
     conceptName: 'The Wheel of Inclusions',
     difficulty: 3,
     statement:
-      'Bands Dₙ = (0, n) for n = 1, 2, 3, … Which set is ⋃ₙ₌₁^∞ Dₙ?',
+      'Bands $D_n = (0, n)$ for $n = 1, 2, 3, \\ldots$ Which set is $\\bigcup_{n=1}^{\\infty} D_n$?',
     options: [
-      '(0, 1)',
-      '(0, ∞)',
-      '[0, ∞)',
-      '∅'
+      '$(0, 1)$',
+      '$(0, \\infty)$',
+      '$[0, \\infty)$',
+      '$\\emptyset$'
     ],
     correctIndex: 1,
     solution:
@@ -151,12 +151,12 @@ export const aRodaDasInclusoes: Exercise[] = [
     conceptName: 'The Wheel of Inclusions',
     difficulty: 4,
     statement:
-      'Mirror Law (De Morgan). Knowing that (⋃ᵢ Aᵢ)ᶜ = ⋂ᵢ Aᵢᶜ, which expression is equivalent to (⋂ᵢ Aᵢ)ᶜ?',
+      'Mirror Law (De Morgan). Knowing that $\\left(\\bigcup_i A_i\\right)^c = \\bigcap_i A_i^c$, which expression is equivalent to $\\left(\\bigcap_i A_i\\right)^c$?',
     options: [
-      '⋃ᵢ Aᵢ',
-      '⋂ᵢ Aᵢᶜ',
-      '⋃ᵢ Aᵢᶜ',
-      '⋂ᵢ Aᵢ'
+      '$\\bigcup_i A_i$',
+      '$\\bigcap_i A_i^c$',
+      '$\\bigcup_i A_i^c$',
+      '$\\bigcap_i A_i$'
     ],
     correctIndex: 2,
     solution:
@@ -168,12 +168,12 @@ export const aRodaDasInclusoes: Exercise[] = [
     conceptName: 'The Wheel of Inclusions',
     difficulty: 5,
     statement:
-      'The shamans throw a bone until a 6. Eₙ = "ritual ends exactly on the n-th throw". The scout says: "It\'s the infinite sequence in which the 6 never appears." Which event is he referring to?',
+      'The shamans throw a bone until a 6. $E_n$ = "ritual ends exactly on the $n$-th throw". The scout says: "It\'s the infinite sequence in which the 6 never appears." Which event is he referring to?',
     options: [
-      '⋃ₙ Eₙ',
-      '⋂ₙ Eₙ',
-      '(⋃ₙ Eₙ)ᶜ',
-      '(⋂ₙ Eₙ)ᶜ'
+      '$\\bigcup_n E_n$',
+      '$\\bigcap_n E_n$',
+      '$\\left(\\bigcup_n E_n\\right)^c$',
+      '$\\left(\\bigcap_n E_n\\right)^c$'
     ],
     correctIndex: 2,
     solution:

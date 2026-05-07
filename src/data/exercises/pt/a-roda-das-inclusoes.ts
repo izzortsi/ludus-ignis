@@ -14,12 +14,12 @@ export const aRodaDasInclusoes: Exercise[] = [
     conceptName: 'A Roda das Inclusões',
     difficulty: 1,
     statement:
-      'O batedor anota se há vento-norte cortante a cada noite i = 1, 2, 3, … Seja Vᵢ o evento "vento-norte na noite i". Qual expressão captura "houve vento-norte em ao menos uma noite"?',
+      'O batedor anota se há vento-norte cortante a cada noite $i = 1, 2, 3, \\ldots$ Seja $V_i$ o evento "vento-norte na noite $i$". Qual expressão captura "houve vento-norte em ao menos uma noite"?',
     options: [
-      '⋂ᵢ Vᵢ',
-      '⋃ᵢ Vᵢ',
-      '⋂ᵢ Vᵢᶜ',
-      '(⋃ᵢ Vᵢ)ᶜ'
+      '$\\bigcap_i V_i$',
+      '$\\bigcup_i V_i$',
+      '$\\bigcap_i V_i^c$',
+      '$\\left(\\bigcup_i V_i\\right)^c$'
     ],
     correctIndex: 1,
     solution:
@@ -31,12 +31,12 @@ export const aRodaDasInclusoes: Exercise[] = [
     conceptName: 'A Roda das Inclusões',
     difficulty: 1,
     statement:
-      'Mesma sequência de eventos Vᵢ. Qual expressão captura "vento-norte ocorreu em todas as noites"?',
+      'Mesma sequência de eventos $V_i$. Qual expressão captura "vento-norte ocorreu em todas as noites"?',
     options: [
-      '⋃ᵢ Vᵢ',
-      '⋃ᵢ Vᵢᶜ',
-      '⋂ᵢ Vᵢ',
-      'V₁ ∪ V₂'
+      '$\\bigcup_i V_i$',
+      '$\\bigcup_i V_i^c$',
+      '$\\bigcap_i V_i$',
+      '$V_1 \\cup V_2$'
     ],
     correctIndex: 2,
     solution:
@@ -48,12 +48,12 @@ export const aRodaDasInclusoes: Exercise[] = [
     conceptName: 'A Roda das Inclusões',
     difficulty: 2,
     statement:
-      'Mesma sequência Vᵢ. Qual expressão captura "vento-norte não ocorreu em noite alguma"?',
+      'Mesma sequência $V_i$. Qual expressão captura "vento-norte não ocorreu em noite alguma"?',
     options: [
-      '⋂ᵢ Vᵢ',
-      '⋃ᵢ Vᵢᶜ',
-      '⋂ᵢ Vᵢᶜ',
-      '⋃ᵢ Vᵢ'
+      '$\\bigcap_i V_i$',
+      '$\\bigcup_i V_i^c$',
+      '$\\bigcap_i V_i^c$',
+      '$\\bigcup_i V_i$'
     ],
     correctIndex: 2,
     solution:
@@ -65,12 +65,12 @@ export const aRodaDasInclusoes: Exercise[] = [
     conceptName: 'A Roda das Inclusões',
     difficulty: 3,
     statement:
-      'Mesma sequência Vᵢ. Qual expressão captura "vento-norte ocorreu em ao menos uma noite, mas não em todas"?',
+      'Mesma sequência $V_i$. Qual expressão captura "vento-norte ocorreu em ao menos uma noite, mas não em todas"?',
     options: [
-      '⋃ᵢ Vᵢ ∩ (⋂ᵢ Vᵢ)ᶜ',
-      '⋃ᵢ Vᵢ ∩ ⋂ᵢ Vᵢ',
-      '⋂ᵢ Vᵢᶜ',
-      '(⋃ᵢ Vᵢ)ᶜ'
+      '$\\bigcup_i V_i \\cap \\left(\\bigcap_i V_i\\right)^c$',
+      '$\\bigcup_i V_i \\cap \\bigcap_i V_i$',
+      '$\\bigcap_i V_i^c$',
+      '$\\left(\\bigcup_i V_i\\right)^c$'
     ],
     correctIndex: 0,
     solution:
@@ -82,12 +82,12 @@ export const aRodaDasInclusoes: Exercise[] = [
     conceptName: 'A Roda das Inclusões',
     difficulty: 3,
     statement:
-      'A Mestra registra a intensidade da maré-espelho a cada amanhecer (real ≥ 0). Para cada n ≥ 1, define a faixa Aₙ = [0, 1/n]. Qual conjunto é ⋂ₙ₌₁^∞ Aₙ?',
+      'A Mestra registra a intensidade da maré-espelho a cada amanhecer (real $\\geq 0$). Para cada $n \\geq 1$, define a faixa $A_n = [0, 1/n]$. Qual conjunto é $\\bigcap_{n=1}^{\\infty} A_n$?',
     options: [
-      '{0}',
-      '[0, 1]',
-      '(0, 1)',
-      '∅'
+      '$\\{0\\}$',
+      '$[0, 1]$',
+      '$(0, 1)$',
+      '$\\emptyset$'
     ],
     correctIndex: 0,
     solution:
@@ -100,12 +100,12 @@ export const aRodaDasInclusoes: Exercise[] = [
     conceptName: 'A Roda das Inclusões',
     difficulty: 4,
     statement:
-      'Mesma Mestra; agora Bₙ = (0, 1/n) (intervalo aberto em 0). Qual conjunto é ⋂ₙ₌₁^∞ Bₙ?',
+      'Mesma Mestra; agora $B_n = (0, 1/n)$ (intervalo aberto em 0). Qual conjunto é $\\bigcap_{n=1}^{\\infty} B_n$?',
     options: [
-      '{0}',
-      '(0, 1)',
-      '[0, 1]',
-      '∅'
+      '$\\{0\\}$',
+      '$(0, 1)$',
+      '$[0, 1]$',
+      '$\\emptyset$'
     ],
     correctIndex: 3,
     solution:
@@ -118,12 +118,12 @@ export const aRodaDasInclusoes: Exercise[] = [
     conceptName: 'A Roda das Inclusões',
     difficulty: 3,
     statement:
-      'Faixas de intensidade Cₙ = [n, n+1] para n = 1, 2, 3, … Qual conjunto é ⋃ₙ₌₁^∞ Cₙ?',
+      'Faixas de intensidade $C_n = [n, n+1]$ para $n = 1, 2, 3, \\ldots$ Qual conjunto é $\\bigcup_{n=1}^{\\infty} C_n$?',
     options: [
-      '[1, 2]',
-      '[1, ∞)',
-      '(0, ∞)',
-      '∅'
+      '$[1, 2]$',
+      '$[1, \\infty)$',
+      '$(0, \\infty)$',
+      '$\\emptyset$'
     ],
     correctIndex: 1,
     solution:
@@ -136,12 +136,12 @@ export const aRodaDasInclusoes: Exercise[] = [
     conceptName: 'A Roda das Inclusões',
     difficulty: 3,
     statement:
-      'Faixas Dₙ = (0, n) para n = 1, 2, 3, … Qual conjunto é ⋃ₙ₌₁^∞ Dₙ?',
+      'Faixas $D_n = (0, n)$ para $n = 1, 2, 3, \\ldots$ Qual conjunto é $\\bigcup_{n=1}^{\\infty} D_n$?',
     options: [
-      '(0, 1)',
-      '(0, ∞)',
-      '[0, ∞)',
-      '∅'
+      '$(0, 1)$',
+      '$(0, \\infty)$',
+      '$[0, \\infty)$',
+      '$\\emptyset$'
     ],
     correctIndex: 1,
     solution:
@@ -154,12 +154,12 @@ export const aRodaDasInclusoes: Exercise[] = [
     conceptName: 'A Roda das Inclusões',
     difficulty: 4,
     statement:
-      'Lei do Espelho (De Morgan). Sabendo que (⋃ᵢ Aᵢ)ᶜ = ⋂ᵢ Aᵢᶜ, qual expressão é equivalente a (⋂ᵢ Aᵢ)ᶜ?',
+      'Lei do Espelho (De Morgan). Sabendo que $\\left(\\bigcup_i A_i\\right)^c = \\bigcap_i A_i^c$, qual expressão é equivalente a $\\left(\\bigcap_i A_i\\right)^c$?',
     options: [
-      '⋃ᵢ Aᵢ',
-      '⋂ᵢ Aᵢᶜ',
-      '⋃ᵢ Aᵢᶜ',
-      '⋂ᵢ Aᵢ'
+      '$\\bigcup_i A_i$',
+      '$\\bigcap_i A_i^c$',
+      '$\\bigcup_i A_i^c$',
+      '$\\bigcap_i A_i$'
     ],
     correctIndex: 2,
     solution:
@@ -171,12 +171,12 @@ export const aRodaDasInclusoes: Exercise[] = [
     conceptName: 'A Roda das Inclusões',
     difficulty: 5,
     statement:
-      'Os pajés lançam um osso até sair 6. Eₙ = "ritual termina exatamente no n-ésimo lançamento". O batedor fala assim: "É a sequência infinita em que o 6 nunca aparece." A qual evento ele se refere?',
+      'Os pajés lançam um osso até sair 6. $E_n$ = "ritual termina exatamente no $n$-ésimo lançamento". O batedor fala assim: "É a sequência infinita em que o 6 nunca aparece." A qual evento ele se refere?',
     options: [
-      '⋃ₙ Eₙ',
-      '⋂ₙ Eₙ',
-      '(⋃ₙ Eₙ)ᶜ',
-      '(⋂ₙ Eₙ)ᶜ'
+      '$\\bigcup_n E_n$',
+      '$\\bigcap_n E_n$',
+      '$\\left(\\bigcup_n E_n\\right)^c$',
+      '$\\left(\\bigcap_n E_n\\right)^c$'
     ],
     correctIndex: 2,
     solution:

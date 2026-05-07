@@ -726,7 +726,7 @@ function PracticeView(props: { lesson: Lesson; onBack: () => void }) {
         {(ex) => (
           <>
             <p class="study-intro">{exerciseIntro(cinder.personality)}</p>
-            <p class="study-statement">{ex().statement}</p>
+            <p class="study-statement" innerHTML={renderInlineMarkup(ex().statement)} />
             <div class="study-options">
               <For each={ex().options}>
                 {(opt, i) => {
@@ -746,9 +746,8 @@ function PracticeView(props: { lesson: Lesson; onBack: () => void }) {
                       class={classes()}
                       disabled={exerciseState.result !== null}
                       onClick={() => onSelect(i())}
-                    >
-                      {opt}
-                    </button>
+                      innerHTML={renderInlineMarkup(opt)}
+                    />
                   );
                 }}
               </For>

@@ -58,11 +58,11 @@ export const osDoisSinais: Exercise[] = [
     conceptName: 'The Two Signs',
     difficulty: 3,
     statement:
-      'The Mistress observes that P(hawk cries) = 0.3, P(cutting north-wind) = 0.5, and P(both) = 0.15. Are the two signs independent?',
+      'The Mistress observes that $P(\\text{hawk cries}) = 0.3$, $P(\\text{north-wind}) = 0.5$, and $P(\\text{both}) = 0.15$. Are the two signs independent?',
     options: [
-      'Yes — for 0.3 × 0.5 = 0.15.',
-      'No — for 0.15 ≠ 0.3 + 0.5.',
-      'No — for P(both) should be 0.3 + 0.5 − 0.15 = 0.65 if independent.',
+      'Yes — for $0.3 \\times 0.5 = 0.15$.',
+      'No — for $0.15 \\neq 0.3 + 0.5$.',
+      'No — for $P(\\text{both})$ should be $0.3 + 0.5 - 0.15 = 0.65$ if independent.',
       'Indeterminate without more data.'
     ],
     correctIndex: 0,
@@ -87,10 +87,10 @@ export const osDoisSinais: Exercise[] = [
     conceptName: 'The Two Signs',
     difficulty: 4,
     statement:
-      'I throw two honest bones. Let A = "first bone is even" and B = "sum of bones is 7". Are events A and B independent?',
+      'I throw two honest bones. Let $A$ = "first bone is even" and $B$ = "sum of bones is 7". Are events $A$ and $B$ independent?',
     options: [
-      'Yes — for P(A) · P(B) = (1/2)(1/6) = 1/12 = P(A ∩ B).',
-      'No — for P(A ∩ B) = 1/12 but P(A) · P(B) = 1/24.',
+      'Yes — for $P(A) \\cdot P(B) = (1/2)(1/6) = 1/12 = P(A \\cap B)$.',
+      'No — for $P(A \\cap B) = 1/12$ but $P(A) \\cdot P(B) = 1/24$.',
       'No — for "sum is 7" depends on who rolled first.',
       'Indeterminate without knowing whether the bones are honest.'
     ],

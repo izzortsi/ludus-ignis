@@ -59,11 +59,11 @@ export const osDoisSinais: Exercise[] = [
     conceptName: 'Os Dois Sinais',
     difficulty: 3,
     statement:
-      'A Mestra observa que P(gavião grita) = 0,3, P(vento-norte cortante) = 0,5, e P(ambos) = 0,15. Os dois sinais são independentes?',
+      'A Mestra observa que $P(\\text{gavião grita}) = 0{,}3$, $P(\\text{vento-norte}) = 0{,}5$, e $P(\\text{ambos}) = 0{,}15$. Os dois sinais são independentes?',
     options: [
-      'Sim — pois 0,3 × 0,5 = 0,15.',
-      'Não — pois 0,15 ≠ 0,3 + 0,5.',
-      'Não — pois P(ambos) deveria ser 0,3 + 0,5 − 0,15 = 0,65 se independentes.',
+      'Sim — pois $0{,}3 \\times 0{,}5 = 0{,}15$.',
+      'Não — pois $0{,}15 \\neq 0{,}3 + 0{,}5$.',
+      'Não — pois $P(\\text{ambos})$ deveria ser $0{,}3 + 0{,}5 - 0{,}15 = 0{,}65$ se independentes.',
       'Indeterminado sem mais dados.'
     ],
     correctIndex: 0,
@@ -88,10 +88,10 @@ export const osDoisSinais: Exercise[] = [
     conceptName: 'Os Dois Sinais',
     difficulty: 4,
     statement:
-      'Lanço dois ossos honestos. Sejam A = "primeiro osso é par" e B = "soma dos ossos é 7". Os eventos A e B são independentes?',
+      'Lanço dois ossos honestos. Sejam $A$ = "primeiro osso é par" e $B$ = "soma dos ossos é 7". Os eventos $A$ e $B$ são independentes?',
     options: [
-      'Sim — pois P(A) · P(B) = (1/2)(1/6) = 1/12 = P(A ∩ B).',
-      'Não — pois P(A ∩ B) = 1/12 mas P(A) · P(B) = 1/24.',
+      'Sim — pois $P(A) \\cdot P(B) = (1/2)(1/6) = 1/12 = P(A \\cap B)$.',
+      'Não — pois $P(A \\cap B) = 1/12$ mas $P(A) \\cdot P(B) = 1/24$.',
       'Não — pois "soma é 7" depende de quem rolou primeiro.',
       'Indeterminado sem saber se os ossos são honestos.'
     ],
